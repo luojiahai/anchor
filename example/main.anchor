@@ -1,0 +1,16 @@
+class[public] Main
+begin
+    property[public, get, set] a;   # fully public property
+    property[public, get] b;        # get only public property
+    property[private] c;            # equivalent to private property
+
+    method[public] init(num: Number[ref], str: String[val]) -> Null
+    begin
+    end
+
+    method[public] program() -> Null
+    begin
+        print("Hello, World!");
+    end
+
+end

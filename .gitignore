@@ -1,0 +1,20 @@
+# general things to ignore
+build/
+dist/
+*.egg-info/
+*.egg
+*.py[cod]
+__pycache__/
+*.so
+*~
+
+# due to using tox and pytest
+.tox
+.cache
+
+# ply-specific files
+parser.out
+parsetab.py
+
+# debug files
+*.dbg
