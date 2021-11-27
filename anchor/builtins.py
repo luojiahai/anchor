@@ -1,7 +1,7 @@
-from abc import *
+import abc
 
 
-class AnchorType(ABC):
+class AnchorType(abc.ABC):
     
     def __init__(self, type_name):
         self._type = type_name

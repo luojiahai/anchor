@@ -1,14 +1,12 @@
-from anchor.ply import *
-from anchor.lex import *
-from anchor.parse import *
-from anchor.symtable import *
+import anchor.parse as parse
+import anchor.symtable as symtable
 
 
 __all__ = ['execute',]
 
 
 def execute(data):
-    symtable = SymbolTable('main')
-    parser = AnchorParser(debug=True)
+    st = symtable.SymbolTable('main')
+    parser = parse.AnchorParser(debug=True)
     ast = parser.parse(data)
     print(ast)

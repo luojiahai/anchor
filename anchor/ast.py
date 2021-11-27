@@ -1,9 +1,8 @@
-from abc import *
-from anchor.symtable import *
+import abc
 
 
-class ASTNode(ABC):
+class ASTNode(abc.ABC):
 
-    @abstractmethod
+    @abc.abstractmethod
     def evaluate(self, symtable): pass
 

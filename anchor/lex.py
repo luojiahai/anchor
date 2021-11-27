@@ -1,6 +1,6 @@
-import anchor.ply as ply
 import anchor.token as token
 import anchor.keyword as keyword
+import anchor.ply.lex as lex
 
 
 __all__ = ['AnchorLexer',]
@@ -94,7 +94,7 @@ class AnchorLexer:
 
     # Build the lexer
     def build(self, **kwargs):
-        self.lexer = ply.lex.lex(module=self, **kwargs)
+        self.lexer = lex.lex(module=self, **kwargs)
 
     # Test it output
     def test(self, data):
