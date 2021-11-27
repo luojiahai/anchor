@@ -33,9 +33,7 @@ class Block(ASTNode):
 
     def evaluate(self, st):
         for statement in self.statements:
-            value = statement.evaluate(st)
-            if (isinstance(value, Terminal)):
-                return value
+            statement.evaluate(st)
         return None
 
 
@@ -51,10 +49,18 @@ class Assignment(Statement):
         self.__name = name
         self.__expression = expression
 
+    @property
+    def name(self):
+        return self.__name
+
+    @property
+    def expression(self):
+        return self.__expression
+
     def evaluate(self, st):
-        identifier = self.__name.identifier
+        identifier = self.name.identifier
         flags = dict()
-        namespaces = [self.__expression.evaluate(st)]
+        namespaces = [self.expression.evaluate(st)]
         st.insert(identifier, flags, namespaces)
         return None
 
@@ -156,6 +162,19 @@ class FunctionDef(Statement):
         namespaces = [self]
         st.insert(identifier, flags, namespaces)
         return None
+
+
+class Return(Terminal):
+
+    def __init__(self, expression):
+        self.__expression = expression
+
+    @property
+    def expression(self):
+        return self.__expression
+
+    def evaluate(self, st):
+        return self.expression.evaluate(st)
 
 
 class Expression(ASTNode): pass
@@ -687,7 +706,7 @@ class Call(Expression):
         body = functiondef.body
 
         # Create function symbol table
-        function_symtable = symtable.Function(st)
+        function_symtable = symtable.Function(identifier, st)
 
         # Insert symbols for default arguments
         if (functiondef.default_args):

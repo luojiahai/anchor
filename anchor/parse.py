@@ -75,16 +75,16 @@ class AnchorParser(Parser):
 
     def p_statement_assignment(self, p):
         '''statement : NAME EQUAL expression SEMI'''
-        # TODO
-        pass
+        name = ast.Name(p[1])
+        expression = p[3]
+        p[0] = ast.Assignment(name, expression)
 
     def p_statement_if(self, p):
         '''statement : IF expression THEN block elif_statements END'''
-        # TODO
         expression = p[2]
         block = p[4]
         elif_statements = p[5]
-        p[0] = (expression, block, elif_statements)
+        p[0] = ast.If(expression, block, elif_statements)
 
     def p_statement_if_else(self, p):
         '''statement : IF expression THEN block else_block END
@@ -242,7 +242,7 @@ class AnchorParser(Parser):
                       | expression GREATEREQUAL expression'''
         left = p[1]
         right = p[3]
-        operator = token.EXACT_TOKEN_TYPES[p[2]]
+        operator = token.NAME[p[2]]
         if (operator == token.EQEQUAL):
             p[0] = ast.EqEqual(left, right)
         elif (operator == token.NOTEQUAL):
@@ -266,7 +266,7 @@ class AnchorParser(Parser):
                       | expression PERCENT expression'''
         left = p[1]
         right = p[3]
-        operator = token.EXACT_TOKEN_TYPES[p[2]]
+        operator = token.NAME[p[2]]
         if (operator == token.PLUS):
             p[0] = ast.Plus(left, right)
         elif (operator == token.MINUS):
@@ -286,7 +286,7 @@ class AnchorParser(Parser):
         '''expression : PLUS expression %prec UPLUS
                       | MINUS expression %prec UMINUS'''
         right = p[2]
-        operator = token.EXACT_TOKEN_TYPES[p[1]]
+        operator = token.NAME[p[1]]
         if (operator == token.PLUS):
             p[0] = ast.UPlus(right)
         elif (operator == token.MINUS):

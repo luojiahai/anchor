@@ -39,7 +39,7 @@ String = group(r"'[^\n'\\]*(?:\\.[^\n'\\]*)*'", r'"[^\n"\\]*(?:\\.[^\n"\\]*)*"')
 class AnchorLexer:
 
     # List of token names
-    tokens = tuple(token.EXACT_TOKEN_TYPES.values()) + (
+    tokens = tuple(token.NAME.values()) + (
         'NAME', 'INTEGER', 'FLOAT', 'COMPLEX', 'STRING',
     )
 
@@ -80,7 +80,7 @@ class AnchorLexer:
     def t_NAME(self, t):
         r'[a-zA-Z_][a-zA-Z0-9_]*'
         if (keyword.iskeyword(t.value)):
-            t.type = token.EXACT_TOKEN_TYPES[t.value]
+            t.type = token.NAME[t.value]
         return t
 
     # Define a rule for newline so we can track line numbers

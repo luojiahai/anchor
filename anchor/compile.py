@@ -11,6 +11,7 @@ __all__ = ['execute',]
 def execute(data):
     st = symtable.SymbolTable('main')
 
+    # Include builtin functions
     def get_default_args(func):
         signature = inspect.signature(func)
         return {

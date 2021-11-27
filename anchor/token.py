@@ -1,7 +1,7 @@
 from typing import *
 
 
-__all__ = ['pmdict', 'kwdict', 'EXACT_TOKEN_TYPES',]
+__all__ = ['pmdict', 'kwdict', 'NAME',]
 
 
 PERCENT: Literal        = 'PERCENT'
@@ -90,6 +90,7 @@ PRIVATE: Literal        = 'PRIVATE'
 PROTECTED: Literal      = 'PROTECTED'
 GET: Literal            = 'GET'
 SET: Literal            = 'SET'
+OPTIONAL: Literal       = 'OPTIONAL'
 REF: Literal            = 'REF'
 VAL: Literal            = 'VAL'
 
@@ -122,11 +123,18 @@ kwdict: dict[Literal, str] = {
     PROTECTED           : 'protected',
     GET                 : 'get',
     SET                 : 'set',
+    OPTIONAL            : 'optional',
     REF                 : 'ref',
     VAL                 : 'val',
 }
 
-__all__.extend([name for name, value in globals().items() if isinstance(value, str)])
+
+__all__.extend(
+    [name for name, value in globals().items() if isinstance(value, str)]
+)
 
 
-EXACT_TOKEN_TYPES = {value.strip('\\'): name for name, value in (pmdict | kwdict).items()}
+NAME = {
+    value.replace('\\', ''): name 
+    for name, value in (pmdict | kwdict).items()
+}
