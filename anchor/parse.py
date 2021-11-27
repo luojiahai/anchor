@@ -83,8 +83,8 @@ class AnchorParser(Parser):
         # TODO
         expression = p[2]
         block = p[4]
-        statement_elif = p[5]
-        p[0] = (expression, block, statement_elif)
+        elif_ = p[5]
+        p[0] = (expression, block, elif_)
 
     def p_statement_if_else(self, p):
         '''statement : IF expression THEN block else_block END
@@ -105,8 +105,8 @@ class AnchorParser(Parser):
         # TODO
         expression = p[2]
         block = p[4]
-        statement_elif = p[5]
-        p[0] = [(expression, block)] + statement_elif
+        elif_ = p[5]
+        p[0] = [(expression, block)] + elif_
 
     def p_elif_else(self, p):
         '''elif : ELIF expression THEN block else_block
@@ -359,13 +359,59 @@ class AnchorParser(Parser):
         '''expression : STRING'''
         p[0] = builtins.String(p[1])
 
+    def p_expression_tuple(self, p):
+        '''expression : LPAR expression COMMA expressions RPAR
+                      | LPAR expression COMMA RPAR
+                      | LPAR RPAR'''
+        # TODO
+        pass
+
     def p_expression_list(self, p):
-        '''expression : LSQB RSQB'''
+        '''expression : LSQB expressions RSQB
+                      | LSQB RSQB'''
         # TODO
         pass
 
     def p_expression_dict(self, p):
-        '''expression : LBRACE RBRACE'''
+        '''expression : LBRACE kvpairs RBRACE
+                      | LBRACE RBRACE'''
+        # TODO
+        pass
+
+    def p_expressions(self, p):
+        '''expressions : _expressions COMMA
+                       | _expressions'''
+        p[0] = p[1] 
+
+    def p__expressions(self, p):
+        '''_expressions : _expressions COMMA expression
+                        | expression'''
+        if (len(p) == 4):
+            expressions = p[1]
+            if (p[3]): expressions.append(p[3])
+            p[0] = expressions
+        elif (len(p) == 2):
+            expression = p[1]
+            p[0] = [expression]
+
+    def p_kvpairs(self, p):
+        '''kvpairs : _kvpairs COMMA
+                   | _kvpairs'''
+        p[0] = p[1]
+
+    def p__kvpairs(self, p):
+        '''_kvpairs : _kvpairs COMMA kvpair
+                    | kvpair'''
+        if (len(p) == 4):
+            kvpairs = p[1]
+            if (p[3]): kvpairs.append(p[3])
+            p[0] = kvpairs
+        elif (len(p) == 2):
+            kvpair = p[1]
+            p[0] = [kvpair]
+
+    def p_kvpair(self, p):
+        '''kvpair : expression COLON expression'''
         # TODO
         pass
 
@@ -374,5 +420,5 @@ class AnchorParser(Parser):
         pass
 
     def p_error(self, p):
-        print(f'ERROR: {p}', file=sys.stderr)
+        print(f'Error: {p}', file=sys.stderr)
         pass
