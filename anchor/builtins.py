@@ -66,6 +66,6 @@ class List(AnchorType, list):
 class Dict(AnchorType, dict):
 
     def __init__(self, value):
-        super().__init__('List')
+        super().__init__('Dict')
         self.update(value)
 
