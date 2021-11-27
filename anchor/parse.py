@@ -3,6 +3,7 @@ import sys
 import anchor.ply.yacc as yacc
 import anchor.lex as lex
 import anchor.token as token
+import anchor.builtins as builtins
 
 
 __all__ = ['Parser', 'AnchorParser',]
@@ -85,15 +86,15 @@ class AnchorParser(Parser):
         statement_elif = p[5]
         p[0] = (expression, block, statement_elif)
 
-    def p_statement_ifelse(self, p):
-        '''statement : IF expression THEN block block_else END
+    def p_statement_if_else(self, p):
+        '''statement : IF expression THEN block else_block END
                      | IF expression THEN block END'''
         # TODO
         if (len(p) == 7):
             expression = p[2]
             block = p[4]
-            block_else = p[5]
-            p[0] = (expression, block, block_else)
+            else_block = p[5]
+            p[0] = (expression, block, else_block)
         elif (len(p) == 6):
             expression = p[2]
             block = p[4]
@@ -108,21 +109,21 @@ class AnchorParser(Parser):
         p[0] = [(expression, block)] + statement_elif
 
     def p_elif_else(self, p):
-        '''elif : ELIF expression THEN block block_else
+        '''elif : ELIF expression THEN block else_block
                 | ELIF expression THEN block'''
         # TODO
         if (len(p) == 6):
             expression = p[2]
             block = p[4]
-            block_else = p[5]
-            p[0] = [(expression, block, block_else)]
+            else_block = p[5]
+            p[0] = [(expression, block, else_block)]
         elif (len(p) == 5):
             expression = p[2]
             block = p[4]
             p[0] = [(expression, block)]
 
-    def p_block_else(self, p):
-        '''block_else : ELSE block'''
+    def p_else_block(self, p):
+        '''else_block : ELSE block'''
         # TODO
         p[0] = p[2]
 
@@ -328,15 +329,15 @@ class AnchorParser(Parser):
 
     def p_expression_true(self, p):
         '''expression : TRUE'''
-        p[0] = True
+        p[0] = builtins.Boolean(True)
 
     def p_expression_false(self, p):
         '''expression : FALSE'''
-        p[0] = False
+        p[0] = builtins.Boolean(False)
 
     def p_expression_null(self, p):
         '''expression : NULL'''
-        p[0] = None
+        p[0] = builtins.Null(p[1])
 
     def p_expression_name(self, p):
         '''expression : NAME'''
@@ -344,19 +345,19 @@ class AnchorParser(Parser):
 
     def p_expression_integer(self, p):
         '''expression : INTEGER'''
-        p[0] = int(p[1])
+        p[0] = builtins.Integer(p[1])
 
     def p_expression_float(self, p):
         '''expression : FLOAT'''
-        p[0] = float(p[1])
+        p[0] = builtins.Float(p[1])
 
     def p_expression_complex(self, p):
         '''expression : COMPLEX'''
-        p[0] = complex(p[1])
+        p[0] = builtins.Complex(p[1])
 
     def p_expression_string(self, p):
         '''expression : STRING'''
-        p[0] = str(p[1])
+        p[0] = builtins.String(p[1])
 
     def p_expression_list(self, p):
         '''expression : LSQB RSQB'''
