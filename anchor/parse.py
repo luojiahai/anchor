@@ -3,6 +3,7 @@ import sys
 import anchor.ply.yacc as yacc
 import anchor.lex as lex
 import anchor.token as token
+import anchor.ast as ast
 import anchor.builtins as builtins
 
 
@@ -57,11 +58,11 @@ class AnchorParser(Parser):
     def p_program(self, p):
         '''program : block
                    | empty'''
-        p[0] = p[1]
+        p[0] = ast.Program(p[1])
 
     def p_block(self, p):
         '''block : statements'''
-        p[0] = p[1]
+        p[0] = ast.Block(p[1])
 
     def p_statements(self, p):
         '''statements : statements statement
@@ -79,12 +80,12 @@ class AnchorParser(Parser):
         pass
 
     def p_statement_if(self, p):
-        '''statement : IF expression THEN block elif END'''
+        '''statement : IF expression THEN block elif_statements END'''
         # TODO
         expression = p[2]
         block = p[4]
-        elif_ = p[5]
-        p[0] = (expression, block, elif_)
+        elif_statements = p[5]
+        p[0] = (expression, block, elif_statements)
 
     def p_statement_if_else(self, p):
         '''statement : IF expression THEN block else_block END
@@ -94,37 +95,36 @@ class AnchorParser(Parser):
             expression = p[2]
             block = p[4]
             else_block = p[5]
-            p[0] = (expression, block, else_block)
+            p[0] = ast.If(expression, block, else_block)
         elif (len(p) == 6):
             expression = p[2]
             block = p[4]
-            p[0] = (expression, block)
+            p[0] = ast.If(expression, block)
 
-    def p_elif(self, p):
-        '''elif : ELIF expression THEN block elif'''
+    def p_elif_statements(self, p):
+        '''elif_statements : ELIF expression THEN block elif_statements'''
         # TODO
         expression = p[2]
         block = p[4]
-        elif_ = p[5]
-        p[0] = [(expression, block)] + elif_
+        elif_statements = p[5]
+        p[0] = [ast.Elif(expression, block)] + elif_statements
 
-    def p_elif_else(self, p):
-        '''elif : ELIF expression THEN block else_block
-                | ELIF expression THEN block'''
+    def p_elif_statements_else(self, p):
+        '''elif_statements : ELIF expression THEN block else_block
+                           | ELIF expression THEN block'''
         # TODO
         if (len(p) == 6):
             expression = p[2]
             block = p[4]
             else_block = p[5]
-            p[0] = [(expression, block, else_block)]
+            p[0] = [ast.Elif(expression, block, else_block)]
         elif (len(p) == 5):
             expression = p[2]
             block = p[4]
-            p[0] = [(expression, block)]
+            p[0] = [ast.Elif(expression, block)]
 
     def p_else_block(self, p):
         '''else_block : ELSE block'''
-        # TODO
         p[0] = p[2]
 
     def p_statement_iterate(self, p):
@@ -363,20 +363,28 @@ class AnchorParser(Parser):
         '''expression : LPAR expression COMMA expressions RPAR
                       | LPAR expression COMMA RPAR
                       | LPAR RPAR'''
-        # TODO
-        pass
+        if (len(p) == 6):
+            p[0] = builtins.Tuple(tuple([p[2]] + p[4]))
+        elif (len(p) == 5):
+            p[0] = builtins.Tuple(tuple([p[2]]))
+        elif (len(p) == 3):
+            p[0] = builtins.Tuple(tuple())
 
     def p_expression_list(self, p):
         '''expression : LSQB expressions RSQB
                       | LSQB RSQB'''
-        # TODO
-        pass
+        if (len(p) == 4):
+            p[0] = builtins.List(list(p[2]))
+        elif (len(p) == 3):
+            p[0] = builtins.List(list())
 
     def p_expression_dict(self, p):
         '''expression : LBRACE kvpairs RBRACE
                       | LBRACE RBRACE'''
-        # TODO
-        pass
+        if (len(p) == 4):
+            p[0] = builtins.Dict(dict({k: v for k, v in p[2]}))
+        elif (len(p) == 3):
+            p[0] = builtins.Dict(dict())
 
     def p_expressions(self, p):
         '''expressions : _expressions COMMA
@@ -412,8 +420,7 @@ class AnchorParser(Parser):
 
     def p_kvpair(self, p):
         '''kvpair : expression COLON expression'''
-        # TODO
-        pass
+        p[0] = (p[1], p[3],)
 
     def p_empty(self, p):
         '''empty : '''

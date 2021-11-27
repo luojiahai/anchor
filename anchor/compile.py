@@ -6,7 +6,6 @@ __all__ = ['execute',]
 
 
 def execute(data):
-    st = symtable.SymbolTable('main')
     parser = parse.AnchorParser(debug=True)
     ast = parser.parse(data)
-    print(ast)
+    print(ast.evaluate(symtable.SymbolTable('main')))
