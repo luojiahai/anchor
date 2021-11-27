@@ -42,7 +42,7 @@ class SymbolTable:
             )
         else:
             symbol = Symbol(identifier, flags, namespaces)
-        assert (not symbol)
+        assert (symbol != None)
         self.symbols[identifier] = symbol
 
     def lookup(self, identifier):

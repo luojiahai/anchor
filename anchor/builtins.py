@@ -11,46 +11,76 @@ class AnchorType(abc.ABC):
         return self._type
 
 
-class Null(AnchorType):
-
-    def __init__(self, value):
-        super().__init__('NullType')
-
-
 class Boolean(AnchorType, int):
 
     def __init__(self, value):
-        super().__init__('Boolean')
+        AnchorType.__init__(self, 'Boolean')
+        self.__value = value
+
+    @property
+    def value(self):
+        return self.__value
+
+
+class Null(AnchorType):
+
+    def __init__(self, value):
+        AnchorType.__init__(self, 'NullType')
+        self.__value = value
+
+    @property
+    def value(self):
+        return self.__value
 
 
 class Integer(AnchorType, int):
     
     def __init__(self, value):
-        super().__init__('Integer')
+        AnchorType.__init__(self, 'Integer')
+        self.__value = value
+
+    @property
+    def value(self):
+        return self.__value
 
 
 class Float(AnchorType, float):
 
     def __init__(self, value):
-        super().__init__('Float')
+        AnchorType.__init__(self, 'Float')
+        self.__value = value
+
+    @property
+    def value(self):
+        return self.__value
 
 
 class Complex(AnchorType, complex):
     
     def __init__(self, value):
-        super().__init__('Complex')
+        AnchorType.__init__(self, 'Complex')
+        self.__value = value
+
+    @property
+    def value(self):
+        return self.__value
 
 
 class String(AnchorType, str):
     
     def __init__(self, value):
-        super().__init__('String')
+        AnchorType.__init__(self, 'String')
+        self.__value = value
+
+    @property
+    def value(self):
+        return self.__value
 
 
 class Tuple(AnchorType, tuple): 
     
     def __init__(self, value):
-        super().__init__('Tuple')
+        AnchorType.__init__(self, 'Tuple')
 
     def __new__(self, value):
         return tuple.__new__(self, value)
@@ -59,13 +89,35 @@ class Tuple(AnchorType, tuple):
 class List(AnchorType, list):
 
     def __init__(self, value):
-        super().__init__('List')
+        AnchorType.__init__(self, 'List')
         self.extend(value)
 
 
 class Dict(AnchorType, dict):
 
     def __init__(self, value):
-        super().__init__('Dict')
+        AnchorType.__init__(self, 'Dict')
         self.update(value)
 
+
+# Python builtin type name to Anchor builtin type
+TYPE = {
+    'bool': Boolean,
+    'NoneType': Null,
+    'int': Integer,
+    'float': Float,
+    'complex': Complex,
+    'str': String,
+    'tuple': Tuple,
+    'list': List,
+    'dict': Dict,
+}
+
+
+def builtin_print(value):
+    return print(value)
+
+
+FUNCTIONS = {
+    'print': builtin_print,
+}

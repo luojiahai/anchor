@@ -1,5 +1,5 @@
 import sys
-from anchor.compile import *
+import anchor.compile as compile
 
 
 def read_file(file):
@@ -10,6 +10,6 @@ def read_file(file):
 
 def main():
     data = read_file(sys.argv[1])
-    return execute(data)
+    return compile.execute(data)
 
 main()

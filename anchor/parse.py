@@ -4,7 +4,6 @@ import anchor.ply.yacc as yacc
 import anchor.lex as lex
 import anchor.token as token
 import anchor.ast as ast
-import anchor.builtins as builtins
 
 
 __all__ = ['Parser', 'AnchorParser',]
@@ -90,7 +89,6 @@ class AnchorParser(Parser):
     def p_statement_if_else(self, p):
         '''statement : IF expression THEN block else_block END
                      | IF expression THEN block END'''
-        # TODO
         if (len(p) == 7):
             expression = p[2]
             block = p[4]
@@ -103,7 +101,6 @@ class AnchorParser(Parser):
 
     def p_elif_statements(self, p):
         '''elif_statements : ELIF expression THEN block elif_statements'''
-        # TODO
         expression = p[2]
         block = p[4]
         elif_statements = p[5]
@@ -112,7 +109,6 @@ class AnchorParser(Parser):
     def p_elif_statements_else(self, p):
         '''elif_statements : ELIF expression THEN block else_block
                            | ELIF expression THEN block'''
-        # TODO
         if (len(p) == 6):
             expression = p[2]
             block = p[4]
@@ -227,17 +223,17 @@ class AnchorParser(Parser):
 
     def p_expression_or(self, p):
         '''expression : expression OR expression'''
-        p[0] = p[1] or p[3]
+        p[0] = ast.Or(p[1], p[3])
 
     def p_expression_and(self, p):
         '''expression : expression AND expression'''
-        p[0] = p[1] and p[3]
+        p[0] = ast.And(p[1], p[3])
 
     def p_exrepssion_not(self, p):
         '''expression : NOT expression'''
-        p[0] = not p[2]
+        p[0] = ast.Not(p[2])
 
-    def p_expression_relational(self, p):
+    def p_expression_relationalop(self, p):
         '''expression : expression EQEQUAL expression
                       | expression NOTEQUAL expression
                       | expression LESS expression
@@ -248,19 +244,19 @@ class AnchorParser(Parser):
         right = p[3]
         operator = token.EXACT_TOKEN_TYPES[p[2]]
         if (operator == token.EQEQUAL):
-            p[0] = left == right
+            p[0] = ast.EqEqual(left, right)
         elif (operator == token.NOTEQUAL):
-            p[0] = left != right
+            p[0] = ast.NotEqual(left, right)
         elif (operator == token.LESS):
-            p[0] = left < right
+            p[0] = ast.Less(left, right)
         elif (operator == token.LESSEQUAL):
-            p[0] = left <= right
+            p[0] = ast.LessEqual(left, right)
         elif (operator == token.GREATER):
-            p[0] = left > right
+            p[0] = ast.Greater(left, right)
         elif (operator == token.GREATEREQUAL):
-            p[0] = left >= right
+            p[0] = ast.GreaterEqual(left, right)
     
-    def p_expression_binary(self, p):
+    def p_expression_binaryop(self, p):
         '''expression : expression PLUS expression
                       | expression MINUS expression
                       | expression STAR expression
@@ -272,29 +268,29 @@ class AnchorParser(Parser):
         right = p[3]
         operator = token.EXACT_TOKEN_TYPES[p[2]]
         if (operator == token.PLUS):
-            p[0] = left + right
+            p[0] = ast.Plus(left, right)
         elif (operator == token.MINUS):
-            p[0] = left - right
+            p[0] = ast.Minus(left, right)
         elif (operator == token.STAR):
-            p[0] = left * right
+            p[0] = ast.Star(left, right)
         elif (operator == token.DOUBLESTAR):
-            p[0] = left ** right
+            p[0] = ast.DoubleStar(left, right)
         elif (operator == token.SLASH):
-            p[0] = left / right
+            p[0] = ast.Slash(left, right)
         elif (operator == token.DOUBLESLASH):
-            p[0] = left // right
+            p[0] = ast.DoubleSlash(left, right)
         elif (operator == token.PERCENT):
-            p[0] = left % right
+            p[0] = ast.Percent(left, right)
 
-    def p_expression_unary(self, p):
+    def p_expression_unaryop(self, p):
         '''expression : PLUS expression %prec UPLUS
                       | MINUS expression %prec UMINUS'''
         right = p[2]
         operator = token.EXACT_TOKEN_TYPES[p[1]]
         if (operator == token.PLUS):
-            p[0] = +right
+            p[0] = ast.UPlus(right)
         elif (operator == token.MINUS):
-            p[0] = -right
+            p[0] = ast.UMinus(right)
 
     def p_expression_group(self, p):
         '''expression : LPAR expression RPAR'''
@@ -308,8 +304,14 @@ class AnchorParser(Parser):
     def p_expression_call(self, p):
         '''expression : expression LPAR arguments RPAR
                       | expression LPAR RPAR'''
-        # TODO
-        pass
+        if (len(p) == 5):
+            expression = p[1]
+            arguments = p[3]
+            p[0] = ast.Call(expression, arguments)
+        elif (len(p) == 4):
+            expression = p[1]
+            arguments = []
+            p[0] = ast.Call(expression, arguments)
 
     def p_arguments(self, p):
         '''arguments : args COMMA
@@ -329,62 +331,62 @@ class AnchorParser(Parser):
 
     def p_expression_true(self, p):
         '''expression : TRUE'''
-        p[0] = builtins.Boolean(True)
+        p[0] = ast.Boolean(True)
 
     def p_expression_false(self, p):
         '''expression : FALSE'''
-        p[0] = builtins.Boolean(False)
+        p[0] = ast.Boolean(False)
 
     def p_expression_null(self, p):
         '''expression : NULL'''
-        p[0] = builtins.Null(p[1])
+        p[0] = ast.Null(p[1])
 
     def p_expression_name(self, p):
         '''expression : NAME'''
-        p[0] = p[1]
+        p[0] = ast.Name(p[1])
 
     def p_expression_integer(self, p):
         '''expression : INTEGER'''
-        p[0] = builtins.Integer(p[1])
+        p[0] = ast.Integer(p[1])
 
     def p_expression_float(self, p):
         '''expression : FLOAT'''
-        p[0] = builtins.Float(p[1])
+        p[0] = ast.Float(p[1])
 
     def p_expression_complex(self, p):
         '''expression : COMPLEX'''
-        p[0] = builtins.Complex(p[1])
+        p[0] = ast.Complex(p[1])
 
     def p_expression_string(self, p):
         '''expression : STRING'''
-        p[0] = builtins.String(p[1])
+        p[0] = ast.String(p[1])
 
     def p_expression_tuple(self, p):
         '''expression : LPAR expression COMMA expressions RPAR
                       | LPAR expression COMMA RPAR
                       | LPAR RPAR'''
         if (len(p) == 6):
-            p[0] = builtins.Tuple(tuple([p[2]] + p[4]))
+            p[0] = ast.Tuple([p[2]] + p[4])
         elif (len(p) == 5):
-            p[0] = builtins.Tuple(tuple([p[2]]))
+            p[0] = ast.Tuple([p[2]])
         elif (len(p) == 3):
-            p[0] = builtins.Tuple(tuple())
+            p[0] = ast.Tuple([])
 
     def p_expression_list(self, p):
         '''expression : LSQB expressions RSQB
                       | LSQB RSQB'''
         if (len(p) == 4):
-            p[0] = builtins.List(list(p[2]))
+            p[0] = ast.List(p[2])
         elif (len(p) == 3):
-            p[0] = builtins.List(list())
+            p[0] = ast.List([])
 
     def p_expression_dict(self, p):
         '''expression : LBRACE kvpairs RBRACE
                       | LBRACE RBRACE'''
         if (len(p) == 4):
-            p[0] = builtins.Dict(dict({k: v for k, v in p[2]}))
+            p[0] = ast.Dict(p[2])
         elif (len(p) == 3):
-            p[0] = builtins.Dict(dict())
+            p[0] = ast.Dict([])
 
     def p_expressions(self, p):
         '''expressions : _expressions COMMA
