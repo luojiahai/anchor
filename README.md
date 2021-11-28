@@ -2,14 +2,18 @@
 
 ## Installing and running
 
-Build the code and install Anchor compiler:
+Build and install the Anchor compiler:
 ```
 python3 -m pip install --upgrade pip
 python3 -m pip install --upgrade build
 python3 -m build
 pip install ./dist/anchor-<version>.tar.gz --force-reinstall
 ```
-Then, execute command `anchor [option] [file]` to run.
+
+Run the Anchor compiler:
+```
+anchor [option] [file]
+```
 
 ## Contributing
 
