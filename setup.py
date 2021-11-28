@@ -23,4 +23,7 @@ setuptools.setup(
     package_dir={"": "."},
     packages=setuptools.find_packages(where="."),
     python_requires=">=3.9",
+    entry_points = {
+        'console_scripts': ['anchor=anchor.__main__:main'],
+    }
 )

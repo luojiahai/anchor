@@ -16,5 +16,7 @@ __pycache__/
 parser.out
 parsetab.py
 
-# debug files
+# log files
+log/
+*.log
 *.dbg

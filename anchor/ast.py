@@ -67,7 +67,10 @@ class Assignment(Statement):
 
 class If(Statement):
 
-    def __init__(self, expression, block, elif_statements=list(), else_block=None):
+    def __init__(
+        self, expression, block, 
+        elif_statements=list(), else_block=None
+    ):
         self.__expression = expression
         self.__block = block
         self.__elif_statements = elif_statements
@@ -129,7 +132,10 @@ class Elif(Statement):
 
 class FunctionDef(Statement):
 
-    def __init__(self, name, parameters, body, default_args=list(), is_builtin=False):
+    def __init__(
+        self, name, parameters, body, 
+        default_args=list(), is_builtin=False
+    ):
         self.__name = name
         self.__parameters = parameters
         self.__body = body

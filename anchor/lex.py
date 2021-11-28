@@ -1,3 +1,4 @@
+import anchor.system as system
 import anchor.token as token
 import anchor.keyword as keyword
 import anchor.ply.lex as lex
@@ -97,15 +98,10 @@ class AnchorLexer:
         self.lexer = lex.lex(module=self, **kwargs)
 
     # Test it output
-    def test(self, data):
+    def debug(self, data):
         self.lexer.input(data)
         while True:
             tok = self.lexer.token()
             if not tok: 
                 break
-            print(tok)
-
-
-# -----------------------------------------------------------------------------
-# END lex.py
-# -----------------------------------------------------------------------------
+            system.GLOBAL.log.debug(tok)

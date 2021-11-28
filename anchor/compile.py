@@ -1,4 +1,5 @@
 import inspect
+import anchor.system as system
 import anchor.parse as parse
 import anchor.ast as ast
 import anchor.symtable as symtable
@@ -26,6 +27,10 @@ def execute(data):
         functiondef = ast.FunctionDef(name, parameters, function, default_args, is_builtin=True)
         functiondef.evaluate(st)
         
-    parser = parse.AnchorParser(debug=True)
+    parser = parse.AnchorParser(
+        debuglex=system.GLOBAL.debuglex, 
+        debugyacc=system.GLOBAL.debugyacc,
+        debuglog=system.GLOBAL.log,
+    )
     a = parser.parse(data)
     return a.evaluate(st)

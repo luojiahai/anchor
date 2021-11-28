@@ -1,4 +1,3 @@
-import os
 import sys
 import anchor.ply.yacc as yacc
 import anchor.lex as lex
@@ -15,25 +14,24 @@ class Parser:
     precedence = ()
 
     def __init__(self, **kwargs):
-        self.debug = kwargs.get('debug', 0)
-        self.names = {}
-        try:
-            modname = os.path.split(os.path.splitext(__file__)[0])[1] + "_" + self.__class__.__name__
-        except:
-            modname = "parser" + "_" + self.__class__.__name__
-        self.debugfile = modname + ".dbg"
+        self.debuglex = kwargs.get('debuglex', False)
+        self.debugyacc = kwargs.get('debugyacc', False)
+        self.debuglog = kwargs.get('debuglog', None)
 
         # Build the lexer and parser
         self.lexer = lex.AnchorLexer()
-        self.lexer.build(debug=self.debug)
+        self.lexer.build(
+            debug=self.debuglex, 
+            debuglog=self.debuglog if self.debuglex else None,
+        )
         self.parser = yacc.yacc(
             module=self,
-            debug=self.debug,
-            debugfile=self.debugfile
+            debug=self.debugyacc,
+            debuglog=self.debuglog if self.debugyacc else None,
         )
 
     def parse(self, data):
-        self.lexer.test(data)
+        if (self.debuglex): self.lexer.debug(data)
         return self.parser.parse(data)
 
 
@@ -47,7 +45,8 @@ class AnchorParser(Parser):
         ('left', token.OR,),
         ('left', token.AND,),
         ('right', token.NOT,),
-        ('nonassoc', token.EQEQUAL, token.NOTEQUAL, token.LESS, token.GREATER, token.LESSEQUAL, token.GREATEREQUAL,),
+        ('nonassoc', token.EQEQUAL, token.NOTEQUAL, 
+            token.LESS, token.GREATER, token.LESSEQUAL, token.GREATEREQUAL,),
         ('left', token.PLUS, token.MINUS,),
         ('left', token.STAR, token.SLASH, token.DOUBLESLASH, token.PERCENT,),
         ('right', token.UPLUS, token.UMINUS,),
