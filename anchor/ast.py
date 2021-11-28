@@ -60,14 +60,14 @@ class Assignment(Statement):
     def evaluate(self, st):
         identifier = self.name.identifier
         flags = dict()
-        namespaces = [self.expression.evaluate(st)]
+        namespaces = list([self.expression.evaluate(st)])
         st.insert(identifier, flags, namespaces)
         return None
 
 
 class If(Statement):
 
-    def __init__(self, expression, block, elif_statements=[], else_block=None):
+    def __init__(self, expression, block, elif_statements=list(), else_block=None):
         self.__expression = expression
         self.__block = block
         self.__elif_statements = elif_statements
@@ -129,7 +129,7 @@ class Elif(Statement):
 
 class FunctionDef(Statement):
 
-    def __init__(self, name, parameters, body, default_args=[], is_builtin=False):
+    def __init__(self, name, parameters, body, default_args=list(), is_builtin=False):
         self.__name = name
         self.__parameters = parameters
         self.__body = body
@@ -159,7 +159,7 @@ class FunctionDef(Statement):
     def evaluate(self, st):
         identifier = self.name.identifier
         flags = dict({'is_namespace': True})
-        namespaces = [self]
+        namespaces = list([self])
         st.insert(identifier, flags, namespaces)
         return None
 
@@ -714,14 +714,14 @@ class Call(Expression):
                 identifier = parameter.identifier
                 if (identifier in functiondef.default_args):
                     flags = dict({'is_parameter': True})
-                    namespaces = [functiondef.default_args[identifier]]
+                    namespaces = list([functiondef.default_args[identifier]])
                     function_symtable.insert(identifier, flags, namespaces)
         
         # Insert symbols for arguments
         for parameter, expression in zip(parameters, self.arguments):
             identifier = parameter.identifier
             flags = dict({'is_parameter': True})
-            namespaces = [expression.evaluate(st)]
+            namespaces = list([expression.evaluate(st)])
             function_symtable.insert(identifier, flags, namespaces)
         
         # Evaluate function body

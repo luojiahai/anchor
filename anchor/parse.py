@@ -68,10 +68,12 @@ class AnchorParser(Parser):
                       | statement'''
         if (len(p) == 3):
             statements = p[1]
-            if (p[2]): statements.append(p[2])
+            statement = p[2]
+            if (statement): statements.append(statement)
             p[0] = statements
         elif (len(p) == 2):
-            p[0] = [p[1]]
+            statement = p[1]
+            p[0] = list([statement])
 
     def p_statement_assignment(self, p):
         '''statement : NAME EQUAL expression SEMI'''
@@ -104,7 +106,7 @@ class AnchorParser(Parser):
         expression = p[2]
         block = p[4]
         elif_statements = p[5]
-        p[0] = [ast.Elif(expression, block)] + elif_statements
+        p[0] = list([ast.Elif(expression, block)]) + elif_statements
 
     def p_elif_statements_else(self, p):
         '''elif_statements : ELIF expression THEN block else_block
@@ -113,11 +115,11 @@ class AnchorParser(Parser):
             expression = p[2]
             block = p[4]
             else_block = p[5]
-            p[0] = [ast.Elif(expression, block, else_block)]
+            p[0] = list([ast.Elif(expression, block, else_block)])
         elif (len(p) == 5):
             expression = p[2]
             block = p[4]
-            p[0] = [ast.Elif(expression, block)]
+            p[0] = list([ast.Elif(expression, block)])
 
     def p_else_block(self, p):
         '''else_block : ELSE block'''
@@ -174,11 +176,12 @@ class AnchorParser(Parser):
                         | annotation'''
         if (len(p) == 4):
             annotations = p[1]
-            if (p[3]): annotations.append(p[3])
+            annotation = p[3]
+            if (annotation): annotations.append(annotation)
             p[0] = annotations
         elif (len(p) == 2):
             annotation = p[1]
-            p[0] = [annotation]
+            p[0] = list([annotation])
 
     def p_annotation(self, p):
         '''annotation : PUBLIC
@@ -200,11 +203,12 @@ class AnchorParser(Parser):
                        | parameter'''
         if (len(p) == 4):
             parameters = p[1]
-            if (p[3]): parameters.append(p[3])
+            parameter = p[3]
+            if (parameter): parameters.append(parameter)
             p[0] = parameters
         if (len(p) == 2):
             parameter = p[1]
-            p[0] = [parameter]
+            p[0] = list([parameter])
 
     def p_parameter(self, p):
         '''parameter : NAME COLON NAME LSQB annotations RSQB
@@ -323,11 +327,12 @@ class AnchorParser(Parser):
                 | expression'''
         if (len(p) == 4):
             args = p[1]
-            if (p[3]): args.append(p[3])
+            expression = p[3]
+            if (expression): args.append(expression)
             p[0] = args
         elif (len(p) == 2):
             expression = p[1]
-            p[0] = [expression]
+            p[0] = list([expression])
 
     def p_expression_true(self, p):
         '''expression : TRUE'''
@@ -366,27 +371,32 @@ class AnchorParser(Parser):
                       | LPAR expression COMMA RPAR
                       | LPAR RPAR'''
         if (len(p) == 6):
-            p[0] = ast.Tuple([p[2]] + p[4])
+            expression = p[2]
+            expressions = p[4]
+            p[0] = ast.Tuple(list([expression] + expressions))
         elif (len(p) == 5):
-            p[0] = ast.Tuple([p[2]])
+            expression = p[2]
+            p[0] = ast.Tuple(list([expression]))
         elif (len(p) == 3):
-            p[0] = ast.Tuple([])
+            p[0] = ast.Tuple(list())
 
     def p_expression_list(self, p):
         '''expression : LSQB expressions RSQB
                       | LSQB RSQB'''
         if (len(p) == 4):
-            p[0] = ast.List(p[2])
+            expressions = p[2]
+            p[0] = ast.List(expressions)
         elif (len(p) == 3):
-            p[0] = ast.List([])
+            p[0] = ast.List(list())
 
     def p_expression_dict(self, p):
         '''expression : LBRACE kvpairs RBRACE
                       | LBRACE RBRACE'''
         if (len(p) == 4):
-            p[0] = ast.Dict(p[2])
+            kvpairs = p[2]
+            p[0] = ast.Dict(kvpairs)
         elif (len(p) == 3):
-            p[0] = ast.Dict([])
+            p[0] = ast.Dict(list())
 
     def p_expressions(self, p):
         '''expressions : _expressions COMMA
@@ -398,11 +408,12 @@ class AnchorParser(Parser):
                         | expression'''
         if (len(p) == 4):
             expressions = p[1]
-            if (p[3]): expressions.append(p[3])
+            expression = p[3]
+            if (expression): expressions.append(expression)
             p[0] = expressions
         elif (len(p) == 2):
             expression = p[1]
-            p[0] = [expression]
+            p[0] = list([expression])
 
     def p_kvpairs(self, p):
         '''kvpairs : _kvpairs COMMA
@@ -414,15 +425,18 @@ class AnchorParser(Parser):
                     | kvpair'''
         if (len(p) == 4):
             kvpairs = p[1]
-            if (p[3]): kvpairs.append(p[3])
+            kvpair = p[3]
+            if (kvpair): kvpairs.append(kvpair)
             p[0] = kvpairs
         elif (len(p) == 2):
             kvpair = p[1]
-            p[0] = [kvpair]
+            p[0] = list([kvpair])
 
     def p_kvpair(self, p):
         '''kvpair : expression COLON expression'''
-        p[0] = (p[1], p[3],)
+        key = p[1]
+        value = p[3]
+        p[0] = tuple((key, value,))
 
     def p_empty(self, p):
         '''empty : '''
