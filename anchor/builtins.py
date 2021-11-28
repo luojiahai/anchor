@@ -1,3 +1,5 @@
+from re import S
+import sys
 import abc
 
 
@@ -114,10 +116,25 @@ TYPE = {
 }
 
 
-def builtin_print(value):
-    return print(value)
+# Anchor stream name to Python stream
+STREAM = {
+    'stdin': sys.stdin,
+    'stdout': sys.stdout,
+    'stderr': sys.stderr,
+}
 
 
-FUNCTIONS = {
+def builtin_print(value, file='stdout'):
+    stream = None
+    if (file in STREAM):
+        stream = STREAM[file]
+    else:
+        stream = open(file, 'w')
+    assert (stream != None)
+    return print(value, file=stream)
+
+
+# Anchor builtin function name to Python function pointer
+FUNCTION = {
     'print': builtin_print,
 }

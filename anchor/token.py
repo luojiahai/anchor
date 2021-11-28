@@ -90,7 +90,6 @@ PRIVATE: Literal        = 'PRIVATE'
 PROTECTED: Literal      = 'PROTECTED'
 GET: Literal            = 'GET'
 SET: Literal            = 'SET'
-OPTIONAL: Literal       = 'OPTIONAL'
 REF: Literal            = 'REF'
 VAL: Literal            = 'VAL'
 
@@ -123,7 +122,6 @@ kwdict: dict[Literal, str] = {
     PROTECTED           : 'protected',
     GET                 : 'get',
     SET                 : 'set',
-    OPTIONAL            : 'optional',
     REF                 : 'ref',
     VAL                 : 'val',
 }

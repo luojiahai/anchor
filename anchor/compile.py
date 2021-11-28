@@ -19,7 +19,7 @@ def execute(data):
             for k, v in signature.parameters.items()
             if v.default is not inspect.Parameter.empty
         })
-    for identifier, function in builtins.FUNCTIONS.items():
+    for identifier, function in builtins.FUNCTION.items():
         name = ast.Name(identifier)
         parameters = list([ast.Name(arg) for arg in inspect.getfullargspec(function)[0]])
         default_args = get_default_args(function)

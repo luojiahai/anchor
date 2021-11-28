@@ -708,20 +708,16 @@ class Call(Expression):
         # Create function symbol table
         function_symtable = symtable.Function(identifier, st)
 
-        # Insert symbols for default arguments
-        if (functiondef.default_args):
-            for parameter in parameters:
-                identifier = parameter.identifier
-                if (identifier in functiondef.default_args):
-                    flags = dict({'is_parameter': True})
-                    namespaces = list([functiondef.default_args[identifier]])
-                    function_symtable.insert(identifier, flags, namespaces)
-        
         # Insert symbols for arguments
-        for parameter, expression in zip(parameters, self.arguments):
+        for index in range(len(parameters)):
+            parameter = parameters[index]
             identifier = parameter.identifier
             flags = dict({'is_parameter': True})
-            namespaces = list([expression.evaluate(st)])
+            namespaces = list([
+                self.arguments[index].evaluate(st)
+                if index < len(self.arguments)
+                else functiondef.default_args[identifier]
+            ])
             function_symtable.insert(identifier, flags, namespaces)
         
         # Evaluate function body
