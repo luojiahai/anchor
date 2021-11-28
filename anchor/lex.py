@@ -12,10 +12,8 @@ def group(*choices):    return '(' + '|'.join(choices) + ')'
 def any(*choices):      return group(*choices) + '*'
 def maybe(*choices):    return group(*choices) + '?'
 
-# Ignore
-Whitespace              = r'[ \f\t]*'
+# Comment
 Comment                 = r'\#[^\r\n]*'
-Ignore                  = Whitespace + any(r'\\\r?\n' + Whitespace) + maybe(Comment)
 
 # Number
 Hexnumber               = r'0[xX](?:_?[0-9a-fA-F])+'

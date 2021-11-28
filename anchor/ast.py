@@ -130,6 +130,93 @@ class Elif(Statement):
         return self.block.evaluate(st)
 
 
+class Iterate(Statement):
+
+    def __init__(self, iterable, variable, block):
+        self.__iterable = iterable
+        self.__variable = variable
+        self.__block = block
+
+    @property
+    def iterable(self):
+        return self.__iterable
+    
+    @property
+    def variable(self):
+        return self.__variable
+
+    @property
+    def block(self):
+        return self.__block
+
+    def evaluate(self, st):
+        identifier = self.variable.identifier
+        for e in self.iterable.evaluate(st):
+            flags = dict()
+            namespaces = list([e])
+            st.insert(identifier, flags, namespaces)
+            value = self.block.evaluate(st)
+            if (isinstance(value, Return)):
+                return value.evaluate(st)
+            elif (isinstance(value, Break)):
+                break
+            elif (isinstance(value, Continue)):
+                continue
+        return None
+
+
+class Loop(Statement):
+
+    def __init__(self, expression, block):
+        self.__expression = expression
+        self.__block = block
+
+    @property
+    def expression(self):
+        return self.__expression
+    
+    @property
+    def block(self):
+        return self.__block
+
+    def evaluate(self, st):
+        while (self.expression.evaluate(st)):
+            value = self.block.evaluate(st)
+            if (isinstance(value, Return)):
+                return value.evaluate(st)
+            elif (isinstance(value, Break)):
+                break
+            elif (isinstance(value, Continue)):
+                continue
+        return None
+
+
+class Break(Terminal):
+
+    def __init__(self, literal):
+        self.__literal = literal
+
+    @property
+    def literal(self):
+        return self.__literal
+
+    def evaluate(self, st):
+        return None
+
+
+class Continue(Terminal):
+    
+    def __init__(self, literal):
+        self.__literal = literal
+
+    @property
+    def literal(self):
+        return self.__literal
+
+    def evaluate(self, st):
+        return None
+
+
 class FunctionDef(Statement):
 
     def __init__(

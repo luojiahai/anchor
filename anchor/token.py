@@ -82,7 +82,7 @@ ELIF: Literal           = 'ELIF'
 ELSE: Literal           = 'ELSE'
 ITERATE: Literal        = 'ITERATE'
 FOR: Literal            = 'FOR'
-WHILE: Literal          = 'WHILE'
+LOOP: Literal          = 'LOOP'
 CONTINUE: Literal       = 'CONTINUE'
 BREAK: Literal          = 'BREAK'
 PUBLIC: Literal         = 'PUBLIC'
@@ -114,7 +114,7 @@ kwdict: dict[Literal, str] = {
     ELSE                : 'else',
     ITERATE             : 'iterate',
     FOR                 : 'for',
-    WHILE               : 'while',
+    LOOP                : 'loop',
     CONTINUE            : 'continue',
     BREAK               : 'break',
     PUBLIC              : 'public',

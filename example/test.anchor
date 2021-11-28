@@ -7,3 +7,21 @@ elif (a < 2) then
 else
     print("OK3");
 end
+
+iterate [1, 2, 3] for e
+begin
+    print(e);
+end
+
+i = 5;
+loop (i < 9)
+begin
+    if (i % 2 == 0) then
+        if (i == 8) then
+            break;
+        else       
+            print(i);
+        end
+    end
+    i = i + 1;
+end

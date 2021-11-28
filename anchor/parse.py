@@ -5,7 +5,7 @@ import anchor.token as token
 import anchor.ast as ast
 
 
-__all__ = ['Parser', 'AnchorParser',]
+__all__ = ['AnchorParser',]
 
 
 class Parser:
@@ -85,7 +85,7 @@ class AnchorParser(Parser):
         expression = p[2]
         block = p[4]
         elif_statements = p[5]
-        p[0] = ast.If(expression, block, elif_statements)
+        p[0] = ast.If(expression, block, elif_statements=elif_statements)
 
     def p_statement_if_else(self, p):
         '''statement : IF expression THEN block else_block END
@@ -94,7 +94,7 @@ class AnchorParser(Parser):
             expression = p[2]
             block = p[4]
             else_block = p[5]
-            p[0] = ast.If(expression, block, else_block)
+            p[0] = ast.If(expression, block, else_block=else_block)
         elif (len(p) == 6):
             expression = p[2]
             block = p[4]
@@ -126,21 +126,24 @@ class AnchorParser(Parser):
 
     def p_statement_iterate(self, p):
         '''statement : ITERATE expression FOR NAME BEGIN block END'''
-        # TODO
-        pass
+        iterable = p[2]
+        variable = ast.Name(p[4])
+        block = p[6]
+        p[0] = ast.Iterate(iterable, variable, block)
 
-    def p_statement_while(self, p):
-        '''statement : WHILE expression BEGIN block END'''
-        # TODO
-        pass
+    def p_statement_loop(self, p):
+        '''statement : LOOP expression BEGIN block END'''
+        expression = p[2]
+        block = p[4]
+        p[0] = ast.Loop(expression, block)
 
     def p_statement_break(self, p):
         '''statement : BREAK SEMI'''
-        p[0] = p[1]
+        p[0] = ast.Break(p[1])
 
     def p_statement_continue(self, p):
         '''statement : CONTINUE SEMI'''
-        p[0] = p[1]
+        p[0] = ast.Continue(p[1])
 
     def p_statement_classdef(self, p):
         '''statement : CLASS LSQB annotations RSQB NAME INHERIT LPAR NAME RPAR BEGIN block END
