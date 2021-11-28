@@ -40,9 +40,6 @@ class Block(ASTNode):
 class Statement(ASTNode): pass
 
 
-class Terminal(Statement): pass
-
-
 class Assignment(Statement):
 
     def __init__(self, name, expression):
@@ -191,7 +188,7 @@ class Loop(Statement):
         return None
 
 
-class Break(Terminal):
+class Break(Statement):
 
     def __init__(self, literal):
         self.__literal = literal
@@ -204,7 +201,7 @@ class Break(Terminal):
         return None
 
 
-class Continue(Terminal):
+class Continue(Statement):
     
     def __init__(self, literal):
         self.__literal = literal
@@ -257,7 +254,7 @@ class FunctionDef(Statement):
         return None
 
 
-class Return(Terminal):
+class Return(Statement):
 
     def __init__(self, expression):
         self.__expression = expression

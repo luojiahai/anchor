@@ -163,6 +163,10 @@ class AnchorParser(Parser):
         # TODO
         pass
 
+    def p_statement_return(self, p):
+        '''statement : RETURN expression SEMI'''
+        p[0] = ast.Return(p[2])
+
     def p_statement_property(self, p):
         '''statement : PROPERTY LSQB annotations RSQB NAME SEMI'''
         # TODO
@@ -218,10 +222,6 @@ class AnchorParser(Parser):
                      | NAME'''
         # TODO
         pass
-
-    def p_statement_return(self, p):
-        '''statement : RETURN expression SEMI'''
-        p[0] = p[2]
 
     def p_statement_expression(self, p):
         '''statement : expression SEMI'''
