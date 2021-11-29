@@ -17,9 +17,7 @@ class SymbolTable:
         self._symbols = dict()
         if (parent):
             for _, symbol in parent.symbols.items():
-                self.insert(
-                    symbol.identifier, symbol.flags, symbol.namespaces
-                )
+                self.insert(symbol.identifier, symbol.namespaces, **symbol.flags)
 
     @property
     def type(self):
@@ -33,15 +31,12 @@ class SymbolTable:
     def symbols(self):
         return self._symbols
     
-    def insert(self, identifier, flags, namespaces):
+    def insert(self, identifier, namespaces, **flags):
         symbol = None
         if (identifier in self.symbols):
-            symbol = Symbol(
-                identifier, flags, 
-                self.symbols[identifier].namespaces + namespaces
-            )
+            symbol = Symbol(identifier, self.symbols[identifier].namespaces + namespaces, **flags)
         else:
-            symbol = Symbol(identifier, flags, namespaces)
+            symbol = Symbol(identifier, namespaces, **flags)
         assert (symbol != None)
         self.symbols[identifier] = symbol
 
@@ -79,22 +74,22 @@ class Function(SymbolTable):
 
 class Symbol:
 
-    def __init__(self, identifier, flags, namespaces=None):
+    def __init__(self, identifier, namespaces, **flags):
         self.__identifier = identifier
-        self.__flags = flags
         self.__namespaces = namespaces
+        self.__flags = flags
 
     @property
     def identifier(self):
         return self.__identifier
 
     @property
-    def flags(self):
-        return self.__flags
-
-    @property
     def namespaces(self):
         return self.__namespaces
+
+    @property
+    def flags(self):
+        return self.__flags
 
     @property
     def namespace(self):
@@ -103,11 +98,9 @@ class Symbol:
             return self.__namespaces[-1]
         return self.__namespaces[0]
 
-    def is_namespace(self):
-        try: return self.__flags['is_namespace']
-        except: return False
+    def isnamespace(self):
+        return self.flags.get('isnamespace', False)
 
-    def is_parameter(self):
-        try: return self.__flags['is_parameter']
-        except: return False
+    def isparameter(self):
+        return self.flags.get('isparameter', False)
     

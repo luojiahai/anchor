@@ -56,9 +56,8 @@ class Assignment(Statement):
 
     def evaluate(self, st):
         identifier = self.name.identifier
-        flags = dict()
         namespaces = list([self.expression.evaluate(st)])
-        st.insert(identifier, flags, namespaces)
+        st.insert(identifier, namespaces)
         return None
 
 
@@ -149,9 +148,8 @@ class Iterate(Statement):
     def evaluate(self, st):
         identifier = self.variable.identifier
         for e in self.iterable.evaluate(st):
-            flags = dict()
             namespaces = list([e])
-            st.insert(identifier, flags, namespaces)
+            st.insert(identifier, namespaces)
             value = self.block.evaluate(st)
             if (isinstance(value, Return)):
                 return value.evaluate(st)
@@ -216,15 +214,11 @@ class Continue(Statement):
 
 class FunctionDef(Statement):
 
-    def __init__(
-        self, name, parameters, body, 
-        default_args=list(), is_builtin=False
-    ):
+    def __init__(self, name, parameters, body, **flags):
         self.__name = name
         self.__parameters = parameters
         self.__body = body
-        self.__default_args = default_args
-        self.__is_builtin = is_builtin
+        self.__flags = flags
 
     @property
     def name(self):
@@ -239,18 +233,13 @@ class FunctionDef(Statement):
         return self.__body
 
     @property
-    def default_args(self):
-        return self.__default_args
-
-    @property
     def is_builtin(self):
-        return self.__is_builtin
+        return self.__flags.get('isbuiltin', False)
 
     def evaluate(self, st):
         identifier = self.name.identifier
-        flags = dict({'is_namespace': True})
         namespaces = list([self])
-        st.insert(identifier, flags, namespaces)
+        st.insert(identifier, namespaces, isnamespace=True)
         return None
 
 
@@ -727,11 +716,11 @@ class Complex(Expression):
 class Tuple(Expression):
 
     def __init__(self, expressions):
-        self._expressions = expressions
+        self.__expressions = expressions
 
     @property
     def expressions(self):
-        return self._expressions
+        return self.__expressions
     
     def evaluate(self, st):
         return builtins.Tuple(tuple([
@@ -743,11 +732,11 @@ class Tuple(Expression):
 class List(Expression):
 
     def __init__(self, expressions):
-        self._expressions = expressions
+        self.__expressions = expressions
 
     @property
     def expressions(self):
-        return self._expressions
+        return self.__expressions
     
     def evaluate(self, st):
         return builtins.List(list([
@@ -759,11 +748,11 @@ class List(Expression):
 class Dict(Expression):
 
     def __init__(self, kvpairs):
-        self._kvpairs = kvpairs
+        self.__kvpairs = kvpairs
 
     @property
     def kvpairs(self):
-        return self._kvpairs
+        return self.__kvpairs
 
     def evaluate(self, st):
         the_dict = dict()
@@ -796,26 +785,21 @@ class Call(Expression):
         body = functiondef.body
 
         # Create function symbol table
-        function_symtable = symtable.Function(identifier, st)
+        functionst = symtable.Function(identifier, st)
 
         # Insert symbols for arguments
         for index in range(len(parameters)):
             parameter = parameters[index]
             identifier = parameter.identifier
-            flags = dict({'is_parameter': True})
-            namespaces = list([
-                self.arguments[index].evaluate(st)
-                if index < len(self.arguments)
-                else functiondef.default_args[identifier]
-            ])
-            function_symtable.insert(identifier, flags, namespaces)
+            namespaces = list([self.arguments[index].evaluate(st)])
+            functionst.insert(identifier, namespaces, isparameter=True)
         
         # Evaluate function body
         if (functiondef.is_builtin):
             function = body
             args = dict()
             for parameter in parameters:
-                value = parameter.evaluate(function_symtable)
+                value = parameter.evaluate(functionst)
                 args[parameter.identifier] = value
             value = function(**args)
             return builtins.TYPE[type(value).__name__](value)

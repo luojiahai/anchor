@@ -124,14 +124,8 @@ STREAM = {
 }
 
 
-def builtin_print(value, file='stdout'):
-    stream = None
-    if (file in STREAM):
-        stream = STREAM[file]
-    else:
-        stream = open(file, 'w')
-    assert (stream != None)
-    return print(value, file=stream)
+def builtin_print(value):
+    return print(value, file=STREAM['stdout'])
 
 
 # Anchor builtin function name to Python function pointer
