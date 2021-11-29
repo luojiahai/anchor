@@ -19,8 +19,8 @@ class Program(ASTNode):
         return self.__block
     
     def evaluate(self, st):
-        value, _ = self.block.evaluate(st)
-        return value
+        node = self.block.evaluate(st)
+        return node
 
 
 class Block(ASTNode):
@@ -34,14 +34,14 @@ class Block(ASTNode):
 
     def evaluate(self, st):
         for statement in self.statements:
-            value = statement.evaluate(st)
-            if (isinstance(value, Return)):
-                return (value.expression.evaluate(st), {'return': True},)
-            elif (isinstance(value, Break)):
-                return (value, {'break': True},)
-            elif (isinstance(value, Continue)):
-                return (value, {'continue': True},)
-        return (None, {},)
+            node = statement.evaluate(st)
+            if (isinstance(node, Return)):
+                return node
+            elif (isinstance(node, Break)):
+                return node
+            elif (isinstance(node, Continue)):
+                return node
+        return None
 
 
 class Statement(ASTNode): pass
@@ -96,11 +96,11 @@ class If(Statement):
         return self.__else_block
 
     def evaluate(self, st):
-        if (self.expression.evaluate(st)):
+        if (self.expression.evaluate(st).value):
             return self.block.evaluate(st)
         else:
             for elif_statement in self.elif_statements:
-                if (elif_statement.expression.evaluate(st)):
+                if (elif_statement.expression.evaluate(st).value):
                     return elif_statement.evaluate(st)
                 elif (elif_statement.else_block):
                     return elif_statement.else_block.evaluate(st)
@@ -154,15 +154,15 @@ class Iterate(Statement):
 
     def evaluate(self, st):
         identifier = self.variable.identifier
-        for e in self.iterable.evaluate(st):
+        for e in self.iterable.evaluate(st).iterable:
             namespaces = list([e])
             st.insert(identifier, namespaces)
-            value, flags = self.block.evaluate(st)
-            if (flags.get('return', False)):
-                return value
-            elif (flags.get('break', False)):
+            node = self.block.evaluate(st)
+            if (isinstance(node, Return)):
+                return node
+            elif (isinstance(node, Break)):
                 break
-            elif (flags.get('continue', False)):
+            elif (isinstance(node, Continue)):
                 continue
         return None
 
@@ -182,41 +182,15 @@ class Loop(Statement):
         return self.__block
 
     def evaluate(self, st):
-        while (self.expression.evaluate(st)):
-            value, flags = self.block.evaluate(st)
-            if (flags.get('return', False)):
-                return value
-            elif (flags.get('break', False)):
+        while (self.expression.evaluate(st).value):
+            node = self.block.evaluate(st)
+            if (isinstance(node, Return)):
+                return node
+            elif (isinstance(node, Break)):
                 break
-            elif (flags.get('continue', False)):
+            elif (isinstance(node, Continue)):
                 continue
         return None
-
-
-class Break(Statement):
-
-    def __init__(self, literal):
-        self.__literal = literal
-
-    @property
-    def literal(self):
-        return self.__literal
-
-    def evaluate(self, st):
-        return self
-
-
-class Continue(Statement):
-    
-    def __init__(self, literal):
-        self.__literal = literal
-
-    @property
-    def literal(self):
-        return self.__literal
-
-    def evaluate(self, st):
-        return self
 
 
 class FunctionDef(Statement):
@@ -317,7 +291,35 @@ class Property(Statement):
         return self.__name
 
 
+class Break(Statement):
+
+    def __init__(self, literal):
+        self.__literal = literal
+
+    @property
+    def literal(self):
+        return self.__literal
+
+    def evaluate(self, st):
+        return self
+
+
+class Continue(Statement):
+    
+    def __init__(self, literal):
+        self.__literal = literal
+
+    @property
+    def literal(self):
+        return self.__literal
+
+    def evaluate(self, st):
+        return self
+
+
 class Return(Statement):
+
+    __value = None
 
     def __init__(self, expression):
         self.__expression = expression
@@ -326,7 +328,12 @@ class Return(Statement):
     def expression(self):
         return self.__expression
 
+    @property
+    def value(self):
+        return self.__value
+
     def evaluate(self, st):
+        self.__value = self.expression.evaluate(st).value
         return self
 
 
@@ -350,8 +357,10 @@ class Or(Expression):
     def evaluate(self, st):
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
-        value = left or right
-        return TYPE[type(value)](value)
+        value = left.value or right.value
+        node = TYPE[type(value)](value)
+        node.evaluate(st)
+        return node
 
 
 class And(Expression):
@@ -371,8 +380,10 @@ class And(Expression):
     def evaluate(self, st):
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
-        value = left and right
-        return TYPE[type(value)](value)
+        value = left.value and right.value
+        node = TYPE[type(value)](value)
+        node.evaluate(st)
+        return node
 
 
 class Not(Expression):
@@ -386,8 +397,10 @@ class Not(Expression):
 
     def evaluate(self, st):
         right = self.right.evaluate(st)
-        value = not right
-        return TYPE[type(value)](value)
+        value = not right.value
+        node = TYPE[type(value)](value)
+        node.evaluate(st)
+        return node
 
 
 class EqEqual(Expression):
@@ -407,8 +420,10 @@ class EqEqual(Expression):
     def evaluate(self, st):
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
-        value = left == right
-        return TYPE[type(value)](value)
+        value = left.value == right.value
+        node = TYPE[type(value)](value)
+        node.evaluate(st)
+        return node
 
 
 class NotEqual(Expression):
@@ -428,8 +443,10 @@ class NotEqual(Expression):
     def evaluate(self, st):
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
-        value = left != right
-        return TYPE[type(value)](value)
+        value = left.value != right.value
+        node = TYPE[type(value)](value)
+        node.evaluate(st)
+        return node
 
 
 class Less(Expression):
@@ -449,8 +466,10 @@ class Less(Expression):
     def evaluate(self, st):
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
-        value = left < right
-        return TYPE[type(value)](value)
+        value = left.value < right.value
+        node = TYPE[type(value)](value)
+        node.evaluate(st)
+        return node
 
 
 class LessEqual(Expression):
@@ -470,8 +489,10 @@ class LessEqual(Expression):
     def evaluate(self, st):
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
-        value = left <= right
-        return TYPE[type(value)](value)
+        value = left.value <= right.value
+        node = TYPE[type(value)](value)
+        node.evaluate(st)
+        return node
 
 
 class Greater(Expression):
@@ -491,8 +512,10 @@ class Greater(Expression):
     def evaluate(self, st):
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
-        value = left > right
-        return TYPE[type(value)](value)
+        value = left.value > right.value
+        node = TYPE[type(value)](value)
+        node.evaluate(st)
+        return node
 
 
 class GreaterEqual(Expression):
@@ -512,8 +535,10 @@ class GreaterEqual(Expression):
     def evaluate(self, st):
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
-        value = left >= right
-        return TYPE[type(value)](value)
+        value = left.value >= right.value
+        node = TYPE[type(value)](value)
+        node.evaluate(st)
+        return node
 
 
 class Plus(Expression):
@@ -533,8 +558,10 @@ class Plus(Expression):
     def evaluate(self, st):
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
-        value = left + right
-        return TYPE[type(value)](value)
+        value = left.value + right.value
+        node = TYPE[type(value)](value)
+        node.evaluate(st)
+        return node
 
 
 class Minus(Expression):
@@ -554,8 +581,10 @@ class Minus(Expression):
     def evaluate(self, st):
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
-        value = left - right
-        return TYPE[type(value)](value)
+        value = left.value - right.value
+        node = TYPE[type(value)](value)
+        node.evaluate(st)
+        return node
 
 
 class Star(Expression):
@@ -575,8 +604,10 @@ class Star(Expression):
     def evaluate(self, st):
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
-        value = left * right
-        return TYPE[type(value)](value)
+        value = left.value * right.value
+        node = TYPE[type(value)](value)
+        node.evaluate(st)
+        return node
 
 
 class DoubleStar(Expression):
@@ -596,8 +627,10 @@ class DoubleStar(Expression):
     def evaluate(self, st):
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
-        value = left ** right
-        return TYPE[type(value)](value)
+        value = left.value ** right.value
+        node = TYPE[type(value)](value)
+        node.evaluate(st)
+        return node
 
 
 class Slash(Expression):
@@ -617,8 +650,10 @@ class Slash(Expression):
     def evaluate(self, st):
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
-        value = left / right
-        return TYPE[type(value)](value)
+        value = left.value / right.value
+        node = TYPE[type(value)](value)
+        node.evaluate(st)
+        return node
 
 
 class DoubleSlash(Expression):
@@ -638,8 +673,10 @@ class DoubleSlash(Expression):
     def evaluate(self, st):
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
-        value = left // right
-        return TYPE[type(value)](value)
+        value = left.value // right.value
+        node = TYPE[type(value)](value)
+        node.evaluate(st)
+        return node
 
 
 class Percent(Expression):
@@ -659,8 +696,10 @@ class Percent(Expression):
     def evaluate(self, st):
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
-        value = left % right
-        return TYPE[type(value)](value)
+        value = left.value % right.value
+        node = TYPE[type(value)](value)
+        node.evaluate(st)
+        return node
 
 
 class UPlus(Expression):
@@ -674,8 +713,10 @@ class UPlus(Expression):
 
     def evaluate(self, st):
         right = self.right.evaluate(st)
-        value = +right
-        return TYPE[type(value)](value)
+        value = +right.value
+        node = TYPE[type(value)](value)
+        node.evaluate(st)
+        return node
 
 
 class UMinus(Expression):
@@ -689,8 +730,10 @@ class UMinus(Expression):
 
     def evaluate(self, st):
         right = self.right.evaluate(st)
-        value = -right
-        return TYPE[type(value)](value)
+        value = -right.value
+        node = TYPE[type(value)](value)
+        node.evaluate(st)
+        return node
 
 
 class Name(Expression):
@@ -704,122 +747,197 @@ class Name(Expression):
 
     def evaluate(self, st):
         symbol = st.lookup(self.identifier)
-        if (not symbol):
-            raise NameError()
         return symbol.namespace
 
 
 class Boolean(Expression):
 
-    def __init__(self, value):
-        self.__value = value
+    __value = None
+
+    def __init__(self, literal):
+        self.__literal = literal
+
+    @property
+    def literal(self):
+        return self.__literal
 
     @property
     def value(self):
         return self.__value
 
     def evaluate(self, st):
-        return builtins.Boolean(bool(self.value))
+        self.__value = builtins.Boolean(bool(self.literal))
+        return self
 
 
 class Null(Expression):
 
-    def __init__(self, value):
-        self.__value = value
+    __value = None
+
+    def __init__(self, literal):
+        self.__literal = literal
+
+    @property
+    def literal(self):
+        return self.__literal
 
     @property
     def value(self):
         return self.__value
 
     def evaluate(self, st):
-        return builtins.Null(self.value)
+        self.__value = builtins.Null(self.literal)
+        return self
 
 
 class String(Expression):
 
-    def __init__(self, value):
-        self.__value = value
+    __value = None
+
+    def __init__(self, literal):
+        self.__literal = literal
+
+    @property
+    def literal(self):
+        return self.__literal
 
     @property
     def value(self):
         return self.__value
 
     def evaluate(self, st):
-        return builtins.String(str(self.value))
+        self.__value = builtins.String(str(self.literal))
+        return self
 
 
 class Integer(Expression):
 
-    def __init__(self, value):
-        self.__value = value
+    __value = None
+
+    def __init__(self, literal):
+        self.__literal = literal
+
+    @property
+    def literal(self):
+        return self.__literal
 
     @property
     def value(self):
         return self.__value
 
     def evaluate(self, st):
-        return builtins.Integer(int(self.value))
+        self.__value = builtins.Integer(int(self.literal))
+        return self
 
 
 class Float(Expression):
 
-    def __init__(self, value):
-        self.__value = value
+    __value = None
+
+    def __init__(self, literal):
+        self.__literal = literal
+
+    @property
+    def literal(self):
+        return self.__literal
 
     @property
     def value(self):
         return self.__value
 
     def evaluate(self, st):
-        return builtins.Float(float(self.value))
+        self.__value = builtins.Float(float(self.literal))
+        return self
 
 
 class Complex(Expression):
 
-    def __init__(self, value):
-        self.__value = value
+    __value = None
+
+    def __init__(self, literal):
+        self.__literal = literal
+
+    @property
+    def literal(self):
+        return self.__literal
 
     @property
     def value(self):
         return self.__value
 
     def evaluate(self, st):
-        return builtins.Complex(complex(self.value))
+        self.__value = builtins.Complex(complex(self.literal))
+        return self
 
 
 class Tuple(Expression):
 
+    __value = None
+    __iterable = None
+
     def __init__(self, expressions):
         self.__expressions = expressions
 
     @property
     def expressions(self):
         return self.__expressions
+
+    @property
+    def value(self):
+        return self.__value
+
+    @property
+    def iterable(self):
+        return self.__iterable
     
     def evaluate(self, st):
-        return builtins.Tuple(tuple([
-            expression.evaluate(st) 
+        self.__value = builtins.Tuple(tuple([
+            expression.evaluate(st).value
             for expression in self.expressions
         ]))
+        self.__iterable = tuple([
+            expression.evaluate(st)
+            for expression in self.expressions
+        ])
+        return self
 
 
 class List(Expression):
 
+    __value = None
+    __iterable = None
+
     def __init__(self, expressions):
         self.__expressions = expressions
 
     @property
     def expressions(self):
         return self.__expressions
+
+    @property
+    def value(self):
+        return self.__value
+
+    @property
+    def iterable(self):
+        return self.__iterable
     
     def evaluate(self, st):
-        return builtins.List(list([
-            expression.evaluate(st) 
+        self.__value = builtins.List(list([
+            expression.evaluate(st).value
             for expression in self.expressions
         ]))
+        self.__iterable = list([
+            expression.evaluate(st) 
+            for expression in self.expressions
+        ])
+        return self
 
 
 class Dict(Expression):
+
+    __value = None
+    __iterable = None
 
     def __init__(self, kvpairs):
         self.__kvpairs = kvpairs
@@ -828,13 +946,24 @@ class Dict(Expression):
     def kvpairs(self):
         return self.__kvpairs
 
+    @property
+    def value(self):
+        return self.__value
+
+    @property
+    def iterable(self):
+        return self.__iterable
+
     def evaluate(self, st):
-        the_dict = dict()
-        for k, v in self.kvpairs:
-            key = k.evaluate(st)
-            value = v.evaluate(st)
-            the_dict[key] = value
-        return builtins.Dict(the_dict)
+        self.__value = builtins.Dict({
+            k.evaluate(st).value: v.evaluate(st).value
+            for k, v in self.kvpairs
+        })
+        self.__iterable = dict({
+            k.evaluate(st): v.evaluate(st)
+            for k, v in self.kvpairs
+        })
+        return self
 
 
 class Call(Expression):
@@ -893,24 +1022,24 @@ class Call(Expression):
                 fnptr = body
                 args = dict()
                 for parameter in parameters:
-                    value = parameter.evaluate(fnst)
+                    value = parameter.evaluate(fnst).value
                     args[parameter.identifier] = value
                 value = fnptr(**args)
                 return TYPE[type(value)](value)
             else:
                 block = body
-                value, _ = block.evaluate(fnst)
-                return value
+                node = block.evaluate(fnst)
+                return node
 
 
 TYPE = {
-    bool: builtins.Boolean,
-    type(None): builtins.Null,
-    int: builtins.Integer,
-    float: builtins.Float,
-    complex: builtins.Complex,
-    str: builtins.String,
-    tuple: builtins.Tuple,
-    list: builtins.List,
-    dict: builtins.Dict,
+    bool: Boolean,
+    type(None): Null,
+    int: Integer,
+    float: Float,
+    complex: Complex,
+    str: String,
+    tuple: Tuple,
+    list: List,
+    dict: Dict,
 }
