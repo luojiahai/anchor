@@ -74,26 +74,26 @@ def read_command(argv):
             system.GLOBAL.debuglex = options.debuglex
             system.GLOBAL.debugyacc = options.debugyacc
 
-        # Log stream
-        logstream = None
-        if (options.log_file):
-            logstream_path = f'./log/anchor_{time.strftime("%Y%m%d%H%M%S", time.localtime())}.log'
-            os.makedirs(os.path.dirname(logstream_path), exist_ok=True)
-            logstream = open(logstream_path, 'w')
-        elif (options.logstream in builtins.STREAM):
-            logstream = builtins.STREAM[options.logstream]
-        else:
-            logstream = open(options.logstream, 'w')
-        system.GLOBAL.logstream = logstream
+    # Log stream
+    logstream = None
+    if (options.log_file):
+        logstream_path = f'./log/anchor_{time.strftime("%Y%m%d%H%M%S", time.localtime())}.log'
+        os.makedirs(os.path.dirname(logstream_path), exist_ok=True)
+        logstream = open(logstream_path, 'w')
+    elif (options.logstream in builtins.STREAM):
+        logstream = builtins.STREAM[options.logstream]
+    else:
+        logstream = open(options.logstream, 'w')
+    system.GLOBAL.logstream = logstream
 
-        # Set up a logging object
-        logging.basicConfig(
-            level = logging.DEBUG,
-            stream = system.GLOBAL.logstream,
-            format = '[DEBUG] %(filename)s:%(lineno)d:%(message)s'
-        )
-        log = logging.getLogger()
-        system.GLOBAL.log = log
+    # Set up a logging object
+    logging.basicConfig(
+        level = logging.DEBUG,
+        stream = system.GLOBAL.logstream,
+        format = '[DEBUG] %(filename)s:%(lineno)d:%(message)s'
+    )
+    log = logging.getLogger()
+    system.GLOBAL.log = log
 
     # Input stream
     inputstream = None

@@ -127,7 +127,46 @@ class Function(AnchorType):
         return self.__flags
 
 
-class Class(AnchorType): pass
+class Class(AnchorType):
+
+    def __init__(self, name, superclasses, properties, methods, **flags):
+        AnchorType.__init__(self, 'Class')
+        self.__name = name
+        self.__superclasses = superclasses
+        self.__properties = properties
+        self.__methods = methods
+        self.__flags = flags
+    
+    @property
+    def name(self):
+        return self.__name
+
+    @property
+    def superclasses(self):
+        return self.__superclasses
+
+    @property
+    def properties(self):
+        return self.__properties
+
+    @property
+    def methods(self):
+        return self.__methods
+
+    @property
+    def flags(self):
+        return self.__flags
+
+
+class Object(AnchorType):
+
+    def __init__(self, classname, symtable):
+        AnchorType.__init__(self, classname)
+        self.__symtable = symtable
+    
+    @property
+    def symtable(self):
+        return self.__symtable
 
 
 # Anchor stream name to Python stream

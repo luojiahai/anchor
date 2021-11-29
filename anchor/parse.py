@@ -1,8 +1,8 @@
-import sys
 import anchor.ply.yacc as yacc
 import anchor.lex as lex
 import anchor.token as token
 import anchor.ast as ast
+import anchor.system as system
 
 
 __all__ = ['AnchorParser',]
@@ -137,18 +137,6 @@ class AnchorParser(Parser):
         block = p[4]
         p[0] = ast.Loop(expression, block)
 
-    def p_statement_classdef(self, p):
-        '''statement : CLASS LSQB annotations RSQB name INHERIT LPAR name RPAR BEGIN block END
-                     | CLASS LSQB annotations RSQB name BEGIN block END'''
-        # TODO
-        pass
-
-    def p_statement_methoddef(self, p):
-        '''statement : METHOD LSQB annotations RSQB name LPAR parameters RPAR RARROW name BEGIN block END
-                     | METHOD LSQB annotations RSQB name LPAR RPAR RARROW name BEGIN block END'''
-        # TODO
-        pass
-
     def p_statement_functiondef(self, p):
         '''statement : FUNCTION name LPAR parameters RPAR RARROW expression BEGIN block END
                      | FUNCTION name LPAR RPAR RARROW expression BEGIN block END'''
@@ -157,18 +145,60 @@ class AnchorParser(Parser):
             parameters = p[4]
             returntype = p[7]
             body = p[9]
-            p[0] = ast.FunctionDef(name, parameters, body, returntype=returntype)
+            flags = dict({'returntype': returntype})
+            p[0] = ast.FunctionDef(name, parameters, body, **flags)
         elif (len(p) == 10):
             name = p[2]
             parameters = list()
             returntype = p[7]
             body = p[8]
-            p[0] = ast.FunctionDef(name, parameters, body, returntype=returntype)
+            flags = dict({'returntype': returntype})
+            p[0] = ast.FunctionDef(name, parameters, body, **flags)
+
+    def p_statement_classdef(self, p):
+        '''statement : CLASS LSQB annotations RSQB name INHERIT LPAR name RPAR BEGIN block END
+                     | CLASS LSQB annotations RSQB name BEGIN block END'''
+        # TODO: annotations
+        if (len(p) == 13):
+            annotations = p[3]
+            name = p[5]
+            superclasses = [p[8]]
+            block = p[11]
+            p[0] = ast.ClassDef(name, superclasses, block)
+        if (len(p) == 9):
+            annotations = p[3]
+            name = p[5]
+            superclasses = []
+            block = p[7]
+            p[0] = ast.ClassDef(name, superclasses, block)
 
     def p_statement_property(self, p):
         '''statement : PROPERTY LSQB annotations RSQB name SEMI'''
-        # TODO
-        pass
+        # TODO: annotations
+        annotations = p[3]
+        name = p[5]
+        p[0] = ast.Property(name)
+
+    def p_statement_methoddef(self, p):
+        '''statement : METHOD LSQB annotations RSQB name LPAR parameters RPAR RARROW expression BEGIN block END
+                     | METHOD LSQB annotations RSQB name LPAR RPAR RARROW expression BEGIN block END'''
+        # TODO: annotations
+        if (len(p) == 14):
+            annotations = [p[3]]
+            name = p[5]
+            parameters = p[7]
+            returntype = p[10]
+            body = p[12]
+            flags = dict({'returntype': returntype, 'ismethod': True})
+            p[0] = ast.FunctionDef(name, parameters, body, **flags)
+        elif (len(p) == 13):
+            annotations = [p[3]]
+            name = p[5]
+            parameters = []
+            returntype = p[9]
+            body = p[11]
+            flags = dict({'returntype': returntype, 'ismethod': True})
+            p[0] = ast.FunctionDef(name, parameters, body, **flags)
 
     def p_annotations(self, p):
         '''annotations : _annotations COMMA
@@ -195,6 +225,7 @@ class AnchorParser(Parser):
                       | SET
                       | REF
                       | VAL'''
+        # TODO
         p[0] = p[1]
 
     def p_parameters(self, p):
@@ -469,5 +500,5 @@ class AnchorParser(Parser):
         pass
 
     def p_error(self, p):
-        print(f'Error: {p}', file=sys.stderr)
+        system.GLOBAL.log.debug(f'Error: {p}')
         pass

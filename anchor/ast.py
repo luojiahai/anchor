@@ -219,38 +219,6 @@ class Continue(Statement):
         return self
 
 
-class ClassDef(Statement):
-
-    def __init__(self, name, superclasses, block, **flags):
-        self.__name = name
-        self.__superclasses = superclasses
-        self.__block = block
-        self.__flags = flags
-
-    @property
-    def name(self):
-        return self.__name
-
-    @property
-    def superclasses(self):
-        return self.__superclasses
-
-    @property
-    def block(self):
-        return self.__block
-
-    @property
-    def flags(self):
-        return self.__flags
-
-    def evaluate(self, st):
-        identifier = self.name.identifier
-        cs = builtins.Class(self.name, self.superclasses, self.block, **self.flags)
-        namespaces = list([cs])
-        st.insert(identifier, namespaces, isnamespace=True)
-        return None
-
-
 class FunctionDef(Statement):
 
     def __init__(self, name, parameters, body, **flags):
@@ -281,6 +249,71 @@ class FunctionDef(Statement):
         namespaces = list([fn])
         st.insert(identifier, namespaces, isnamespace=True)
         return None
+
+
+class ClassDef(Statement):
+
+    def __init__(self, name, superclasses, block, **flags):
+        self.__name = name
+        self.__superclasses = superclasses
+        self.__block = block
+        self.__flags = flags
+
+        self.__properties = dict()
+        self.__methods = dict()
+        for statement in self.__block.statements:
+            if (isinstance(statement, Property)):
+                identifier = statement.name.identifier
+                self.__properties[identifier] = statement
+            elif (isinstance(statement, FunctionDef)):
+                identifier = statement.name.identifier
+                self.__methods[identifier] = statement
+
+        if ('init' not in self.__methods):
+            parameters = list()
+            body = Block(list())
+            self.__methods[identifier] = FunctionDef(identifier, parameters, body)
+
+    @property
+    def name(self):
+        return self.__name
+
+    @property
+    def superclasses(self):
+        return self.__superclasses
+
+    @property
+    def block(self):
+        return self.__block
+
+    @property
+    def flags(self):
+        return self.__flags
+
+    @property
+    def properties(self):
+        return self.__properties
+
+    @property
+    def methods(self):
+        return self.__methods
+
+    def evaluate(self, st):
+        identifier = self.name.identifier
+        cs = builtins.Class(self.name, self.superclasses, self.properties, self.methods, **self.flags)
+        namespaces = list([cs])
+        st.insert(identifier, namespaces, isnamespace=True)
+        return None
+
+
+class Property(Statement):
+
+    def __init__(self, name):
+        self.__name = name
+
+    @property
+    def name(self):
+        return self.__name
 
 
 class Return(Statement):
@@ -711,7 +744,7 @@ class String(Expression):
         return self.__value
 
     def evaluate(self, st):
-        return builtins.String(str(self.value[1:-1]))
+        return builtins.String(str(self.value))
 
 
 class Integer(Expression):
@@ -820,33 +853,53 @@ class Call(Expression):
     def evaluate(self, st):
         # Get function definition and its attributes
         identifier = self.name.identifier
-        fn = st.lookup(identifier).namespace
-        parameters = fn.parameters
-        body = fn.body
+        namespace = st.lookup(identifier).namespace
 
-        # Create function symbol table
-        fnst = symtable.Function(identifier, st)
+        if (isinstance(namespace, builtins.Class)):
+            cs = namespace
+            superclasses = cs.superclasses
+            properties = cs.properties
+            methods = cs.methods
+            csst = symtable.Class(identifier, st)
 
-        # Insert symbols for arguments
-        for index in range(len(parameters)):
-            parameter = parameters[index]
-            identifier = parameter.identifier
-            namespaces = list([self.arguments[index].evaluate(st)])
-            fnst.insert(identifier, namespaces, isparameter=True)
-        
-        # Evaluate function body
-        if (fn.flags.get('isbuiltin', False)):
-            fnptr = body
-            args = dict()
-            for parameter in parameters:
-                value = parameter.evaluate(fnst)
-                args[parameter.identifier] = value
-            value = fnptr(**args)
-            return TYPE[type(value)](value)
-        else:
-            block = body
-            value, _ = block.evaluate(fnst)
-            return value
+            # TODO: Insert symbols for properties
+            # TODO: Insert methods for properties
+
+            # Evaluate constructor
+            constructor = methods['init']
+            constructor.evaluate(csst)
+            call = Call(Name('init'), list())
+            call.evaluate(csst)
+
+            # Return class instance
+            return builtins.Object(identifier, csst)
+
+        elif (isinstance(namespace, builtins.Function)):
+            fn = namespace
+            parameters = fn.parameters
+            body = fn.body
+            fnst = symtable.Function(identifier, st)
+
+            # Insert symbols for arguments
+            for index in range(len(parameters)):
+                parameter = parameters[index]
+                identifier = parameter.identifier
+                namespaces = list([self.arguments[index].evaluate(st)])
+                fnst.insert(identifier, namespaces, isparameter=True)
+            
+            # Evaluate function body
+            if (fn.flags.get('isbuiltin', False)):
+                fnptr = body
+                args = dict()
+                for parameter in parameters:
+                    value = parameter.evaluate(fnst)
+                    args[parameter.identifier] = value
+                value = fnptr(**args)
+                return TYPE[type(value)](value)
+            else:
+                block = body
+                value, _ = block.evaluate(fnst)
+                return value
 
 
 TYPE = {
