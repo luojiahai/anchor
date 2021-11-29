@@ -1,4 +1,5 @@
 import abc
+import typing
 import anchor.builtins as builtins
 import anchor.symtable as symtable
 
@@ -9,18 +10,10 @@ class ASTNode(abc.ABC):
     def evaluate(self, st): pass
 
 
-class Program(ASTNode):
+class Expression(ASTNode): pass
 
-    def __init__(self, block):
-        self.__block = block
 
-    @property
-    def block(self):
-        return self.__block
-    
-    def evaluate(self, st):
-        node = self.block.evaluate(st)
-        return node
+class Statement(ASTNode): pass
 
 
 class Block(ASTNode):
@@ -29,10 +22,10 @@ class Block(ASTNode):
         self.__statements = statements
 
     @property
-    def statements(self):
+    def statements(self) -> list[Statement]:
         return self.__statements
 
-    def evaluate(self, st):
+    def evaluate(self, st) -> ASTNode:
         for statement in self.statements:
             node = statement.evaluate(st)
             if (isinstance(node, Return)):
@@ -44,7 +37,32 @@ class Block(ASTNode):
         return None
 
 
-class Statement(ASTNode): pass
+class Program(ASTNode):
+
+    def __init__(self, block):
+        self.__block = block
+
+    @property
+    def block(self) -> Block:
+        return self.__block
+    
+    def evaluate(self, st) -> ASTNode:
+        node = self.block.evaluate(st)
+        return node
+
+
+class Name(Expression):
+
+    def __init__(self, identifier):
+        self.__identifier = identifier
+
+    @property
+    def identifier(self) -> str:
+        return self.__identifier
+
+    def evaluate(self, st) -> ASTNode:
+        symbol = st.lookup(self.identifier)
+        return symbol.namespace
 
 
 class Assignment(Statement):
@@ -54,18 +72,87 @@ class Assignment(Statement):
         self.__expression = expression
 
     @property
-    def name(self):
+    def name(self) -> Name:
         return self.__name
 
     @property
-    def expression(self):
+    def expression(self) -> Expression:
         return self.__expression
 
-    def evaluate(self, st):
+    def evaluate(self, st) -> ASTNode:
         identifier = self.name.identifier
         namespaces = list([self.expression.evaluate(st)])
         st.insert(identifier, namespaces)
         return None
+
+
+class Break(Statement):
+
+    def __init__(self, literal):
+        self.__literal = literal
+
+    @property
+    def literal(self):
+        return self.__literal
+
+    def evaluate(self, st) -> ASTNode:
+        return self
+
+
+class Continue(Statement):
+    
+    def __init__(self, literal):
+        self.__literal = literal
+
+    @property
+    def literal(self):
+        return self.__literal
+
+    def evaluate(self, st) -> ASTNode:
+        return self
+
+
+class Return(Statement):
+
+    __value = None
+
+    def __init__(self, expression):
+        self.__expression = expression
+
+    @property
+    def expression(self) -> Expression:
+        return self.__expression
+
+    @property
+    def value(self) -> typing.Any:
+        return self.__value
+
+    def evaluate(self, st) -> ASTNode:
+        self.__value = self.expression.evaluate(st).value
+        return self
+
+
+class Elif(Statement):
+
+    def __init__(self, expression, block, else_block=None):
+        self.__expression = expression
+        self.__block = block
+        self.__else_block = else_block
+
+    @property
+    def expression(self) -> Expression:
+        return self.__expression
+    
+    @property
+    def block(self) -> Block:
+        return self.__block
+
+    @property
+    def else_block(self) -> Block:
+        return self.__else_block
+
+    def evaluate(self, st) -> ASTNode:
+        return self.block.evaluate(st)
 
 
 class If(Statement):
@@ -80,22 +167,22 @@ class If(Statement):
         self.__else_block = else_block
 
     @property
-    def expression(self):
+    def expression(self) -> Expression:
         return self.__expression
     
     @property
-    def block(self):
+    def block(self) -> Block:
         return self.__block
 
     @property
-    def elif_statements(self):
+    def elif_statements(self) -> list[Elif]:
         return self.__elif_statements
 
     @property
-    def else_block(self):
+    def else_block(self) -> Block:
         return self.__else_block
 
-    def evaluate(self, st):
+    def evaluate(self, st) -> ASTNode:
         if (self.expression.evaluate(st).value):
             return self.block.evaluate(st)
         else:
@@ -110,29 +197,6 @@ class If(Statement):
             return None
 
 
-class Elif(Statement):
-
-    def __init__(self, expression, block, else_block=None):
-        self.__expression = expression
-        self.__block = block
-        self.__else_block = else_block
-
-    @property
-    def expression(self):
-        return self.__expression
-    
-    @property
-    def block(self):
-        return self.__block
-
-    @property
-    def else_block(self):
-        return self.__else_block
-
-    def evaluate(self, st):
-        return self.block.evaluate(st)
-
-
 class Iterate(Statement):
 
     def __init__(self, iterable, variable, block):
@@ -141,18 +205,18 @@ class Iterate(Statement):
         self.__block = block
 
     @property
-    def iterable(self):
+    def iterable(self) -> Expression:
         return self.__iterable
     
     @property
-    def variable(self):
+    def variable(self) -> Name:
         return self.__variable
 
     @property
-    def block(self):
+    def block(self) -> Block:
         return self.__block
 
-    def evaluate(self, st):
+    def evaluate(self, st) -> ASTNode:
         identifier = self.variable.identifier
         for e in self.iterable.evaluate(st).iterable:
             namespaces = list([e])
@@ -174,14 +238,14 @@ class Loop(Statement):
         self.__block = block
 
     @property
-    def expression(self):
+    def expression(self) -> Expression:
         return self.__expression
     
     @property
-    def block(self):
+    def block(self) -> Block:
         return self.__block
 
-    def evaluate(self, st):
+    def evaluate(self, st) -> ASTNode:
         while (self.expression.evaluate(st).value):
             node = self.block.evaluate(st)
             if (isinstance(node, Return)):
@@ -193,7 +257,23 @@ class Loop(Statement):
         return None
 
 
+class Property(Statement):
+
+    def __init__(self, name):
+        self.__name = name
+
+    @property
+    def name(self) -> Name:
+        return self.__name
+
+    def evaluate(self, st) -> ASTNode:
+        # TODO
+        pass
+
+
 class FunctionDef(Statement):
+
+    __value = None
 
     def __init__(self, name, parameters, body, **flags):
         self.__name = name
@@ -202,30 +282,36 @@ class FunctionDef(Statement):
         self.__flags = flags
 
     @property
-    def name(self):
+    def name(self) -> Name:
         return self.__name
 
     @property
-    def parameters(self):
+    def parameters(self) -> list[Name]:
         return self.__parameters
 
     @property
-    def body(self):
+    def body(self) -> Block:
         return self.__body
 
     @property
-    def flags(self):
+    def flags(self) -> dict[str, typing.Any]:
         return self.__flags
 
-    def evaluate(self, st):
+    @property
+    def value(self):
+        return self.__value
+
+    def evaluate(self, st) -> ASTNode:
+        self.__value = builtins.Function(self.name, self.parameters, self.body, **self.flags)
         identifier = self.name.identifier
-        fn = builtins.Function(self.name, self.parameters, self.body, **self.flags)
-        namespaces = list([fn])
+        namespaces = list([self])
         st.insert(identifier, namespaces, isnamespace=True)
         return None
 
 
 class ClassDef(Statement):
+
+    __value = None
 
     def __init__(self, name, superclasses, block, **flags):
         self.__name = name
@@ -250,94 +336,39 @@ class ClassDef(Statement):
             self.__methods['init'] = FunctionDef(name, parameters, body)
 
     @property
-    def name(self):
+    def name(self) -> Name:
         return self.__name
 
     @property
-    def superclasses(self):
+    def superclasses(self) -> list[Name]:
         return self.__superclasses
 
     @property
-    def block(self):
+    def block(self) -> Block:
         return self.__block
 
     @property
-    def flags(self):
+    def flags(self) -> dict[str, typing.Any]:
         return self.__flags
 
     @property
-    def properties(self):
+    def properties(self) -> list[Property]:
         return self.__properties
 
     @property
-    def methods(self):
+    def methods(self) -> list[FunctionDef]:
         return self.__methods
-
-    def evaluate(self, st):
-        identifier = self.name.identifier
-        cs = builtins.Class(self.name, self.superclasses, self.properties, self.methods, **self.flags)
-        namespaces = list([cs])
-        st.insert(identifier, namespaces, isnamespace=True)
-        return None
-
-
-class Property(Statement):
-
-    def __init__(self, name):
-        self.__name = name
-
-    @property
-    def name(self):
-        return self.__name
-
-
-class Break(Statement):
-
-    def __init__(self, literal):
-        self.__literal = literal
-
-    @property
-    def literal(self):
-        return self.__literal
-
-    def evaluate(self, st):
-        return self
-
-
-class Continue(Statement):
-    
-    def __init__(self, literal):
-        self.__literal = literal
-
-    @property
-    def literal(self):
-        return self.__literal
-
-    def evaluate(self, st):
-        return self
-
-
-class Return(Statement):
-
-    __value = None
-
-    def __init__(self, expression):
-        self.__expression = expression
-
-    @property
-    def expression(self):
-        return self.__expression
 
     @property
     def value(self):
         return self.__value
 
-    def evaluate(self, st):
-        self.__value = self.expression.evaluate(st).value
-        return self
-
-
-class Expression(ASTNode): pass
+    def evaluate(self, st) -> ASTNode:
+        self.__value = builtins.Class(self.name, self.superclasses, self.properties, self.methods, **self.flags)
+        identifier = self.name.identifier
+        namespaces = list([self])
+        st.insert(identifier, namespaces, isnamespace=True)
+        return None
 
 
 class Or(Expression):
@@ -347,14 +378,14 @@ class Or(Expression):
         self.__right = right
 
     @property
-    def left(self):
+    def left(self) -> Expression:
         return self.__left
 
     @property
-    def right(self):
+    def right(self) -> Expression:
         return self.__right
 
-    def evaluate(self, st):
+    def evaluate(self, st) -> ASTNode:
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
         value = left.value or right.value
@@ -370,14 +401,14 @@ class And(Expression):
         self.__right = right
 
     @property
-    def left(self):
+    def left(self) -> Expression:
         return self.__left
 
     @property
-    def right(self):
+    def right(self) -> Expression:
         return self.__right
 
-    def evaluate(self, st):
+    def evaluate(self, st) -> ASTNode:
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
         value = left.value and right.value
@@ -392,10 +423,10 @@ class Not(Expression):
         self.__right = right
 
     @property
-    def right(self):
+    def right(self) -> Expression:
         return self.__right
 
-    def evaluate(self, st):
+    def evaluate(self, st) -> ASTNode:
         right = self.right.evaluate(st)
         value = not right.value
         node = TYPE[type(value)](value)
@@ -410,14 +441,14 @@ class EqEqual(Expression):
         self.__right = right
 
     @property
-    def left(self):
+    def left(self) -> Expression:
         return self.__left
 
     @property
-    def right(self):
+    def right(self) -> Expression:
         return self.__right
 
-    def evaluate(self, st):
+    def evaluate(self, st) -> ASTNode:
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
         value = left.value == right.value
@@ -433,14 +464,14 @@ class NotEqual(Expression):
         self.__right = right
 
     @property
-    def left(self):
+    def left(self) -> Expression:
         return self.__left
 
     @property
-    def right(self):
+    def right(self) -> Expression:
         return self.__right
 
-    def evaluate(self, st):
+    def evaluate(self, st) -> ASTNode:
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
         value = left.value != right.value
@@ -456,14 +487,14 @@ class Less(Expression):
         self.__right = right
 
     @property
-    def left(self):
+    def left(self) -> Expression:
         return self.__left
 
     @property
-    def right(self):
+    def right(self) -> Expression:
         return self.__right
 
-    def evaluate(self, st):
+    def evaluate(self, st) -> ASTNode:
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
         value = left.value < right.value
@@ -479,14 +510,14 @@ class LessEqual(Expression):
         self.__right = right
 
     @property
-    def left(self):
+    def left(self) -> Expression:
         return self.__left
 
     @property
-    def right(self):
+    def right(self) -> Expression:
         return self.__right
 
-    def evaluate(self, st):
+    def evaluate(self, st) -> ASTNode:
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
         value = left.value <= right.value
@@ -502,14 +533,14 @@ class Greater(Expression):
         self.__right = right
 
     @property
-    def left(self):
+    def left(self) -> Expression:
         return self.__left
 
     @property
-    def right(self):
+    def right(self) -> Expression:
         return self.__right
 
-    def evaluate(self, st):
+    def evaluate(self, st) -> ASTNode:
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
         value = left.value > right.value
@@ -525,14 +556,14 @@ class GreaterEqual(Expression):
         self.__right = right
 
     @property
-    def left(self):
+    def left(self) -> Expression:
         return self.__left
 
     @property
-    def right(self):
+    def right(self) -> Expression:
         return self.__right
 
-    def evaluate(self, st):
+    def evaluate(self, st) -> ASTNode:
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
         value = left.value >= right.value
@@ -548,14 +579,14 @@ class Plus(Expression):
         self.__right = right
 
     @property
-    def left(self):
+    def left(self) -> Expression:
         return self.__left
 
     @property
-    def right(self):
+    def right(self) -> Expression:
         return self.__right
 
-    def evaluate(self, st):
+    def evaluate(self, st) -> ASTNode:
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
         value = left.value + right.value
@@ -571,14 +602,14 @@ class Minus(Expression):
         self.__right = right
 
     @property
-    def left(self):
+    def left(self) -> Expression:
         return self.__left
 
     @property
-    def right(self):
+    def right(self) -> Expression:
         return self.__right
 
-    def evaluate(self, st):
+    def evaluate(self, st) -> ASTNode:
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
         value = left.value - right.value
@@ -594,14 +625,14 @@ class Star(Expression):
         self.__right = right
 
     @property
-    def left(self):
+    def left(self) -> Expression:
         return self.__left
 
     @property
-    def right(self):
+    def right(self) -> Expression:
         return self.__right
 
-    def evaluate(self, st):
+    def evaluate(self, st) -> ASTNode:
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
         value = left.value * right.value
@@ -617,14 +648,14 @@ class DoubleStar(Expression):
         self.__right = right
 
     @property
-    def left(self):
+    def left(self) -> Expression:
         return self.__left
 
     @property
-    def right(self):
+    def right(self) -> Expression:
         return self.__right
 
-    def evaluate(self, st):
+    def evaluate(self, st) -> ASTNode:
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
         value = left.value ** right.value
@@ -640,14 +671,14 @@ class Slash(Expression):
         self.__right = right
 
     @property
-    def left(self):
+    def left(self) -> Expression:
         return self.__left
 
     @property
-    def right(self):
+    def right(self) -> Expression:
         return self.__right
 
-    def evaluate(self, st):
+    def evaluate(self, st) -> ASTNode:
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
         value = left.value / right.value
@@ -663,14 +694,14 @@ class DoubleSlash(Expression):
         self.__right = right
 
     @property
-    def left(self):
+    def left(self) -> Expression:
         return self.__left
 
     @property
-    def right(self):
+    def right(self) -> Expression:
         return self.__right
 
-    def evaluate(self, st):
+    def evaluate(self, st) -> ASTNode:
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
         value = left.value // right.value
@@ -686,14 +717,14 @@ class Percent(Expression):
         self.__right = right
 
     @property
-    def left(self):
+    def left(self) -> Expression:
         return self.__left
 
     @property
-    def right(self):
+    def right(self) -> Expression:
         return self.__right
 
-    def evaluate(self, st):
+    def evaluate(self, st) -> ASTNode:
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
         value = left.value % right.value
@@ -708,10 +739,10 @@ class UPlus(Expression):
         self.__right = right
 
     @property
-    def right(self):
+    def right(self) -> Expression:
         return self.__right
 
-    def evaluate(self, st):
+    def evaluate(self, st) -> ASTNode:
         right = self.right.evaluate(st)
         value = +right.value
         node = TYPE[type(value)](value)
@@ -725,29 +756,15 @@ class UMinus(Expression):
         self.__right = right
 
     @property
-    def right(self):
+    def right(self) -> Expression:
         return self.__right
 
-    def evaluate(self, st):
+    def evaluate(self, st) -> ASTNode:
         right = self.right.evaluate(st)
         value = -right.value
         node = TYPE[type(value)](value)
         node.evaluate(st)
         return node
-
-
-class Name(Expression):
-
-    def __init__(self, identifier):
-        self.__identifier = identifier
-
-    @property
-    def identifier(self):
-        return self.__identifier
-
-    def evaluate(self, st):
-        symbol = st.lookup(self.identifier)
-        return symbol.namespace
 
 
 class Boolean(Expression):
@@ -762,10 +779,10 @@ class Boolean(Expression):
         return self.__literal
 
     @property
-    def value(self):
+    def value(self) -> builtins.Boolean:
         return self.__value
 
-    def evaluate(self, st):
+    def evaluate(self, st) -> ASTNode:
         self.__value = builtins.Boolean(bool(self.literal))
         return self
 
@@ -782,10 +799,10 @@ class Null(Expression):
         return self.__literal
 
     @property
-    def value(self):
+    def value(self) -> builtins.Null:
         return self.__value
 
-    def evaluate(self, st):
+    def evaluate(self, st) -> ASTNode:
         self.__value = builtins.Null(self.literal)
         return self
 
@@ -802,10 +819,10 @@ class String(Expression):
         return self.__literal
 
     @property
-    def value(self):
+    def value(self) -> builtins.String:
         return self.__value
 
-    def evaluate(self, st):
+    def evaluate(self, st) -> ASTNode:
         self.__value = builtins.String(str(self.literal))
         return self
 
@@ -822,10 +839,10 @@ class Integer(Expression):
         return self.__literal
 
     @property
-    def value(self):
+    def value(self) -> builtins.Integer:
         return self.__value
 
-    def evaluate(self, st):
+    def evaluate(self, st) -> ASTNode:
         self.__value = builtins.Integer(int(self.literal))
         return self
 
@@ -842,10 +859,10 @@ class Float(Expression):
         return self.__literal
 
     @property
-    def value(self):
+    def value(self) -> builtins.Float:
         return self.__value
 
-    def evaluate(self, st):
+    def evaluate(self, st) -> ASTNode:
         self.__value = builtins.Float(float(self.literal))
         return self
 
@@ -862,10 +879,10 @@ class Complex(Expression):
         return self.__literal
 
     @property
-    def value(self):
+    def value(self) -> builtins.Complex:
         return self.__value
 
-    def evaluate(self, st):
+    def evaluate(self, st) -> ASTNode:
         self.__value = builtins.Complex(complex(self.literal))
         return self
 
@@ -879,18 +896,18 @@ class Tuple(Expression):
         self.__expressions = expressions
 
     @property
-    def expressions(self):
+    def expressions(self) -> list[Expression]:
         return self.__expressions
 
     @property
-    def value(self):
+    def value(self) -> builtins.Tuple:
         return self.__value
 
     @property
-    def iterable(self):
+    def iterable(self) -> tuple[Expression]:
         return self.__iterable
     
-    def evaluate(self, st):
+    def evaluate(self, st) -> ASTNode:
         self.__value = builtins.Tuple(tuple([
             expression.evaluate(st).value
             for expression in self.expressions
@@ -911,18 +928,18 @@ class List(Expression):
         self.__expressions = expressions
 
     @property
-    def expressions(self):
+    def expressions(self) -> Expression:
         return self.__expressions
 
     @property
-    def value(self):
+    def value(self) -> builtins.List:
         return self.__value
 
     @property
-    def iterable(self):
+    def iterable(self) -> list[Expression]:
         return self.__iterable
     
-    def evaluate(self, st):
+    def evaluate(self, st) -> ASTNode:
         self.__value = builtins.List(list([
             expression.evaluate(st).value
             for expression in self.expressions
@@ -943,18 +960,18 @@ class Dict(Expression):
         self.__kvpairs = kvpairs
 
     @property
-    def kvpairs(self):
+    def kvpairs(self) -> list[tuple[Expression, Expression]]:
         return self.__kvpairs
 
     @property
-    def value(self):
+    def value(self) -> builtins.Dict:
         return self.__value
 
     @property
-    def iterable(self):
+    def iterable(self) -> dict[Expression, Expression]:
         return self.__iterable
 
-    def evaluate(self, st):
+    def evaluate(self, st) -> ASTNode:
         self.__value = builtins.Dict({
             k.evaluate(st).value: v.evaluate(st).value
             for k, v in self.kvpairs
@@ -973,62 +990,62 @@ class Call(Expression):
         self.__arguments = arguments
 
     @property
-    def name(self):
+    def name(self) -> Name:
         return self.__name
 
     @property
-    def arguments(self):
+    def arguments(self) -> list[Expression]:
         return self.__arguments
     
-    def evaluate(self, st):
+    def evaluate(self, st) -> ASTNode:
         # Get function definition and its attributes
         identifier = self.name.identifier
         namespace = st.lookup(identifier).namespace
 
-        if (isinstance(namespace, builtins.Class)):
-            cs = namespace
-            superclasses = cs.superclasses
-            properties = cs.properties
-            methods = cs.methods
-            csst = symtable.Class(identifier, st)
+        if (isinstance(namespace, ClassDef)):
+            classdef = namespace
+            superclasses = classdef.superclasses
+            properties = classdef.properties
+            methods = classdef.methods
+            instancest = symtable.Class(identifier, parent=st)
 
             # TODO: Insert symbols for properties
             # TODO: Insert methods for properties
 
             # Evaluate constructor
-            constructor = methods['init']
-            constructor.evaluate(csst)
+            constructor: FunctionDef = methods['init']
+            constructor.evaluate(instancest)
             call = Call(Name('init'), self.arguments)
-            call.evaluate(csst)
+            call.evaluate(instancest)
 
             # Return class instance
-            return builtins.Object(identifier, csst)
+            return builtins.Object(identifier, instancest)
 
-        elif (isinstance(namespace, builtins.Function)):
-            fn = namespace
-            parameters = fn.parameters
-            body = fn.body
-            fnst = symtable.Function(identifier, st)
+        elif (isinstance(namespace, FunctionDef)):
+            functiondef = namespace
+            parameters = functiondef.parameters
+            body = functiondef.body
+            functionst = symtable.Function(identifier, parent=st)
 
             # Insert symbols for arguments
             for index in range(len(parameters)):
                 parameter = parameters[index]
                 identifier = parameter.identifier
                 namespaces = list([self.arguments[index].evaluate(st)])
-                fnst.insert(identifier, namespaces, isparameter=True)
+                functionst.insert(identifier, namespaces, isparameter=True)
             
             # Evaluate function body
-            if (fn.flags.get('isbuiltin', False)):
-                fnptr = body
+            if (functiondef.flags.get('isbuiltin', False)):
+                functionptr = functiondef.flags.get('ptr', None)
                 args = dict()
                 for parameter in parameters:
-                    value = parameter.evaluate(fnst).value
+                    value = parameter.evaluate(functionst).value
                     args[parameter.identifier] = value
-                value = fnptr(**args)
+                value = functionptr(**args)
                 return TYPE[type(value)](value)
             else:
                 block = body
-                node = block.evaluate(fnst)
+                node = block.evaluate(functionst)
                 return node
 
 

@@ -13,25 +13,24 @@ def execute(data):
     st = symtable.SymbolTable('main')
 
     # Include builtin functions
-    for identifier, fn in builtins.FUNCTION.items():
+    for identifier, fnptr in builtins.FUNCTION.items():
         name = ast.Name(identifier)
-        parameters = list([ast.Name(arg) for arg in inspect.getfullargspec(fn)[0]])
-        fndef = ast.FunctionDef(name, parameters, fn, isbuiltin=True)
-        fndef.evaluate(st)
+        parameters = list([ast.Name(arg) for arg in inspect.getfullargspec(fnptr)[0]])
+        functiondef = ast.FunctionDef(name, parameters, None, ptr=fnptr, isbuiltin=True)
+        functiondef.evaluate(st)
 
     # Include builtin classes
-    for identifier, cs in builtins.CLASS.items():
-        fns = inspect.getmembers(cs, predicate=inspect.isfunction)
+    for identifier, clsptr in builtins.CLASS.items():
         name = ast.Name(identifier)
         superclasses = list()
         properties = list()
         methods = list()
-        for fnid, fn in fns:
+        for fnid, fnptr in inspect.getmembers(clsptr, predicate=inspect.isfunction):
             fnids = fnid.split('_')
             if (fnids[0] == 'Anchor'):
                 fnname = ast.Name(fnids[1])
-                parameters = list([ast.Name(arg) for arg in inspect.getfullargspec(fn)[0]])[1:]
-                method = ast.FunctionDef(fnname, parameters, fn, isbuiltin=True)
+                parameters = list([ast.Name(arg) for arg in inspect.getfullargspec(fnptr)[0]])[1:]
+                method = ast.FunctionDef(fnname, parameters, fnptr, isbuiltin=True)
                 methods.append(method)
         block = ast.Block(properties + methods)
         csdef = ast.ClassDef(name, superclasses, block, isbuiltin=True)
