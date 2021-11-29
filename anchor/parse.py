@@ -75,8 +75,8 @@ class AnchorParser(Parser):
             p[0] = list([statement])
 
     def p_statement_assignment(self, p):
-        '''statement : NAME EQUAL expression SEMI'''
-        name = ast.Name(p[1])
+        '''statement : name EQUAL expression SEMI'''
+        name = p[1]
         expression = p[3]
         p[0] = ast.Assignment(name, expression)
 
@@ -125,9 +125,9 @@ class AnchorParser(Parser):
         p[0] = p[2]
 
     def p_statement_iterate(self, p):
-        '''statement : ITERATE expression FOR NAME BEGIN block END'''
+        '''statement : ITERATE expression FOR name BEGIN block END'''
         iterable = p[2]
-        variable = ast.Name(p[4])
+        variable = p[4]
         block = p[6]
         p[0] = ast.Iterate(iterable, variable, block)
 
@@ -137,38 +137,36 @@ class AnchorParser(Parser):
         block = p[4]
         p[0] = ast.Loop(expression, block)
 
-    def p_statement_break(self, p):
-        '''statement : BREAK SEMI'''
-        p[0] = ast.Break(p[1])
-
-    def p_statement_continue(self, p):
-        '''statement : CONTINUE SEMI'''
-        p[0] = ast.Continue(p[1])
-
     def p_statement_classdef(self, p):
-        '''statement : CLASS LSQB annotations RSQB NAME INHERIT LPAR NAME RPAR BEGIN block END
-                     | CLASS LSQB annotations RSQB NAME BEGIN block END'''
+        '''statement : CLASS LSQB annotations RSQB name INHERIT LPAR name RPAR BEGIN block END
+                     | CLASS LSQB annotations RSQB name BEGIN block END'''
         # TODO
         pass
 
     def p_statement_methoddef(self, p):
-        '''statement : METHOD LSQB annotations RSQB NAME LPAR parameters RPAR RARROW NAME BEGIN block END
-                     | METHOD LSQB annotations RSQB NAME LPAR RPAR RARROW NAME BEGIN block END'''
+        '''statement : METHOD LSQB annotations RSQB name LPAR parameters RPAR RARROW name BEGIN block END
+                     | METHOD LSQB annotations RSQB name LPAR RPAR RARROW name BEGIN block END'''
         # TODO
         pass
 
     def p_statement_functiondef(self, p):
-        '''statement : FUNCTION NAME LPAR parameters RPAR RARROW NAME BEGIN block END
-                     | FUNCTION NAME LPAR RPAR RARROW NAME BEGIN block END'''
-        # TODO
-        pass
-
-    def p_statement_return(self, p):
-        '''statement : RETURN expression SEMI'''
-        p[0] = ast.Return(p[2])
+        '''statement : FUNCTION name LPAR parameters RPAR RARROW expression BEGIN block END
+                     | FUNCTION name LPAR RPAR RARROW expression BEGIN block END'''
+        if (len(p) == 11):
+            name = p[2]
+            parameters = p[4]
+            returntype = p[7]
+            body = p[9]
+            p[0] = ast.FunctionDef(name, parameters, body, returntype=returntype)
+        elif (len(p) == 10):
+            name = p[2]
+            parameters = list()
+            returntype = p[7]
+            body = p[8]
+            p[0] = ast.FunctionDef(name, parameters, body, returntype=returntype)
 
     def p_statement_property(self, p):
-        '''statement : PROPERTY LSQB annotations RSQB NAME SEMI'''
+        '''statement : PROPERTY LSQB annotations RSQB name SEMI'''
         # TODO
         pass
 
@@ -217,11 +215,23 @@ class AnchorParser(Parser):
             p[0] = list([parameter])
 
     def p_parameter(self, p):
-        '''parameter : NAME COLON NAME LSQB annotations RSQB
-                     | NAME COLON NAME
-                     | NAME'''
+        '''parameter : name COLON name LSQB annotations RSQB
+                     | name COLON name
+                     | name'''
         # TODO
         pass
+
+    def p_statement_break(self, p):
+        '''statement : BREAK SEMI'''
+        p[0] = ast.Break(p[1])
+
+    def p_statement_continue(self, p):
+        '''statement : CONTINUE SEMI'''
+        p[0] = ast.Continue(p[1])
+
+    def p_statement_return(self, p):
+        '''statement : RETURN expression SEMI'''
+        p[0] = ast.Return(p[2])
 
     def p_statement_expression(self, p):
         '''statement : expression SEMI'''
@@ -303,7 +313,7 @@ class AnchorParser(Parser):
         p[0] = p[2]
 
     def p_expression_dotname(self, p):
-        '''expression : expression DOT NAME'''
+        '''expression : expression DOT name'''
         # TODO
         pass
 
@@ -336,42 +346,56 @@ class AnchorParser(Parser):
             expression = p[1]
             p[0] = list([expression])
 
-    def p_expression_true(self, p):
-        '''expression : TRUE'''
+    def p_expression_atom(self, p):
+        '''expression : true
+                      | false
+                      | null
+                      | name
+                      | integer
+                      | float
+                      | complex
+                      | string
+                      | tuple
+                      | list
+                      | dict'''
+        p[0] = p[1]
+
+    def p_true(self, p):
+        '''true : TRUE'''
         p[0] = ast.Boolean(True)
 
-    def p_expression_false(self, p):
-        '''expression : FALSE'''
+    def p_false(self, p):
+        '''false : FALSE'''
         p[0] = ast.Boolean(False)
 
-    def p_expression_null(self, p):
-        '''expression : NULL'''
+    def p_null(self, p):
+        '''null : NULL'''
         p[0] = ast.Null(p[1])
 
-    def p_expression_name(self, p):
-        '''expression : NAME'''
+    def p_name(self, p):
+        '''name : NAME'''
         p[0] = ast.Name(p[1])
 
-    def p_expression_integer(self, p):
-        '''expression : INTEGER'''
+    def p_integer(self, p):
+        '''integer : INTEGER'''
         p[0] = ast.Integer(p[1])
 
-    def p_expression_float(self, p):
-        '''expression : FLOAT'''
+    def p_float(self, p):
+        '''float : FLOAT'''
         p[0] = ast.Float(p[1])
 
-    def p_expression_complex(self, p):
-        '''expression : COMPLEX'''
+    def p_complex(self, p):
+        '''complex : COMPLEX'''
         p[0] = ast.Complex(p[1])
 
-    def p_expression_string(self, p):
-        '''expression : STRING'''
+    def p_string(self, p):
+        '''string : STRING'''
         p[0] = ast.String(p[1])
 
-    def p_expression_tuple(self, p):
-        '''expression : LPAR expression COMMA expressions RPAR
-                      | LPAR expression COMMA RPAR
-                      | LPAR RPAR'''
+    def p_tuple(self, p):
+        '''tuple : LPAR expression COMMA expressions RPAR
+                 | LPAR expression COMMA RPAR
+                 | LPAR RPAR'''
         if (len(p) == 6):
             expression = p[2]
             expressions = p[4]
@@ -382,18 +406,18 @@ class AnchorParser(Parser):
         elif (len(p) == 3):
             p[0] = ast.Tuple(list())
 
-    def p_expression_list(self, p):
-        '''expression : LSQB expressions RSQB
-                      | LSQB RSQB'''
+    def p_list(self, p):
+        '''list : LSQB expressions RSQB
+                | LSQB RSQB'''
         if (len(p) == 4):
             expressions = p[2]
             p[0] = ast.List(expressions)
         elif (len(p) == 3):
             p[0] = ast.List(list())
 
-    def p_expression_dict(self, p):
-        '''expression : LBRACE kvpairs RBRACE
-                      | LBRACE RBRACE'''
+    def p_dict(self, p):
+        '''dict : LBRACE kvpairs RBRACE
+                | LBRACE RBRACE'''
         if (len(p) == 4):
             kvpairs = p[2]
             p[0] = ast.Dict(kvpairs)

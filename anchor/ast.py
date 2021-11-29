@@ -19,7 +19,8 @@ class Program(ASTNode):
         return self.__block
     
     def evaluate(self, st):
-        return self.block.evaluate(st)
+        value, _ = self.block.evaluate(st)
+        return value
 
 
 class Block(ASTNode):
@@ -33,8 +34,14 @@ class Block(ASTNode):
 
     def evaluate(self, st):
         for statement in self.statements:
-            statement.evaluate(st)
-        return None
+            value = statement.evaluate(st)
+            if (isinstance(value, Return)):
+                return (value.expression.evaluate(st), {'return': True},)
+            elif (isinstance(value, Break)):
+                return (value, {'break': True},)
+            elif (isinstance(value, Continue)):
+                return (value, {'continue': True},)
+        return (None, {},)
 
 
 class Statement(ASTNode): pass
@@ -150,12 +157,12 @@ class Iterate(Statement):
         for e in self.iterable.evaluate(st):
             namespaces = list([e])
             st.insert(identifier, namespaces)
-            value = self.block.evaluate(st)
-            if (isinstance(value, Return)):
-                return value.evaluate(st)
-            elif (isinstance(value, Break)):
+            value, flags = self.block.evaluate(st)
+            if (flags.get('return', False)):
+                return value
+            elif (flags.get('break', False)):
                 break
-            elif (isinstance(value, Continue)):
+            elif (flags.get('continue', False)):
                 continue
         return None
 
@@ -176,12 +183,12 @@ class Loop(Statement):
 
     def evaluate(self, st):
         while (self.expression.evaluate(st)):
-            value = self.block.evaluate(st)
-            if (isinstance(value, Return)):
-                return value.evaluate(st)
-            elif (isinstance(value, Break)):
+            value, flags = self.block.evaluate(st)
+            if (flags.get('return', False)):
+                return value
+            elif (flags.get('break', False)):
                 break
-            elif (isinstance(value, Continue)):
+            elif (flags.get('continue', False)):
                 continue
         return None
 
@@ -196,7 +203,7 @@ class Break(Statement):
         return self.__literal
 
     def evaluate(self, st):
-        return None
+        return self
 
 
 class Continue(Statement):
@@ -209,6 +216,38 @@ class Continue(Statement):
         return self.__literal
 
     def evaluate(self, st):
+        return self
+
+
+class ClassDef(Statement):
+
+    def __init__(self, name, superclasses, block, **flags):
+        self.__name = name
+        self.__superclasses = superclasses
+        self.__block = block
+        self.__flags = flags
+
+    @property
+    def name(self):
+        return self.__name
+
+    @property
+    def superclasses(self):
+        return self.__superclasses
+
+    @property
+    def block(self):
+        return self.__block
+
+    @property
+    def flags(self):
+        return self.__flags
+
+    def evaluate(self, st):
+        identifier = self.name.identifier
+        cs = builtins.Class(self.name, self.superclasses, self.block, **self.flags)
+        namespaces = list([cs])
+        st.insert(identifier, namespaces, isnamespace=True)
         return None
 
 
@@ -233,12 +272,13 @@ class FunctionDef(Statement):
         return self.__body
 
     @property
-    def is_builtin(self):
-        return self.__flags.get('isbuiltin', False)
+    def flags(self):
+        return self.__flags
 
     def evaluate(self, st):
         identifier = self.name.identifier
-        namespaces = list([self])
+        fn = builtins.Function(self.name, self.parameters, self.body, **self.flags)
+        namespaces = list([fn])
         st.insert(identifier, namespaces, isnamespace=True)
         return None
 
@@ -253,7 +293,7 @@ class Return(Statement):
         return self.__expression
 
     def evaluate(self, st):
-        return self.expression.evaluate(st)
+        return self
 
 
 class Expression(ASTNode): pass
@@ -780,32 +820,33 @@ class Call(Expression):
     def evaluate(self, st):
         # Get function definition and its attributes
         identifier = self.name.identifier
-        functiondef = st.lookup(identifier).namespace
-        parameters = functiondef.parameters
-        body = functiondef.body
+        fn = st.lookup(identifier).namespace
+        parameters = fn.parameters
+        body = fn.body
 
         # Create function symbol table
-        functionst = symtable.Function(identifier, st)
+        fnst = symtable.Function(identifier, st)
 
         # Insert symbols for arguments
         for index in range(len(parameters)):
             parameter = parameters[index]
             identifier = parameter.identifier
             namespaces = list([self.arguments[index].evaluate(st)])
-            functionst.insert(identifier, namespaces, isparameter=True)
+            fnst.insert(identifier, namespaces, isparameter=True)
         
         # Evaluate function body
-        if (functiondef.is_builtin):
-            function = body
+        if (fn.flags.get('isbuiltin', False)):
+            fnptr = body
             args = dict()
             for parameter in parameters:
-                value = parameter.evaluate(functionst)
+                value = parameter.evaluate(fnst)
                 args[parameter.identifier] = value
-            value = function(**args)
+            value = fnptr(**args)
             return builtins.TYPE[type(value).__name__](value)
         else:
-            # Case: user-defined function
-            pass
+            block = body
+            value, _ = block.evaluate(fnst)
+            return value
 
 
 # Anchor builtin type name to AST node

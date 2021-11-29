@@ -14,14 +14,24 @@ begin
 end
 
 i = 5;
-loop (i < 9)
+loop (i < 13)
 begin
     if (i % 2 == 0) then
         if (i == 8) then
-            break;
+            i = i + 1;
+            continue;
         else       
             print(i);
         end
     end
     i = i + 1;
 end
+
+function myfunc() -> Null
+begin
+    print("this is in function");
+    return 123;
+end
+
+c = myfunc();
+print(c);

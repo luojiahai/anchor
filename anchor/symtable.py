@@ -88,19 +88,13 @@ class Symbol:
         return self.__namespaces
 
     @property
-    def flags(self):
-        return self.__flags
-
-    @property
     def namespace(self):
         if len(self.__namespaces) != 1:
             # return latest defined namespace
             return self.__namespaces[-1]
         return self.__namespaces[0]
 
-    def isnamespace(self):
-        return self.flags.get('isnamespace', False)
-
-    def isparameter(self):
-        return self.flags.get('isparameter', False)
+    @property
+    def flags(self):
+        return self.__flags
     

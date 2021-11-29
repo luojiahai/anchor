@@ -1,4 +1,3 @@
-from re import S
 import sys
 import abc
 
@@ -100,6 +99,35 @@ class Dict(AnchorType, dict):
     def __init__(self, value):
         AnchorType.__init__(self, 'Dict')
         self.update(value)
+
+
+class Function(AnchorType):
+
+    def __init__(self, name, parameters, body, **flags):
+        AnchorType.__init__(self, 'Function')
+        self.__name = name
+        self.__parameters = parameters
+        self.__body = body
+        self.__flags = flags
+    
+    @property
+    def name(self):
+        return self.__name
+
+    @property
+    def parameters(self):
+        return self.__parameters
+
+    @property
+    def body(self):
+        return self.__body
+
+    @property
+    def flags(self):
+        return self.__flags
+
+
+class Class(AnchorType): pass
 
 
 # Python builtin type name to Anchor builtin type
