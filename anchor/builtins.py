@@ -130,20 +130,6 @@ class Function(AnchorType):
 class Class(AnchorType): pass
 
 
-# Python builtin type name to Anchor builtin type
-TYPE = {
-    'bool': Boolean,
-    'NoneType': Null,
-    'int': Integer,
-    'float': Float,
-    'complex': Complex,
-    'str': String,
-    'tuple': Tuple,
-    'list': List,
-    'dict': Dict,
-}
-
-
 # Anchor stream name to Python stream
 STREAM = {
     'stdin': sys.stdin,

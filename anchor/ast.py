@@ -317,7 +317,7 @@ class Or(Expression):
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
         value = left or right
-        return builtins.TYPE[type(value).__name__](value)
+        return TYPE[type(value)](value)
 
 
 class And(Expression):
@@ -338,7 +338,7 @@ class And(Expression):
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
         value = left and right
-        return builtins.TYPE[type(value).__name__](value)
+        return TYPE[type(value)](value)
 
 
 class Not(Expression):
@@ -353,7 +353,7 @@ class Not(Expression):
     def evaluate(self, st):
         right = self.right.evaluate(st)
         value = not right
-        return builtins.TYPE[type(value).__name__](value)
+        return TYPE[type(value)](value)
 
 
 class EqEqual(Expression):
@@ -374,7 +374,7 @@ class EqEqual(Expression):
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
         value = left == right
-        return builtins.TYPE[type(value).__name__](value)
+        return TYPE[type(value)](value)
 
 
 class NotEqual(Expression):
@@ -395,7 +395,7 @@ class NotEqual(Expression):
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
         value = left != right
-        return builtins.TYPE[type(value).__name__](value)
+        return TYPE[type(value)](value)
 
 
 class Less(Expression):
@@ -416,7 +416,7 @@ class Less(Expression):
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
         value = left < right
-        return builtins.TYPE[type(value).__name__](value)
+        return TYPE[type(value)](value)
 
 
 class LessEqual(Expression):
@@ -437,7 +437,7 @@ class LessEqual(Expression):
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
         value = left <= right
-        return builtins.TYPE[type(value).__name__](value)
+        return TYPE[type(value)](value)
 
 
 class Greater(Expression):
@@ -458,7 +458,7 @@ class Greater(Expression):
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
         value = left > right
-        return builtins.TYPE[type(value).__name__](value)
+        return TYPE[type(value)](value)
 
 
 class GreaterEqual(Expression):
@@ -479,7 +479,7 @@ class GreaterEqual(Expression):
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
         value = left >= right
-        return builtins.TYPE[type(value).__name__](value)
+        return TYPE[type(value)](value)
 
 
 class Plus(Expression):
@@ -500,7 +500,7 @@ class Plus(Expression):
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
         value = left + right
-        return builtins.TYPE[type(value).__name__](value)
+        return TYPE[type(value)](value)
 
 
 class Minus(Expression):
@@ -521,7 +521,7 @@ class Minus(Expression):
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
         value = left - right
-        return builtins.TYPE[type(value).__name__](value)
+        return TYPE[type(value)](value)
 
 
 class Star(Expression):
@@ -542,7 +542,7 @@ class Star(Expression):
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
         value = left * right
-        return builtins.TYPE[type(value).__name__](value)
+        return TYPE[type(value)](value)
 
 
 class DoubleStar(Expression):
@@ -563,7 +563,7 @@ class DoubleStar(Expression):
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
         value = left ** right
-        return builtins.TYPE[type(value).__name__](value)
+        return TYPE[type(value)](value)
 
 
 class Slash(Expression):
@@ -584,7 +584,7 @@ class Slash(Expression):
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
         value = left / right
-        return builtins.TYPE[type(value).__name__](value)
+        return TYPE[type(value)](value)
 
 
 class DoubleSlash(Expression):
@@ -605,7 +605,7 @@ class DoubleSlash(Expression):
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
         value = left // right
-        return builtins.TYPE[type(value).__name__](value)
+        return TYPE[type(value)](value)
 
 
 class Percent(Expression):
@@ -626,7 +626,7 @@ class Percent(Expression):
         left = self.left.evaluate(st)
         right = self.right.evaluate(st)
         value = left % right
-        return builtins.TYPE[type(value).__name__](value)
+        return TYPE[type(value)](value)
 
 
 class UPlus(Expression):
@@ -641,7 +641,7 @@ class UPlus(Expression):
     def evaluate(self, st):
         right = self.right.evaluate(st)
         value = +right
-        return builtins.TYPE[type(value).__name__](value)
+        return TYPE[type(value)](value)
 
 
 class UMinus(Expression):
@@ -656,7 +656,7 @@ class UMinus(Expression):
     def evaluate(self, st):
         right = self.right.evaluate(st)
         value = -right
-        return builtins.TYPE[type(value).__name__](value)
+        return TYPE[type(value)](value)
 
 
 class Name(Expression):
@@ -842,22 +842,21 @@ class Call(Expression):
                 value = parameter.evaluate(fnst)
                 args[parameter.identifier] = value
             value = fnptr(**args)
-            return builtins.TYPE[type(value).__name__](value)
+            return TYPE[type(value)](value)
         else:
             block = body
             value, _ = block.evaluate(fnst)
             return value
 
 
-# Anchor builtin type name to AST node
-TYPE_NODE = {
-    'Boolean': Boolean,
-    'Null': Null,
-    'Integer': Integer,
-    'Float': Float,
-    'Complex': Complex,
-    'String': String,
-    'Tuple': Tuple,
-    'List': List,
-    'Dict': Dict,
+TYPE = {
+    bool: builtins.Boolean,
+    type(None): builtins.Null,
+    int: builtins.Integer,
+    float: builtins.Float,
+    complex: builtins.Complex,
+    str: builtins.String,
+    tuple: builtins.Tuple,
+    list: builtins.List,
+    dict: builtins.Dict,
 }
