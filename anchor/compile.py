@@ -13,12 +13,31 @@ def execute(data):
     st = symtable.SymbolTable('main')
 
     # Include builtin functions
-    for identifier, function in builtins.FUNCTION.items():
+    for identifier, fn in builtins.FUNCTION.items():
         name = ast.Name(identifier)
-        parameters = list([ast.Name(arg) for arg in inspect.getfullargspec(function)[0]])
-        functiondef = ast.FunctionDef(name, parameters, function, isbuiltin=True)
-        functiondef.evaluate(st)
-        
+        parameters = list([ast.Name(arg) for arg in inspect.getfullargspec(fn)[0]])
+        fndef = ast.FunctionDef(name, parameters, fn, isbuiltin=True)
+        fndef.evaluate(st)
+
+    # Include builtin classes
+    for identifier, cs in builtins.CLASS.items():
+        fns = inspect.getmembers(cs, predicate=inspect.isfunction)
+        name = ast.Name(identifier)
+        superclasses = list()
+        properties = list()
+        methods = list()
+        for fnid, fn in fns:
+            fnids = fnid.split('_')
+            if (fnids[0] == 'Anchor'):
+                fnname = ast.Name(fnids[1])
+                parameters = list([ast.Name(arg) for arg in inspect.getfullargspec(fn)[0]])[1:]
+                method = ast.FunctionDef(fnname, parameters, fn, isbuiltin=True)
+                methods.append(method)
+        block = ast.Block(properties + methods)
+        csdef = ast.ClassDef(name, superclasses, block, isbuiltin=True)
+        csdef.evaluate(st)
+    
+    # Parse
     parser = parse.AnchorParser(
         debuglex=system.GLOBAL.debuglex, 
         debugyacc=system.GLOBAL.debugyacc,

@@ -2,20 +2,33 @@ import sys
 import abc
 
 
+# Anchor stream name to Python stream
+STREAM = {
+    'stdin': sys.stdin,
+    'stdout': sys.stdout,
+    'stderr': sys.stderr,
+}
+
+
 class AnchorType(abc.ABC):
     
-    def __init__(self, type_name):
-        self._type = type_name
+    def __init__(self, type_name, **flags):
+        self.__type = type_name
+        self.__flags = flags
 
     @property
     def type(self):
-        return self._type
+        return self.__type
+
+    @property
+    def flags(self):
+        return self.__flags
 
 
 class Boolean(AnchorType, int):
 
-    def __init__(self, value):
-        AnchorType.__init__(self, 'Boolean')
+    def __init__(self, value, **flags):
+        AnchorType.__init__(self, 'Boolean', **flags)
         self.__value = value
 
     @property
@@ -25,8 +38,8 @@ class Boolean(AnchorType, int):
 
 class Null(AnchorType):
 
-    def __init__(self, value):
-        AnchorType.__init__(self, 'NullType')
+    def __init__(self, value, **flags):
+        AnchorType.__init__(self, 'NullType', **flags)
         self.__value = value
 
     @property
@@ -36,19 +49,26 @@ class Null(AnchorType):
 
 class Integer(AnchorType, int):
     
-    def __init__(self, value):
-        AnchorType.__init__(self, 'Integer')
+    def __init__(self, value, **flags):
+        AnchorType.__init__(self, 'Integer', **flags)
         self.__value = value
 
     @property
     def value(self):
         return self.__value
 
+    def Anchor_init(self, value):
+        self.__init__(value)
+
+    def Anchor_plus(self, other):
+        value = self.__add__(other)
+        return TYPE[type(value)](value)
+
 
 class Float(AnchorType, float):
 
-    def __init__(self, value):
-        AnchorType.__init__(self, 'Float')
+    def __init__(self, value, **flags):
+        AnchorType.__init__(self, 'Float', **flags)
         self.__value = value
 
     @property
@@ -58,8 +78,8 @@ class Float(AnchorType, float):
 
 class Complex(AnchorType, complex):
     
-    def __init__(self, value):
-        AnchorType.__init__(self, 'Complex')
+    def __init__(self, value, **flags):
+        AnchorType.__init__(self, 'Complex', **flags)
         self.__value = value
 
     @property
@@ -69,8 +89,8 @@ class Complex(AnchorType, complex):
 
 class String(AnchorType, str):
     
-    def __init__(self, value):
-        AnchorType.__init__(self, 'String')
+    def __init__(self, value, **flags):
+        AnchorType.__init__(self, 'String', **flags)
         self.__value = value
 
     @property
@@ -80,8 +100,8 @@ class String(AnchorType, str):
 
 class Tuple(AnchorType, tuple): 
     
-    def __init__(self, value):
-        AnchorType.__init__(self, 'Tuple')
+    def __init__(self, value, **flags):
+        AnchorType.__init__(self, 'Tuple', **flags)
 
     def __new__(self, value):
         return tuple.__new__(self, value)
@@ -89,26 +109,25 @@ class Tuple(AnchorType, tuple):
 
 class List(AnchorType, list):
 
-    def __init__(self, value):
-        AnchorType.__init__(self, 'List')
+    def __init__(self, value, **flags):
+        AnchorType.__init__(self, 'List', **flags)
         self.extend(value)
 
 
 class Dict(AnchorType, dict):
 
-    def __init__(self, value):
-        AnchorType.__init__(self, 'Dict')
+    def __init__(self, value, **flags):
+        AnchorType.__init__(self, 'Dict', **flags)
         self.update(value)
 
 
 class Function(AnchorType):
 
     def __init__(self, name, parameters, body, **flags):
-        AnchorType.__init__(self, 'Function')
+        AnchorType.__init__(self, 'Function', **flags)
         self.__name = name
         self.__parameters = parameters
         self.__body = body
-        self.__flags = flags
     
     @property
     def name(self):
@@ -122,20 +141,15 @@ class Function(AnchorType):
     def body(self):
         return self.__body
 
-    @property
-    def flags(self):
-        return self.__flags
-
 
 class Class(AnchorType):
 
     def __init__(self, name, superclasses, properties, methods, **flags):
-        AnchorType.__init__(self, 'Class')
+        AnchorType.__init__(self, 'Class', **flags)
         self.__name = name
         self.__superclasses = superclasses
         self.__properties = properties
         self.__methods = methods
-        self.__flags = flags
     
     @property
     def name(self):
@@ -153,15 +167,11 @@ class Class(AnchorType):
     def methods(self):
         return self.__methods
 
-    @property
-    def flags(self):
-        return self.__flags
-
 
 class Object(AnchorType):
 
-    def __init__(self, classname, symtable):
-        AnchorType.__init__(self, classname)
+    def __init__(self, classname, symtable, **flags):
+        AnchorType.__init__(self, classname, **flags)
         self.__symtable = symtable
     
     @property
@@ -169,11 +179,28 @@ class Object(AnchorType):
         return self.__symtable
 
 
-# Anchor stream name to Python stream
-STREAM = {
-    'stdin': sys.stdin,
-    'stdout': sys.stdout,
-    'stderr': sys.stderr,
+TYPE = {
+    bool: Boolean,
+    type(None): Null,
+    int: Integer,
+    float: Float,
+    complex: Complex,
+    str: String,
+    tuple: Tuple,
+    list: List,
+    dict: Dict,
+}
+
+CLASS = {
+    'Boolean': Boolean,
+    'Null': Null,
+    'Integer': Integer,
+    'Float': Float,
+    'Complex': Complex,
+    'String': String,
+    'Tuple': Tuple,
+    'List': List,
+    'Dict': Dict,
 }
 
 

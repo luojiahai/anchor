@@ -270,9 +270,10 @@ class ClassDef(Statement):
                 self.__methods[identifier] = statement
 
         if ('init' not in self.__methods):
+            name = Name('init')
             parameters = list()
             body = Block(list())
-            self.__methods[identifier] = FunctionDef(identifier, parameters, body)
+            self.__methods['init'] = FunctionDef(name, parameters, body)
 
     @property
     def name(self):
@@ -868,7 +869,7 @@ class Call(Expression):
             # Evaluate constructor
             constructor = methods['init']
             constructor.evaluate(csst)
-            call = Call(Name('init'), list())
+            call = Call(Name('init'), self.arguments)
             call.evaluate(csst)
 
             # Return class instance
