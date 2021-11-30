@@ -158,23 +158,12 @@ class AnchorParser(Parser):
             p[0] = ast.FunctionDef(name, parameters, body, **flags)
 
     def p_statement_classdef(self, p):
-        '''statement : CLASS LSQB annotations RSQB name \
-                       INHERIT LPAR name RPAR BEGIN block END
-                     | CLASS LSQB annotations RSQB name \
-                       BEGIN block END'''
-        # TODO: annotations
-        if (len(p) == 13):
-            annotations = p[3]
-            name = p[5]
-            superclasses = [p[8]]
-            block = p[11]
-            p[0] = ast.ClassDef(name, superclasses, block)
-        if (len(p) == 9):
-            annotations = p[3]
-            name = p[5]
-            superclasses = []
-            block = p[7]
-            p[0] = ast.ClassDef(name, superclasses, block)
+        '''statement : CLASS LSQB annotations RSQB name BEGIN block END'''
+        # TODO: annotations, inheritance
+        annotations = p[3]
+        name = p[5]
+        block = p[7]
+        p[0] = ast.ClassDef(name, block)
 
     def p_statement_property(self, p):
         '''statement : PROPERTY LSQB annotations RSQB name SEMI'''

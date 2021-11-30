@@ -339,11 +339,8 @@ class ClassDef(Statement):
 
     __value: builtins.Class = None
 
-    def __init__(
-        self, name: Name, superclasses: list[Name], block: Block, **flags
-    ):
+    def __init__(self, name: Name, block: Block, **flags):
         self.__name: Name = name
-        self.__superclasses: list[Name] = superclasses
         self.__block: Block = block
         self.__flags: dict[str, typing.Any] = flags
 
@@ -366,10 +363,6 @@ class ClassDef(Statement):
     @property
     def name(self) -> Name:
         return self.__name
-
-    @property
-    def superclasses(self) -> list[Name]:
-        return self.__superclasses
 
     @property
     def block(self) -> Block:
@@ -1032,8 +1025,6 @@ class Call(Expression):
 
         if (isinstance(namespace, ClassDef)):
             classdef: ClassDef = namespace
-            superclasses: list = classdef.superclasses
-            properties: dict[str, Property] = classdef.properties
             methods: dict[str, FunctionDef] = classdef.methods
             instancest: symtable.Class = factory.SymbolTableFactory().new(
                 'Class', identifier=identifier, parent=st

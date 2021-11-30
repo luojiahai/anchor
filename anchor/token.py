@@ -71,11 +71,10 @@ OR: typing.Literal              = 'OR'
 AND: typing.Literal             = 'AND'
 NOT: typing.Literal             = 'NOT'
 CLASS: typing.Literal           = 'CLASS'
-INHERIT: typing.Literal         = 'INHERIT'
+PROPERTY: typing.Literal        = 'PROPERTY'
 METHOD: typing.Literal          = 'METHOD'
 FUNCTION: typing.Literal        = 'FUNCTION'
 RETURN: typing.Literal          = 'RETURN'
-PROPERTY: typing.Literal        = 'PROPERTY'
 IF: typing.Literal              = 'IF'
 THEN: typing.Literal            = 'THEN'
 ELIF: typing.Literal            = 'ELIF'
@@ -103,11 +102,10 @@ kwdict: dict[typing.Literal, str] = {
     AND                         : 'and',
     NOT                         : 'not',
     CLASS                       : 'class',
-    INHERIT                     : 'inherit',
+    PROPERTY                    : 'property',
     METHOD                      : 'method',
     FUNCTION                    : 'function',
     RETURN                      : 'return',
-    PROPERTY                    : 'property',
     IF                          : 'if',
     THEN                        : 'then',
     ELIF                        : 'elif',

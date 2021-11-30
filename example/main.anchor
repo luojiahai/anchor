@@ -8,7 +8,7 @@ begin
     begin
     end
 
-    method[public] program() -> Null
+    method[public] main() -> Null
     begin
         print("Hello, World!");
     end
