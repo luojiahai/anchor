@@ -30,5 +30,6 @@ class SymbolTableFactory(object):
 
     def __new__(cls):
         if (not SymbolTableFactory.__instance):
-            SymbolTableFactory.__instance = SymbolTableFactory.__SymbolTableFactory()
+            SymbolTableFactory.__instance = \
+                SymbolTableFactory.__SymbolTableFactory()
         return SymbolTableFactory.__instance

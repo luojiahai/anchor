@@ -78,7 +78,8 @@ def readcommand(argv: list[str]) -> dict[str, typing.Any]:
     # Log stream
     logstream = None
     if (options.logfile):
-        logstream_path = f'./log/anchor_{time.strftime("%Y%m%d%H%M%S", time.localtime())}.log'
+        logstream_path = f'./log/anchor_ \
+            {time.strftime("%Y%m%d%H%M%S", time.localtime())}.log'
         os.makedirs(os.path.dirname(logstream_path), exist_ok=True)
         logstream = open(logstream_path, 'w')
     elif (options.logstream in builtins.STREAM):

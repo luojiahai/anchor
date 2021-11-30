@@ -20,11 +20,11 @@ def execute(data: str) -> typing.Any:
     # Include builtin functions
     for identifier, functionpointer in builtins.FUNCTION.items():
         name = ast.Name(identifier)
-        parameters = list([
+        parameters: list[ast.Parameter] = list([
             ast.Parameter(ast.Name(argument))
             for argument in inspect.getfullargspec(functionpointer)[0]
         ])
-        functiondef = ast.FunctionDef(
+        functiondef: ast.FunctionDef = ast.FunctionDef(
             name, parameters, None, pointer=functionpointer, isbuiltin=True,
         )
         functiondef.evaluate(symboltable)

@@ -14,8 +14,8 @@ STREAM: dict[str, typing.TextIO] = {
 class AnchorType(abc.ABC):
     
     def __init__(self, typename: str, **flags):
-        self.__typename = typename
-        self.__flags = flags
+        self.__typename: str = typename
+        self.__flags: dict[str, typing.Any] = flags
 
     @property
     def typename(self) -> str:
@@ -30,7 +30,7 @@ class Boolean(AnchorType, int):
 
     def __init__(self, value: int, **flags):
         AnchorType.__init__(self, 'Boolean', **flags)
-        self.__value = value
+        self.__value: int = value
 
     @property
     def value(self) -> int:
@@ -41,7 +41,7 @@ class Null(AnchorType):
 
     def __init__(self, value: str, **flags):
         AnchorType.__init__(self, 'NullType', **flags)
-        self.__value = value
+        self.__value: str = value
 
     @property
     def value(self) -> str:
@@ -52,7 +52,7 @@ class Integer(AnchorType, int):
     
     def __init__(self, value: int, **flags):
         AnchorType.__init__(self, 'Integer', **flags)
-        self.__value = value
+        self.__value: int = value
 
     @property
     def value(self) -> int:
@@ -63,7 +63,7 @@ class Float(AnchorType, float):
 
     def __init__(self, value: float, **flags):
         AnchorType.__init__(self, 'Float', **flags)
-        self.__value = value
+        self.__value: float = value
 
     @property
     def value(self) -> float:
@@ -74,7 +74,7 @@ class Complex(AnchorType, complex):
     
     def __init__(self, value: complex, **flags):
         AnchorType.__init__(self, 'Complex', **flags)
-        self.__value = value
+        self.__value: complex = value
 
     @property
     def value(self) -> complex:
@@ -85,7 +85,7 @@ class String(AnchorType, str):
     
     def __init__(self, value: str, **flags):
         AnchorType.__init__(self, 'String', **flags)
-        self.__value = value
+        self.__value: str = value
 
     @property
     def value(self) -> str:
@@ -129,13 +129,8 @@ class Class(AnchorType):
 
 class Object(AnchorType, object):
 
-    def __init__(self, classname, symtable, **flags):
+    def __init__(self, classname: str, **flags):
         AnchorType.__init__(self, classname, **flags)
-        self.__symtable = symtable
-    
-    @property
-    def symtable(self):
-        return self.__symtable
 
 
 CLASS = {

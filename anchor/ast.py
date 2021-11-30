@@ -1,4 +1,5 @@
 import abc
+import types
 import typing
 import anchor.builtins as builtins
 import anchor.symtable as symtable
@@ -1039,8 +1040,8 @@ class Call(Expression):
             call: Call = Call(Name('init'), self.arguments)
             call.evaluate(instancest)
 
-            # Return class instance
-            return builtins.Object(identifier, instancest)
+            # Return class instance - TODO: object ast
+            return builtins.Object(identifier)
 
         elif (isinstance(namespace, FunctionDef)):
             functiondef: FunctionDef = namespace
@@ -1061,7 +1062,7 @@ class Call(Expression):
             
             # Evaluate function block
             if (functiondef.flags.get('isbuiltin', False)):
-                functionpointer: function = functiondef.flags.get(
+                functionpointer: types.FunctionType = functiondef.flags.get(
                     'pointer', None
                 )
                 args: dict = dict()
