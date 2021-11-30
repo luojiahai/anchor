@@ -222,8 +222,8 @@ class Iterate(Statement):
 
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
         identifier = self.variable.identifier
-        for e in self.iterable.evaluate(st).iterable:
-            namespaces = list([e])
+        for node in self.iterable.evaluate(st).iterable:
+            namespaces = list([node])
             st.insert(identifier, namespaces)
             node = self.block.evaluate(st)
             if (isinstance(node, Return)):
