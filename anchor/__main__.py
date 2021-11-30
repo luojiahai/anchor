@@ -1,5 +1,6 @@
 import sys
 import os
+import typing
 import time
 import logging
 import anchor.system as system
@@ -7,10 +8,10 @@ import anchor.compile as compile
 import anchor.builtins as builtins
 
 
-def default(str):
+def default(str) -> str:
     return str + ' [Default: %default]'
 
-def read_command(argv):
+def readcommand(argv: list[str]) -> dict[str, typing.Any]:
     from optparse import OptionParser
     usage_str = 'anchor [option] [file]'
     parser = OptionParser(usage_str)
@@ -52,7 +53,7 @@ def read_command(argv):
     )
 
     parser.add_option(
-        '--log-file', action='store_true', dest='log_file',
+        '--log-file', action='store_true', dest='logfile',
         help=default('generate log file'), default=False
     )
 
@@ -76,7 +77,7 @@ def read_command(argv):
 
     # Log stream
     logstream = None
-    if (options.log_file):
+    if (options.logfile):
         logstream_path = f'./log/anchor_{time.strftime("%Y%m%d%H%M%S", time.localtime())}.log'
         os.makedirs(os.path.dirname(logstream_path), exist_ok=True)
         logstream = open(logstream_path, 'w')
@@ -121,15 +122,15 @@ def read_command(argv):
 
     return args
 
-def read_file(file):
+def readfile(file) -> str:
     f = open(file, "r", encoding='utf-8')
     data = f.read()
     f.close()
     return data
 
-def main():
-    args = read_command(sys.argv)
-    data = read_file(**args)
+def main() -> typing.Any:
+    args = readcommand(sys.argv)
+    data = readfile(**args)
     return compile.execute(data)
 
 main()

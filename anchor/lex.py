@@ -35,7 +35,7 @@ Number                  = group(Imagnumber, Floatnumber, Intnumber)
 String = group(r"'[^\n'\\]*(?:\\.[^\n'\\]*)*'", r'"[^\n"\\]*(?:\\.[^\n"\\]*)*"')
 
 
-class AnchorLexer:
+class AnchorLexer(object):
 
     # List of token names
     tokens = tuple(token.NAME.values()) + (
@@ -95,8 +95,8 @@ class AnchorLexer:
     def build(self, **kwargs):
         self.lexer = lex.lex(module=self, **kwargs)
 
-    # Test it output
-    def debug(self, data):
+    # Test
+    def debug(self, data: str) -> None:
         self.lexer.input(data)
         while True:
             tok = self.lexer.token()

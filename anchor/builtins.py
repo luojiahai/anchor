@@ -1,9 +1,10 @@
 import sys
 import abc
+import typing
 
 
 # Anchor stream name to Python stream
-STREAM = {
+STREAM: dict[str, typing.TextIO] = {
     'stdin': sys.stdin,
     'stdout': sys.stdout,
     'stderr': sys.stderr,
@@ -12,95 +13,88 @@ STREAM = {
 
 class AnchorType(abc.ABC):
     
-    def __init__(self, type_name, **flags):
-        self.__type = type_name
+    def __init__(self, typename: str, **flags):
+        self.__typename = typename
         self.__flags = flags
 
     @property
-    def type(self):
-        return self.__type
+    def typename(self) -> str:
+        return self.__typename
 
     @property
-    def flags(self):
+    def flags(self) -> dict[str, typing.Any]:
         return self.__flags
 
 
 class Boolean(AnchorType, int):
 
-    def __init__(self, value, **flags):
+    def __init__(self, value: int, **flags):
         AnchorType.__init__(self, 'Boolean', **flags)
         self.__value = value
 
     @property
-    def value(self):
+    def value(self) -> int:
         return self.__value
 
 
 class Null(AnchorType):
 
-    def __init__(self, value, **flags):
+    def __init__(self, value: str, **flags):
         AnchorType.__init__(self, 'NullType', **flags)
         self.__value = value
 
     @property
-    def value(self):
+    def value(self) -> str:
         return self.__value
 
 
 class Integer(AnchorType, int):
     
-    def __init__(self, value, **flags):
+    def __init__(self, value: int, **flags):
         AnchorType.__init__(self, 'Integer', **flags)
         self.__value = value
 
     @property
-    def value(self):
+    def value(self) -> int:
         return self.__value
-
-    def Anchor_init(self, value):
-        self.__init__(value)
-
-    def Anchor_plus(self, other):
-        value = self.__add__(other)
-        return TYPE[type(value)](value)
 
 
 class Float(AnchorType, float):
 
-    def __init__(self, value, **flags):
+    def __init__(self, value: float, **flags):
         AnchorType.__init__(self, 'Float', **flags)
         self.__value = value
 
     @property
-    def value(self):
+    def value(self) -> float:
         return self.__value
 
 
 class Complex(AnchorType, complex):
     
-    def __init__(self, value, **flags):
+    def __init__(self, value: complex, **flags):
         AnchorType.__init__(self, 'Complex', **flags)
         self.__value = value
 
     @property
-    def value(self):
+    def value(self) -> complex:
         return self.__value
 
 
 class String(AnchorType, str):
     
-    def __init__(self, value, **flags):
+    def __init__(self, value: str, **flags):
         AnchorType.__init__(self, 'String', **flags)
         self.__value = value
 
     @property
-    def value(self):
+    def value(self) -> str:
         return self.__value
 
 
 class Tuple(AnchorType, tuple): 
     
-    def __init__(self, value, **flags):
+    def __init__(self, value: tuple, **flags):
         AnchorType.__init__(self, 'Tuple', **flags)
 
     def __new__(self, value):
@@ -109,14 +103,14 @@ class Tuple(AnchorType, tuple):
 
 class List(AnchorType, list):
 
-    def __init__(self, value, **flags):
+    def __init__(self, value: list, **flags):
         AnchorType.__init__(self, 'List', **flags)
         self.extend(value)
 
 
 class Dict(AnchorType, dict):
 
-    def __init__(self, value, **flags):
+    def __init__(self, value: dict, **flags):
         AnchorType.__init__(self, 'Dict', **flags)
         self.update(value)
 
@@ -168,7 +162,7 @@ class Class(AnchorType):
         return self.__methods
 
 
-class Object(AnchorType):
+class Object(AnchorType, object):
 
     def __init__(self, classname, symtable, **flags):
         AnchorType.__init__(self, classname, **flags)
@@ -178,18 +172,6 @@ class Object(AnchorType):
     def symtable(self):
         return self.__symtable
 
-
-TYPE = {
-    bool: Boolean,
-    type(None): Null,
-    int: Integer,
-    float: Float,
-    complex: Complex,
-    str: String,
-    tuple: Tuple,
-    list: List,
-    dict: Dict,
-}
 
 CLASS = {
     'Boolean': Boolean,

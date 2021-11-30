@@ -3,13 +3,13 @@ __all__ = [
 ]
 
 
-class SymbolTableType:
+class SymbolTableType(object):
     MAIN = 'MAIN'
     CLASS = 'CLASS'
     FUNCTION = 'FUNCTION'
 
 
-class SymbolTable:
+class SymbolTable(object):
 
     def __init__(self, identifier, parent=None):
         self._identifier = identifier
@@ -17,7 +17,9 @@ class SymbolTable:
         self._symbols = dict()
         if (parent):
             for _, symbol in parent.symbols.items():
-                self.insert(symbol.identifier, symbol.namespaces, **symbol.flags)
+                self.insert(
+                    symbol.identifier, symbol.namespaces, **symbol.flags,
+                )
 
     @property
     def type(self):
@@ -34,9 +36,12 @@ class SymbolTable:
     def insert(self, identifier, namespaces, **flags):
         symbol = None
         if (identifier in self.symbols):
-            symbol = Symbol(identifier, self.symbols[identifier].namespaces + namespaces, **flags)
+            symbol = Symbol(
+                identifier, self.symbols[identifier].namespaces + namespaces, 
+                **flags,
+            )
         else:
-            symbol = Symbol(identifier, namespaces, **flags)
+            symbol = Symbol(identifier, namespaces, **flags,)
         assert (symbol != None)
         self.symbols[identifier] = symbol
 
@@ -51,7 +56,7 @@ class Class(SymbolTable):
     __methods = None
 
     def __init__(self, identifier, parent=None):
-        super().__init__(identifier=identifier, parent=parent)
+        super().__init__(identifier, parent=parent)
         self._type = SymbolTableType.CLASS
 
     @property
@@ -64,7 +69,7 @@ class Function(SymbolTable):
     __parameters = None
 
     def __init__(self, identifier, parent=None):
-        super().__init__(identifier=identifier, parent=parent)
+        super().__init__(identifier, parent=parent)
         self._type = SymbolTableType.FUNCTION
 
     @property
@@ -72,7 +77,7 @@ class Function(SymbolTable):
         return self.__parameters
 
 
-class Symbol:
+class Symbol(object):
 
     def __init__(self, identifier, namespaces, **flags):
         self.__identifier = identifier

@@ -8,7 +8,7 @@ import anchor.system as system
 __all__ = ['AnchorParser',]
 
 
-class Parser:
+class Parser(object):
 
     tokens = ()
     precedence = ()
@@ -138,8 +138,10 @@ class AnchorParser(Parser):
         p[0] = ast.Loop(expression, block)
 
     def p_statement_functiondef(self, p):
-        '''statement : FUNCTION name LPAR parameters RPAR RARROW expression BEGIN block END
-                     | FUNCTION name LPAR RPAR RARROW expression BEGIN block END'''
+        '''statement : FUNCTION name LPAR parameters RPAR \
+                       RARROW expression BEGIN block END
+                     | FUNCTION name LPAR RPAR \
+                       RARROW expression BEGIN block END'''
         if (len(p) == 11):
             name = p[2]
             parameters = p[4]
@@ -156,8 +158,10 @@ class AnchorParser(Parser):
             p[0] = ast.FunctionDef(name, parameters, body, **flags)
 
     def p_statement_classdef(self, p):
-        '''statement : CLASS LSQB annotations RSQB name INHERIT LPAR name RPAR BEGIN block END
-                     | CLASS LSQB annotations RSQB name BEGIN block END'''
+        '''statement : CLASS LSQB annotations RSQB name \
+                       INHERIT LPAR name RPAR BEGIN block END
+                     | CLASS LSQB annotations RSQB name \
+                       BEGIN block END'''
         # TODO: annotations
         if (len(p) == 13):
             annotations = p[3]
@@ -180,8 +184,10 @@ class AnchorParser(Parser):
         p[0] = ast.Property(name)
 
     def p_statement_methoddef(self, p):
-        '''statement : METHOD LSQB annotations RSQB name LPAR parameters RPAR RARROW expression BEGIN block END
-                     | METHOD LSQB annotations RSQB name LPAR RPAR RARROW expression BEGIN block END'''
+        '''statement : METHOD LSQB annotations RSQB name LPAR parameters RPAR \
+                       RARROW expression BEGIN block END
+                     | METHOD LSQB annotations RSQB name LPAR RPAR \
+                       RARROW expression BEGIN block END'''
         # TODO: annotations
         if (len(p) == 14):
             annotations = [p[3]]
@@ -249,8 +255,17 @@ class AnchorParser(Parser):
         '''parameter : name COLON name LSQB annotations RSQB
                      | name COLON name
                      | name'''
-        # TODO
-        pass
+        if (len(p) == 7):
+            name = p[1]
+            typename = p[3]
+            p[0] = ast.Parameter(name, typename)
+        elif (len(p) == 4):
+            name = p[1]
+            typename = p[3]
+            p[0] = ast.Parameter(name, typename)
+        elif (len(p) == 2):
+            name = p[1]
+            p[0] = ast.Parameter(name)
 
     def p_statement_break(self, p):
         '''statement : BREAK SEMI'''
