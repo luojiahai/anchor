@@ -117,49 +117,14 @@ class Dict(AnchorType, dict):
 
 class Function(AnchorType):
 
-    def __init__(self, name, parameters, body, **flags):
+    def __init__(self, **flags):
         AnchorType.__init__(self, 'Function', **flags)
-        self.__name = name
-        self.__parameters = parameters
-        self.__body = body
-    
-    @property
-    def name(self):
-        return self.__name
-
-    @property
-    def parameters(self):
-        return self.__parameters
-
-    @property
-    def body(self):
-        return self.__body
 
 
 class Class(AnchorType):
 
-    def __init__(self, name, superclasses, properties, methods, **flags):
+    def __init__(self, **flags):
         AnchorType.__init__(self, 'Class', **flags)
-        self.__name = name
-        self.__superclasses = superclasses
-        self.__properties = properties
-        self.__methods = methods
-    
-    @property
-    def name(self):
-        return self.__name
-
-    @property
-    def superclasses(self):
-        return self.__superclasses
-
-    @property
-    def properties(self):
-        return self.__properties
-
-    @property
-    def methods(self):
-        return self.__methods
 
 
 class Object(AnchorType, object):

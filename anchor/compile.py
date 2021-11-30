@@ -5,6 +5,7 @@ import anchor.parse as parse
 import anchor.ast as ast
 import anchor.symtable as symtable
 import anchor.builtins as builtins
+import anchor.factory as factory
 
 
 __all__ = ['execute',]
@@ -12,13 +13,15 @@ __all__ = ['execute',]
 
 def execute(data: str) -> typing.Any:
     # Define main symbol table
-    symboltable = symtable.SymbolTable('main')
+    symboltable: symtable.SymbolTable = factory.SymbolTableFactory().new(
+        'Main', identifier='Main'
+    )
 
     # Include builtin functions
     for identifier, functionpointer in builtins.FUNCTION.items():
         name = ast.Name(identifier)
         parameters = list([
-            ast.Name(argument) 
+            ast.Parameter(ast.Name(argument))
             for argument in inspect.getfullargspec(functionpointer)[0]
         ])
         functiondef = ast.FunctionDef(
@@ -27,10 +30,10 @@ def execute(data: str) -> typing.Any:
         functiondef.evaluate(symboltable)
     
     # Parse and evaluate abstract syntax tree
-    parser = parse.AnchorParser(
+    parser: parse.AnchorParser = parse.AnchorParser(
         debuglex=system.GLOBAL.debuglex, 
         debugyacc=system.GLOBAL.debugyacc,
         debuglog=system.GLOBAL.log,
     )
-    abstractsyntaxtree = parser.parse(data)
+    abstractsyntaxtree: ast.ASTNode = parser.parse(data)
     return abstractsyntaxtree.evaluate(symboltable)

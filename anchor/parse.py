@@ -10,16 +10,16 @@ __all__ = ['AnchorParser',]
 
 class Parser(object):
 
-    tokens = ()
-    precedence = ()
+    tokens: tuple = ()
+    precedence: tuple = ()
 
     def __init__(self, **kwargs):
-        self.debuglex = kwargs.get('debuglex', False)
-        self.debugyacc = kwargs.get('debugyacc', False)
-        self.debuglog = kwargs.get('debuglog', None)
+        self.debuglex: bool = kwargs.get('debuglex', False)
+        self.debugyacc: bool = kwargs.get('debugyacc', False)
+        self.debuglog: bool = kwargs.get('debuglog', None)
 
         # Build the lexer and parser
-        self.lexer = lex.AnchorLexer()
+        self.lexer: lex.AnchorLexer = lex.AnchorLexer()
         self.lexer.build(
             debug=self.debuglex, 
             debuglog=self.debuglog if self.debuglex else None,
@@ -30,7 +30,7 @@ class Parser(object):
             debuglog=self.debuglog if self.debugyacc else None,
         )
 
-    def parse(self, data):
+    def parse(self, data: str) -> ast.ASTNode:
         if (self.debuglex): self.lexer.debug(data)
         return self.parser.parse(data)
 
@@ -38,10 +38,10 @@ class Parser(object):
 class AnchorParser(Parser):
 
     # Tokens list
-    tokens = lex.AnchorLexer.tokens
+    tokens: tuple = lex.AnchorLexer.tokens
 
     # Precedence rules
-    precedence = (
+    precedence: tuple = (
         ('left', token.OR,),
         ('left', token.AND,),
         ('right', token.NOT,),
@@ -81,47 +81,47 @@ class AnchorParser(Parser):
         p[0] = ast.Assignment(name, expression)
 
     def p_statement_if(self, p):
-        '''statement : IF expression THEN block elif_statements END'''
+        '''statement : IF expression THEN block elifs END'''
         expression = p[2]
         block = p[4]
-        elif_statements = p[5]
-        p[0] = ast.If(expression, block, elif_statements=elif_statements)
+        elifs = p[5]
+        p[0] = ast.If(expression, block, elifs=elifs)
 
     def p_statement_if_else(self, p):
-        '''statement : IF expression THEN block else_block END
+        '''statement : IF expression THEN block elseblock END
                      | IF expression THEN block END'''
         if (len(p) == 7):
             expression = p[2]
             block = p[4]
-            else_block = p[5]
-            p[0] = ast.If(expression, block, else_block=else_block)
+            elseblock = p[5]
+            p[0] = ast.If(expression, block, elseblock=elseblock)
         elif (len(p) == 6):
             expression = p[2]
             block = p[4]
             p[0] = ast.If(expression, block)
 
-    def p_elif_statements(self, p):
-        '''elif_statements : ELIF expression THEN block elif_statements'''
+    def p_elifs(self, p):
+        '''elifs : ELIF expression THEN block elifs'''
         expression = p[2]
         block = p[4]
-        elif_statements = p[5]
-        p[0] = list([ast.Elif(expression, block)]) + elif_statements
+        elifs = p[5]
+        p[0] = list([ast.Elif(expression, block)]) + elifs
 
-    def p_elif_statements_else(self, p):
-        '''elif_statements : ELIF expression THEN block else_block
-                           | ELIF expression THEN block'''
+    def p_elifs_else(self, p):
+        '''elifs : ELIF expression THEN block elseblock
+                 | ELIF expression THEN block'''
         if (len(p) == 6):
             expression = p[2]
             block = p[4]
-            else_block = p[5]
-            p[0] = list([ast.Elif(expression, block, else_block)])
+            elseblock = p[5]
+            p[0] = list([ast.Elif(expression, block, elseblock)])
         elif (len(p) == 5):
             expression = p[2]
             block = p[4]
             p[0] = list([ast.Elif(expression, block)])
 
-    def p_else_block(self, p):
-        '''else_block : ELSE block'''
+    def p_elseblock(self, p):
+        '''elseblock : ELSE block'''
         p[0] = p[2]
 
     def p_statement_iterate(self, p):
