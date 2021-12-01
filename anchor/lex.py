@@ -4,7 +4,7 @@ import anchor.keyword as keyword
 import anchor.ply.lex as lex
 
 
-__all__ = ['AnchorLexer',]
+__all__: list[str] = ['AnchorLexer',]
 
 
 # Regular expression utility functions

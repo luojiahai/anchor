@@ -3,7 +3,7 @@ import typing
 import logging
 
 
-__all__ = ['GLOBAL',]
+__all__: list[str] = ['GLOBAL',]
 
 
 class Global(object):
@@ -86,7 +86,7 @@ class Global(object):
 
     __instance: __Global = None
 
-    def __new__(cls):
+    def __new__(cls) -> __Global:
         if (not Global.__instance):
             Global.__instance = Global.__Global()
         return Global.__instance

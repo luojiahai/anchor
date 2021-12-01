@@ -2,7 +2,7 @@ import types
 import anchor.token as token
 
 
-__all__ = ['kwlist', 'iskeyword',]
+__all__: list[str] = ['kwlist', 'iskeyword',]
 
 
 kwlist: list[str] = list(token.kwdict.values())

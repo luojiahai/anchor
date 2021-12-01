@@ -8,7 +8,7 @@ import anchor.builtins as builtins
 import anchor.factory as factory
 
 
-__all__ = ['execute',]
+__all__: list[str] = ['execute',]
 
 
 def execute(data: str) -> typing.Any:

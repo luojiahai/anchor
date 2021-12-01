@@ -1,7 +1,7 @@
 import typing
 
 
-__all__ = ['pmdict', 'kwdict', 'NAME',]
+__all__: list[str] = ['pmdict', 'kwdict', 'NAME',]
 
 
 PERCENT: typing.Literal         = 'PERCENT'

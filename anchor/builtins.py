@@ -3,6 +3,12 @@ import abc
 import typing
 
 
+__all__: list[str] = [
+    'STREAM', 'Boolean', 'Null', 'Integer', 'Float', 'Complex', 'String', 
+    'Tuple', 'List', 'Dict', 'Function', 'Class', 'Object', 'CLASS', 'FUNCTION',
+]
+
+
 # Anchor stream name to Python stream
 STREAM: dict[str, typing.TextIO] = {
     'stdin': sys.stdin,

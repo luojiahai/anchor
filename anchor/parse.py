@@ -1,3 +1,4 @@
+import abc
 import anchor.ply.yacc as yacc
 import anchor.lex as lex
 import anchor.token as token
@@ -5,10 +6,10 @@ import anchor.ast as ast
 import anchor.system as system
 
 
-__all__ = ['AnchorParser',]
+__all__: list[str] = ['AnchorParser',]
 
 
-class Parser(object):
+class Parser(abc.ABC):
 
     tokens: tuple = ()
     precedence: tuple = ()
@@ -434,30 +435,30 @@ class AnchorParser(Parser):
         if (len(p) == 6):
             expression = p[2]
             expressions = p[4]
-            p[0] = ast.Tuple(list([expression] + expressions))
+            p[0] = ast.Tuple(expressions=list([expression] + expressions))
         elif (len(p) == 5):
             expression = p[2]
-            p[0] = ast.Tuple(list([expression]))
+            p[0] = ast.Tuple(expressions=list([expression]))
         elif (len(p) == 3):
-            p[0] = ast.Tuple(list())
+            p[0] = ast.Tuple(expressions=list())
 
     def p_list(self, p):
         '''list : LSQB expressions RSQB
                 | LSQB RSQB'''
         if (len(p) == 4):
             expressions = p[2]
-            p[0] = ast.List(expressions)
+            p[0] = ast.List(expressions=expressions)
         elif (len(p) == 3):
-            p[0] = ast.List(list())
+            p[0] = ast.List(expressions=list())
 
     def p_dict(self, p):
         '''dict : LBRACE kvpairs RBRACE
                 | LBRACE RBRACE'''
         if (len(p) == 4):
             kvpairs = p[2]
-            p[0] = ast.Dict(kvpairs)
+            p[0] = ast.Dict(kvpairs=kvpairs)
         elif (len(p) == 3):
-            p[0] = ast.Dict(list())
+            p[0] = ast.Dict(kvpairs=list())
 
     def p_expressions(self, p):
         '''expressions : _expressions COMMA

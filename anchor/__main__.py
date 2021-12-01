@@ -6,6 +6,10 @@ import logging
 import anchor.system as system
 import anchor.compile as compile
 import anchor.builtins as builtins
+import anchor.ast as ast
+
+
+__all__: list[str] = ['main',]
 
 
 def default(str) -> str:
