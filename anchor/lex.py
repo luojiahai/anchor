@@ -76,19 +76,19 @@ class AnchorLexer(object):
     t_RBRACE            = token.pmdict[token.RBRACE]
 
     # Name
-    def t_NAME(self, t):
+    def t_NAME(self, t: lex.LexToken):
         r'[a-zA-Z_][a-zA-Z0-9_]*'
         if (keyword.iskeyword(t.value)):
             t.type = token.NAME[t.value]
         return t
 
     # Define a rule for newline so we can track line numbers
-    def t_NEWLINE(self, t):
+    def t_NEWLINE(self, t: lex.LexToken):
         r'\n'
         t.lexer.lineno += 1
 
     # Error handling rule
-    def t_error(self, t):
+    def t_error(self, t: lex.LexToken):
         t.lexer.skip(1)
 
     # Build the lexer
@@ -99,7 +99,7 @@ class AnchorLexer(object):
     def debug(self, data: str) -> None:
         self.lexer.input(data)
         while True:
-            tok = self.lexer.token()
-            if not tok: 
+            t: lex.LexToken = self.lexer.token()
+            if (not t): 
                 break
-            system.GLOBAL.log.debug(tok)
+            system.GLOBAL.log.debug(t)

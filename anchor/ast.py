@@ -265,6 +265,17 @@ class Loop(Statement):
         return None
 
 
+class Annotation(Statement):
+
+    def __init__(self, literal):
+        # TODO
+        pass
+
+    def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
+        # TODO
+        return None
+
+
 class Property(Statement):
 
     def __init__(self, name: Name):
@@ -916,7 +927,7 @@ class Tuple(Expression):
 
     __literal: typing.Any = None
     __value: builtins.Tuple = None
-    __iterable: tuple[Expression] = None
+    __iterable: tuple = None
 
     def __init__(self, **kwargs):
         literal: typing.Any = kwargs.get('literal', None)
@@ -943,14 +954,17 @@ class Tuple(Expression):
         return self.__iterable
     
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
-        self.__value = builtins.Tuple(tuple([
-            expression.evaluate(st).value
-            for expression in self.expressions
-        ]))
-        self.__iterable = tuple([
-            expression.evaluate(st)
-            for expression in self.expressions
-        ])
+        if (self.literal):
+            self.__value = builtins.Tuple(tuple(self.literal))
+        else:
+            self.__value = builtins.Tuple(tuple([
+                expression.evaluate(st).value
+                for expression in self.expressions
+            ]))
+            self.__iterable = tuple([
+                expression.evaluate(st)
+                for expression in self.expressions
+            ])
         return self
 
 
@@ -985,14 +999,17 @@ class List(Expression):
         return self.__iterable
     
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
-        self.__value = builtins.List(list([
-            expression.evaluate(st).value
-            for expression in self.expressions
-        ]))
-        self.__iterable = list([
-            expression.evaluate(st) 
-            for expression in self.expressions
-        ])
+        if (self.literal):
+            self.__value = builtins.List(list(self.literal))
+        else:
+            self.__value = builtins.List(list([
+                expression.evaluate(st).value
+                for expression in self.expressions
+            ]))
+            self.__iterable = list([
+                expression.evaluate(st) 
+                for expression in self.expressions
+            ])
         return self
 
 
