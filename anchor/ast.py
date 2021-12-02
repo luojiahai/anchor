@@ -1309,22 +1309,22 @@ class Call(Expression):
         return self.__arguments
     
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
-        name: Name = None
+        astnode: ASTNode = None
         if (isinstance(self.expression, Name)):
             name = self.expression
+            identifier: str = name.identifier
+            astnode = st.lookup(identifier).astnode
         elif (isinstance(self.expression, DotName)):
             dotname: DotName = self.expression
             instancename: Name = dotname.expression
             instance: Instance = st.lookup(instancename.identifier).astnode
             st = instance.instancest
             name = dotname.name
+            identifier: str = name.identifier
+            astnode = st.lookup(identifier).astnode
         else:
-            # TODO: recursively resolve preceding expression
-            node: ASTNode = self.expression.evaluate(st)
-        
-        # Get node and call
-        identifier: str = name.identifier
-        astnode: ASTNode = st.lookup(identifier).astnode
+            astnode = self.expression.evaluate(st)
+
         if (isinstance(astnode, Callable)):
             return astnode.call(self.arguments, st)
 
