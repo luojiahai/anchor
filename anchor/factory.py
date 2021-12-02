@@ -48,9 +48,7 @@ class ASTNodeFactory(object):
 
     __instance: __ASTNodeFactory = None
 
-    def __new__(cls, **kwargs):
-        declarations: list[tuple[str, typing.Type]] = \
-            kwargs.get('declarations', None)
+    def __new__(cls, declarations: list[tuple[str, typing.Type]]):
         if (not ASTNodeFactory.__instance):
             ASTNodeFactory.__instance = \
                 ASTNodeFactory.__ASTNodeFactory(declarations)
@@ -68,9 +66,7 @@ class SymbolTableFactory(object):
 
     __instance: __SymbolTableFactory = None
 
-    def __new__(cls, **kwargs):
-        declarations: list[tuple[str, typing.Type]] = \
-            kwargs.get('declarations', None)
+    def __new__(cls, declarations: list[tuple[str, typing.Type]]):
         if (not SymbolTableFactory.__instance):
             SymbolTableFactory.__instance = \
                 SymbolTableFactory.__SymbolTableFactory(declarations)

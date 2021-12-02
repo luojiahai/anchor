@@ -8,7 +8,7 @@ import anchor.factory as factory
 
 
 __all__: list[str] = [
-    'SymbolTableType', 'SymbolTable', 'Class', 'Function', 'Symbol',
+    'Type', 'SymbolTable', 'Class', 'Function', 'Symbol',
 ]
 
 
@@ -39,7 +39,7 @@ class Symbol(object):
         return self.__kwargs
 
 
-class SymbolTableType(object):
+class Type(object):
     MAIN = 'MAIN'
     CLASS = 'CLASS'
     FUNCTION = 'FUNCTION'
@@ -49,12 +49,12 @@ class SymbolTable(object):
 
     def __init__(self, identifier: str, parent = None):
         self._identifier: str = identifier
-        self._type: SymbolTableType = SymbolTableType.MAIN
+        self._type: Type = Type.MAIN
         self._symbols: dict[str, Symbol] = dict()
         self._parent: SymbolTable = parent
 
     @property
-    def type(self) -> SymbolTableType:
+    def type(self) -> Type:
         return self._type
 
     @property
@@ -94,7 +94,7 @@ class Class(SymbolTable):
 
     def __init__(self, identifier: str, parent: SymbolTable = None):
         super().__init__(identifier, parent=parent)
-        self._type: SymbolTableType = SymbolTableType.CLASS
+        self._type: Type = Type.CLASS
 
     @property
     def methods(self) -> list[Symbol]:
@@ -107,7 +107,7 @@ class Function(SymbolTable):
 
     def __init__(self, identifier: str, parent: SymbolTable=None):
         super().__init__(identifier, parent=parent)
-        self._type: SymbolTableType = SymbolTableType.FUNCTION
+        self._type: Type = Type.FUNCTION
 
     @property
     def parameters(self) -> list[Symbol]:
@@ -115,7 +115,7 @@ class Function(SymbolTable):
 
 
 factory.SYMTABLE = factory.SymbolTableFactory(declarations=list([
-    ('Main', SymbolTable,),
-    ('Class', Class,),
-    ('Function', Function,),
+    (Type.MAIN, SymbolTable,),
+    (Type.CLASS, Class,),
+    (Type.FUNCTION, Function,),
 ]))

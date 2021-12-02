@@ -13,8 +13,9 @@ __all__: list[str] = ['execute',]
 
 def execute(data: str) -> typing.Any:
     # Define main symbol table
-    symboltable: symtable.SymbolTable = factory.SymbolTableFactory().new(
-        'Main', identifier='Main'
+    mainidentifier = 'Main'
+    symboltable: symtable.SymbolTable = factory.SYMTABLE.new(
+        symtable.Type.MAIN, identifier=mainidentifier,
     )
 
     # Include builtin functions

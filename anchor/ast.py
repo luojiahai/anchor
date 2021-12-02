@@ -355,7 +355,8 @@ class FunctionDef(Statement, Callable):
         parameters: list[Parameter] = self.parameters
         block: Block = self.block
         functionst: symtable.Function = factory.SYMTABLE.new(
-            'Function', identifier=self.name.identifier, parent=parentst
+            symtable.Type.FUNCTION, 
+            identifier=self.name.identifier, parent=parentst,
         )
 
         # Insert symbols for arguments
@@ -462,7 +463,8 @@ class MethodDef(Statement, Callable):
         parameters: list[Parameter] = self.parameters
         block: Block = self.block
         methodst: symtable.Function = factory.SYMTABLE.new(
-            'Function', identifier=self.name.identifier, parent=parentst
+            symtable.Type.FUNCTION, 
+            identifier=self.name.identifier, parent=parentst,
         )
 
         # Insert symbols for arguments
@@ -547,7 +549,8 @@ class ClassDef(Statement, Callable):
         properties: dict[str, Property] = self.properties
         methods: dict[str, MethodDef] = self.methods
         instancest: symtable.Class = factory.SYMTABLE.new(
-            'Class', identifier=self.name.identifier, parent=parentst
+            symtable.Type.CLASS, 
+            identifier=self.name.identifier, parent=parentst,
         )
 
         # Insert symbols for properties
