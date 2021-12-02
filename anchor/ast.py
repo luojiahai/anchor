@@ -12,7 +12,19 @@ __all__: list[str] = []
 class ASTNode(abc.ABC):
 
     @abc.abstractmethod
-    def evaluate(self, st: symtable.SymbolTable): pass
+    def evaluate(self, st): pass
+
+
+class Iterable(abc.ABC):
+
+    @abc.abstractmethod
+    def index(self, key): pass
+
+
+class Callable(abc.ABC):
+
+    @abc.abstractmethod
+    def call(self, arguments, st): pass
 
 
 class Expression(ASTNode): pass
@@ -305,7 +317,7 @@ class Parameter(Statement):
         return astnode
 
 
-class FunctionDef(Statement):
+class FunctionDef(Statement, Callable):
 
     __value: builtins.Function = None
 
@@ -336,6 +348,39 @@ class FunctionDef(Statement):
     @property
     def value(self) -> builtins.Function:
         return self.__value
+
+    def call(
+        self, arguments: list[Expression], parentst: symtable.SymbolTable
+    ) -> ASTNode:
+        parameters: list[Parameter] = self.parameters
+        block: Block = self.block
+        functionst: symtable.Function = factory.SYMTABLE.new(
+            'Function', identifier=self.name.identifier, parent=parentst
+        )
+
+        # Insert symbols for arguments
+        for index in range(len(parameters)):
+            parameter: Parameter = parameters[index]
+            identifier: str = parameter.name.identifier
+            astnodes: list[ASTNode] = list([
+                arguments[index].evaluate(parentst)
+            ])
+            functionst.insert(identifier, astnodes, isparameter=True)
+        
+        # Evaluate function block
+        if (self.kwargs.get('isbuiltin', False)):
+            functionpointer: types.FunctionType = self.kwargs.get(
+                'pointer', None
+            )
+            args: dict = dict()
+            for parameter in parameters:
+                value: builtins.Type = parameter.evaluate(functionst).value
+                args[parameter.name.identifier] = value
+            returnvalue: typing.Any = functionpointer(**args)
+            return factory.AST.new(literal=returnvalue)
+        else:
+            node: ASTNode = block.evaluate(functionst)
+            return node
 
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
         self.__value = builtins.Function()
@@ -373,7 +418,7 @@ class Property(Statement):
         return self
 
 
-class MethodDef(Statement):
+class MethodDef(Statement, Callable):
 
     __value: builtins.Method = None
 
@@ -411,6 +456,28 @@ class MethodDef(Statement):
     def value(self) -> builtins.Method:
         return self.__value
 
+    def call(
+        self, arguments: list[Expression], parentst: symtable.SymbolTable
+    ) -> ASTNode:
+        parameters: list[Parameter] = self.parameters
+        block: Block = self.block
+        methodst: symtable.Function = factory.SYMTABLE.new(
+            'Function', identifier=self.name.identifier, parent=parentst
+        )
+
+        # Insert symbols for arguments
+        for index in range(len(parameters)):
+            parameter: Parameter = parameters[index]
+            identifier: str = parameter.name.identifier
+            astnodes: list[ASTNode] = list([
+                arguments[index].evaluate(parentst)
+            ])
+            methodst.insert(identifier, astnodes, isparameter=True)
+        
+        # Evaluate method block
+        node: ASTNode = block.evaluate(methodst)
+        return node
+
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
         self.__value = builtins.Method()
         identifier: str = self.name.identifier
@@ -419,7 +486,7 @@ class MethodDef(Statement):
         return self
 
 
-class ClassDef(Statement):
+class ClassDef(Statement, Callable):
 
     __value: builtins.Class = None
 
@@ -474,6 +541,38 @@ class ClassDef(Statement):
     def value(self) -> builtins.Class:
         return self.__value
 
+    def call(
+        self, arguments: list[Expression], parentst: symtable.SymbolTable
+    ) -> ASTNode:
+        properties: dict[str, Property] = self.properties
+        methods: dict[str, MethodDef] = self.methods
+        instancest: symtable.Class = factory.SYMTABLE.new(
+            'Class', identifier=self.name.identifier, parent=parentst
+        )
+
+        # Insert symbols for properties
+        for _, prop in properties.items():
+            astnodes: list[ASTNode] = list([prop])
+            instancest.insert(
+                prop.name.identifier, astnodes, isproperty=True
+            )
+
+        # Insert symbols for methods
+        for _, method in methods.items():
+            astnodes: list[ASTNode] = list([method])
+            instancest.insert(
+                method.name.identifier, astnodes, ismethod=True
+            )
+
+        # Evaluate constructor
+        factorymethod: MethodDef = methods[self.name.identifier]
+        factorymethod.evaluate(instancest)
+        call: Call = Call(Name(self.name.identifier), arguments)
+        call.evaluate(instancest)
+
+        # Return class instance
+        return Instance(self, instancest)
+
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
         self.__value = builtins.Class()
         identifier: str = self.name.identifier
@@ -487,7 +586,7 @@ class Instance(Statement):
     __value: builtins.Instance = None
 
     def __init__(self, classdef: ClassDef, instancest: symtable.Class):
-        self.__classdef = classdef
+        self.__classdef: ClassDef = classdef
         self.__instancest = instancest
 
     @property
@@ -943,7 +1042,7 @@ class Null(Expression):
         return self
 
 
-class String(Expression):
+class String(Expression, Iterable):
 
     __value: builtins.String = None
 
@@ -957,6 +1056,10 @@ class String(Expression):
     @property
     def value(self) -> builtins.String:
         return self.__value
+
+    def index(self, key):
+        item = self.value.__getitem__(key)
+        return factory.AST.new(literal=item)
 
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
         self.__value = builtins.String(str(self.literal))
@@ -1023,7 +1126,7 @@ class Complex(Expression):
         return self
 
 
-class Tuple(Expression):
+class Tuple(Expression, Iterable):
 
     __literal: typing.Any = None
     __value: builtins.Tuple = None
@@ -1052,6 +1155,10 @@ class Tuple(Expression):
     @property
     def iterable(self) -> tuple[Expression]:
         return self.__iterable
+
+    def index(self, key):
+        item = self.value.__getitem__(key)
+        return factory.AST.new(literal=item)
     
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
         if (self.literal):
@@ -1068,7 +1175,7 @@ class Tuple(Expression):
         return self
 
 
-class List(Expression):
+class List(Expression, Iterable):
 
     __literal: typing.Any = None
     __value: builtins.List = None
@@ -1097,6 +1204,10 @@ class List(Expression):
     @property
     def iterable(self) -> list[Expression]:
         return self.__iterable
+
+    def index(self, key):
+        item = self.value.__getitem__(key)
+        return factory.AST.new(literal=item)
     
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
         if (self.literal):
@@ -1113,7 +1224,7 @@ class List(Expression):
         return self
 
 
-class Dict(Expression):
+class Dict(Expression, Iterable):
 
     __literal: typing.Any = None
     __value: builtins.Dict = None
@@ -1143,6 +1254,10 @@ class Dict(Expression):
     def iterable(self) -> dict[Expression, Expression]:
         return self.__iterable
 
+    def index(self, key):
+        item = self.value.__getitem__(key)
+        return factory.AST.new(literal=item)
+
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
         if (self.literal):
             self.__value = builtins.Dict(dict(self.literal))
@@ -1158,97 +1273,57 @@ class Dict(Expression):
         return self
 
 
-class Call(Expression):
+class DotName(Expression):
 
-    def __init__(self, name: Name, arguments: list[Expression]):
+    def __init__(self, expression: Expression, name: Name):
+        self.__expression: Expression = expression
         self.__name: Name = name
-        self.__arguments: list[Expression] = arguments
+
+    @property
+    def expression(self) -> Expression:
+        return self.__expression
 
     @property
     def name(self) -> Name:
         return self.__name
+
+    def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
+        return self
+
+
+class Call(Expression):
+
+    def __init__(self, expression: Expression, arguments: list[Expression]):
+        self.__expression: Expression = expression
+        self.__arguments: list[Expression] = arguments
+
+    @property
+    def expression(self) -> Expression:
+        return self.__expression
 
     @property
     def arguments(self) -> list[Expression]:
         return self.__arguments
     
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
-        # Get function definition and its attributes
-        identifier: str = self.name.identifier
+        name: Name = None
+        if (isinstance(self.expression, Name)):
+            name = self.expression
+        elif (isinstance(self.expression, DotName)):
+            dotname: DotName = self.expression
+            instancename: Name = dotname.expression
+            instance: Instance = st.lookup(instancename.identifier).astnode
+            st = instance.instancest
+            name = dotname.name
+        else:
+            # TODO: recursively resolve preceding expression
+            node: ASTNode = self.expression.evaluate(st)
+        
+        # Get node and call
+        identifier: str = name.identifier
         astnode: ASTNode = st.lookup(identifier).astnode
-
-        if (isinstance(astnode, ClassDef)):
-            classdef: ClassDef = astnode
-            properties: dict[str, Property] = classdef.properties
-            methods: dict[str, MethodDef] = classdef.methods
-            instancest: symtable.Class = factory.SYMTABLE.new(
-                'Class', identifier=identifier, parent=st
-            )
-
-            # TODO: Insert symbols for properties
-            # TODO: Insert symbols for methods
-
-            # Evaluate constructor
-            factorymethod: MethodDef = methods[identifier]
-            factorymethod.evaluate(instancest)
-            call: Call = Call(Name(identifier), self.arguments)
-            call.evaluate(instancest)
-
-            # Return class instance - TODO: instance ast
-            return Instance(classdef, instancest)
-
-        elif (isinstance(astnode, MethodDef)):
-            methoddef: MethodDef = astnode
-            parameters: list[Parameter] = methoddef.parameters
-            block: Block = methoddef.block
-            methodst: symtable.Function = factory.SYMTABLE.new(
-                'Function', identifier=identifier, parent=st
-            )
-
-            # Insert symbols for arguments
-            for index in range(len(parameters)):
-                parameter: Parameter = parameters[index]
-                identifier: str = parameter.name.identifier
-                astnodes: list[ASTNode] = list([
-                    self.arguments[index].evaluate(st)
-                ])
-                methodst.insert(identifier, astnodes, isparameter=True)
-            
-            # Evaluate method block
-            node: ASTNode = block.evaluate(methodst)
-            return node
-
-        elif (isinstance(astnode, FunctionDef)):
-            functiondef: FunctionDef = astnode
-            parameters: list[Parameter] = functiondef.parameters
-            block: Block = functiondef.block
-            functionst: symtable.Function = factory.SYMTABLE.new(
-                'Function', identifier=identifier, parent=st
-            )
-
-            # Insert symbols for arguments
-            for index in range(len(parameters)):
-                parameter: Parameter = parameters[index]
-                identifier: str = parameter.name.identifier
-                astnodes: list[ASTNode] = list([
-                    self.arguments[index].evaluate(st)
-                ])
-                functionst.insert(identifier, astnodes, isparameter=True)
-            
-            # Evaluate function block
-            if (functiondef.kwargs.get('isbuiltin', False)):
-                functionpointer: types.FunctionType = functiondef.kwargs.get(
-                    'pointer', None
-                )
-                args: dict = dict()
-                for parameter in parameters:
-                    value: builtins.Type = parameter.evaluate(functionst).value
-                    args[parameter.name.identifier] = value
-                returnvalue: typing.Any = functionpointer(**args)
-                return factory.AST.new(literal=returnvalue)
-            else:
-                node: ASTNode = block.evaluate(functionst)
-                return node
+        if (isinstance(astnode, Callable)):
+            return astnode.call(self.arguments, st)
 
 
 factory.AST = factory.ASTNodeFactory(declarations=list([

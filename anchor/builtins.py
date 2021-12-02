@@ -4,9 +4,10 @@ import typing
 
 
 __all__: list[str] = [
-    'STREAM', 'Boolean', 'Null', 'Integer', 'Float', 'Complex', 'String', 
-    'Tuple', 'List', 'Dict', 'Function', 'Class', 'Instance', 
-    'CLASS', 'FUNCTION',
+    'STREAM', 'CLASS', 'FUNCTION',
+    'Boolean', 'Null', 'Integer', 'Float', 'Complex', 'String', 
+    'Tuple', 'List', 'Dict', 'Function', 
+    'Annotation', 'Class', 'Property', 'Method', 'Instance',
 ]
 
 
@@ -53,6 +54,12 @@ class Null(Type):
     @property
     def value(self) -> str:
         return self.__value
+
+    def __str__(self) -> str:
+        return self.value
+
+    def __repr__(self) -> str:
+        return self.value
 
 
 class Integer(Type, int):
@@ -122,6 +129,12 @@ class Dict(Type, dict):
         self.update(value)
 
 
+class Function(Type):
+
+    def __init__(self, **kwargs):
+        Type.__init__(self, 'Function', **kwargs)
+
+
 class Annotation(Type):
 
     def __init__(self, value: str, **kwargs):
@@ -131,12 +144,6 @@ class Annotation(Type):
     @property
     def value(self) -> str:
         return self.__value
-
-
-class Function(Type):
-
-    def __init__(self, **kwargs):
-        Type.__init__(self, 'Function', **kwargs)
 
 
 class Class(Type):

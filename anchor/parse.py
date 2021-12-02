@@ -358,8 +358,9 @@ class AnchorParser(Parser):
 
     def p_expression_dotname(self, p: yacc.YaccProduction) -> None:
         '''expression : expression DOT name'''
-        # TODO
-        pass
+        expression = p[1]
+        name = p[3]
+        p[0] = ast.DotName(expression, name)
 
     def p_expression_call(self, p: yacc.YaccProduction) -> None:
         '''expression : expression LPAR arguments RPAR

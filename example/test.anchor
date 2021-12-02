@@ -38,10 +38,20 @@ print(c);
 
 class[public] MyClass
 begin
+    property[public, get, set] prop;
+    
     method[public, factory] MyClass() -> Null
     begin
-        print("this is in class.init");
+        print("this is in MyClass");
+        prop = 2333;
+    end
+
+    method[public] test() -> Null
+    begin
+        print("this is a test method in MyClass");
+        return Null;
     end
 end
 
-MyClass();
+obj = MyClass();
+print(obj.test());
