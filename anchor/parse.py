@@ -52,6 +52,7 @@ class AnchorParser(Parser):
         ('left', token.STAR, token.SLASH, token.DOUBLESLASH, token.PERCENT,),
         ('right', token.UPLUS, token.UMINUS,),
         ('left', token.DOUBLESTAR,),
+        ('left', token.LPAR, token.RPAR,),
     )
 
     def p_program(self, p: yacc.YaccProduction) -> None:

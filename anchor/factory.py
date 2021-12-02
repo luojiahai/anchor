@@ -1,5 +1,6 @@
 import abc
 import typing
+import anchor.builtins as builtins
 
 
 __all__: list[str] = ['AST', 'SYMTABLE',]
@@ -42,9 +43,10 @@ class ASTNodeFactory(object):
                 self._registerbuilder(key, builder)
         
         def new(self, literal: typing.Any) -> typing.Any:
+            if (isinstance(literal, builtins.Type)):
+                return super().new(literal.typename, literal=literal)
             key = self.__astnodename[type(literal)]
-            kwargs = dict({'literal': literal})
-            return super().new(key, **kwargs)
+            return super().new(key, literal=literal)
 
     __instance: __ASTNodeFactory = None
 

@@ -1,0 +1,10 @@
+function factorial(n: Integer) -> Integer
+begin
+    if (n == 1) then
+        return n;
+    else
+        return n * factorial(n - 1);
+    end
+end
+
+print(factorial(10));

@@ -145,9 +145,18 @@ class Return(Statement):
     def value(self) -> builtins.Type:
         return self.__value
 
+    @value.setter
+    def value(self, other) -> None:
+        self.__value = other
+
+    def copy(self):
+        new = Return(self.expression)
+        new.value = self.value
+        return new
+
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
         self.__value = self.expression.evaluate(st).value
-        return self
+        return self.copy()
 
 
 class Elif(Statement):
@@ -1323,6 +1332,7 @@ class Call(Expression):
             identifier: str = name.identifier
             astnode = st.lookup(identifier).astnode
         else:
+            print("NOE")
             astnode = self.expression.evaluate(st)
 
         if (isinstance(astnode, Callable)):
