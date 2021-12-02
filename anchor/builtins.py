@@ -5,7 +5,8 @@ import typing
 
 __all__: list[str] = [
     'STREAM', 'Boolean', 'Null', 'Integer', 'Float', 'Complex', 'String', 
-    'Tuple', 'List', 'Dict', 'Function', 'Class', 'Object', 'CLASS', 'FUNCTION',
+    'Tuple', 'List', 'Dict', 'Function', 'Class', 'Instance', 
+    'CLASS', 'FUNCTION',
 ]
 
 
@@ -17,25 +18,25 @@ STREAM: dict[str, typing.TextIO] = {
 }
 
 
-class AnchorType(abc.ABC):
+class Type(abc.ABC):
     
-    def __init__(self, typename: str, **flags):
+    def __init__(self, typename: str, **kwargs):
         self.__typename: str = typename
-        self.__flags: dict[str, typing.Any] = flags
+        self.__kwargs: dict[str, typing.Any] = kwargs
 
     @property
     def typename(self) -> str:
         return self.__typename
 
     @property
-    def flags(self) -> dict[str, typing.Any]:
-        return self.__flags
+    def kwargs(self) -> dict[str, typing.Any]:
+        return self.__kwargs
 
 
-class Boolean(AnchorType, int):
+class Boolean(Type, int):
 
-    def __init__(self, value: int, **flags):
-        AnchorType.__init__(self, 'Boolean', **flags)
+    def __init__(self, value: int, **kwargs):
+        Type.__init__(self, 'Boolean', **kwargs)
         self.__value: int = value
 
     @property
@@ -43,10 +44,10 @@ class Boolean(AnchorType, int):
         return self.__value
 
 
-class Null(AnchorType):
+class Null(Type):
 
-    def __init__(self, value: str, **flags):
-        AnchorType.__init__(self, 'NullType', **flags)
+    def __init__(self, value: str, **kwargs):
+        Type.__init__(self, 'NullType', **kwargs)
         self.__value: str = value
 
     @property
@@ -54,10 +55,10 @@ class Null(AnchorType):
         return self.__value
 
 
-class Integer(AnchorType, int):
+class Integer(Type, int):
     
-    def __init__(self, value: int, **flags):
-        AnchorType.__init__(self, 'Integer', **flags)
+    def __init__(self, value: int, **kwargs):
+        Type.__init__(self, 'Integer', **kwargs)
         self.__value: int = value
 
     @property
@@ -65,10 +66,10 @@ class Integer(AnchorType, int):
         return self.__value
 
 
-class Float(AnchorType, float):
+class Float(Type, float):
 
-    def __init__(self, value: float, **flags):
-        AnchorType.__init__(self, 'Float', **flags)
+    def __init__(self, value: float, **kwargs):
+        Type.__init__(self, 'Float', **kwargs)
         self.__value: float = value
 
     @property
@@ -76,10 +77,10 @@ class Float(AnchorType, float):
         return self.__value
 
 
-class Complex(AnchorType, complex):
+class Complex(Type, complex):
     
-    def __init__(self, value: complex, **flags):
-        AnchorType.__init__(self, 'Complex', **flags)
+    def __init__(self, value: complex, **kwargs):
+        Type.__init__(self, 'Complex', **kwargs)
         self.__value: complex = value
 
     @property
@@ -87,10 +88,10 @@ class Complex(AnchorType, complex):
         return self.__value
 
 
-class String(AnchorType, str):
+class String(Type, str):
     
-    def __init__(self, value: str, **flags):
-        AnchorType.__init__(self, 'String', **flags)
+    def __init__(self, value: str, **kwargs):
+        Type.__init__(self, 'String', **kwargs)
         self.__value: str = value
 
     @property
@@ -98,45 +99,68 @@ class String(AnchorType, str):
         return self.__value
 
 
-class Tuple(AnchorType, tuple): 
+class Tuple(Type, tuple): 
     
-    def __init__(self, value: tuple, **flags):
-        AnchorType.__init__(self, 'Tuple', **flags)
+    def __init__(self, value: tuple, **kwargs):
+        Type.__init__(self, 'Tuple', **kwargs)
 
     def __new__(self, value):
         return tuple.__new__(self, value)
 
 
-class List(AnchorType, list):
+class List(Type, list):
 
-    def __init__(self, value: list, **flags):
-        AnchorType.__init__(self, 'List', **flags)
+    def __init__(self, value: list, **kwargs):
+        Type.__init__(self, 'List', **kwargs)
         self.extend(value)
 
 
-class Dict(AnchorType, dict):
+class Dict(Type, dict):
 
-    def __init__(self, value: dict, **flags):
-        AnchorType.__init__(self, 'Dict', **flags)
+    def __init__(self, value: dict, **kwargs):
+        Type.__init__(self, 'Dict', **kwargs)
         self.update(value)
 
 
-class Function(AnchorType):
+class Annotation(Type):
 
-    def __init__(self, **flags):
-        AnchorType.__init__(self, 'Function', **flags)
+    def __init__(self, value: str, **kwargs):
+        super().__init__('Annotation', **kwargs)
+        self.__value: str = value
+
+    @property
+    def value(self) -> str:
+        return self.__value
 
 
-class Class(AnchorType):
+class Function(Type):
 
-    def __init__(self, **flags):
-        AnchorType.__init__(self, 'Class', **flags)
+    def __init__(self, **kwargs):
+        Type.__init__(self, 'Function', **kwargs)
 
 
-class Object(AnchorType, object):
+class Class(Type):
 
-    def __init__(self, classname: str, **flags):
-        AnchorType.__init__(self, classname, **flags)
+    def __init__(self, **kwargs):
+        Type.__init__(self, 'Class', **kwargs)
+
+
+class Property(Type):
+
+    def __init__(self, **kwargs):
+        Type.__init__(self, 'Property', **kwargs)
+
+
+class Method(Type):
+
+    def __init__(self, **kwargs):
+        Type.__init__(self, 'Method', **kwargs)
+
+
+class Instance(Type, object):
+
+    def __init__(self, cls: Class, **kwargs):
+        Type.__init__(self, cls.typename, **kwargs)
 
 
 CLASS = {

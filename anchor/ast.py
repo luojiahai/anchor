@@ -120,7 +120,7 @@ class Continue(Statement):
 
 class Return(Statement):
 
-    __value: typing.Any = None
+    __value: builtins.Type = None
 
     def __init__(self, expression: Expression):
         self.__expression: Expression = expression
@@ -130,7 +130,7 @@ class Return(Statement):
         return self.__expression
 
     @property
-    def value(self) -> typing.Any:
+    def value(self) -> builtins.Type:
         return self.__value
 
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
@@ -267,27 +267,22 @@ class Loop(Statement):
 
 class Annotation(Statement):
 
-    def __init__(self, literal):
-        # TODO
-        pass
+    __value: builtins.Annotation = None
 
-    def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
-        # TODO
-        return None
-
-
-class Property(Statement):
-
-    def __init__(self, name: Name):
-        self.__name: Name = name
+    def __init__(self, literal: typing.Any):
+        self.__literal: typing.Any = literal
 
     @property
-    def name(self) -> Name:
-        return self.__name
+    def literal(self) -> typing.Any:
+        return self.__literal
+
+    @property
+    def value(self) -> builtins.Annotation:
+        return self.__value
 
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
-        # TODO
-        pass
+        self.__value = builtins.Annotation(str(self.literal))
+        return self
 
 
 class Parameter(Statement):
@@ -315,12 +310,12 @@ class FunctionDef(Statement):
     __value: builtins.Function = None
 
     def __init__(
-        self, name: Name, parameters: list[Parameter], block: Block, **flags
+        self, name: Name, parameters: list[Parameter], block: Block, **kwargs
     ):
         self.__name: Name = name
         self.__parameters: list[Parameter] = parameters
         self.__block: Block = block
-        self.__flags: dict[str, typing.Any] = flags
+        self.__kwargs: dict[str, typing.Any] = kwargs
 
     @property
     def name(self) -> Name:
@@ -335,8 +330,8 @@ class FunctionDef(Statement):
         return self.__block
 
     @property
-    def flags(self) -> dict[str, typing.Any]:
-        return self.__flags
+    def kwargs(self) -> dict[str, typing.Any]:
+        return self.__kwargs
 
     @property
     def value(self) -> builtins.Function:
@@ -346,34 +341,110 @@ class FunctionDef(Statement):
         self.__value = builtins.Function()
         identifier: str = self.name.identifier
         astnodes: list[ASTNode] = list([self])
-        st.insert(identifier, astnodes, isastnode=True)
-        return None
+        st.insert(identifier, astnodes)
+        return self
+
+
+class Property(Statement):
+
+    __value: builtins.Property = None
+
+    def __init__(self, name: Name, annotations: list[Annotation]):
+        self.__name: Name = name
+        self.__annotations: list[Annotation] = annotations
+
+    @property
+    def name(self) -> Name:
+        return self.__name
+
+    @property
+    def annotations(self) -> list[Annotation]:
+        return self.__annotations
+
+    @property
+    def value(self) -> builtins.Property:
+        return self.__value
+
+    def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
+        self.__value = builtins.Property()
+        identifier: str = self.name.identifier
+        astnodes: list[ASTNode] = list([self])
+        st.insert(identifier, astnodes)
+        return self
+
+
+class MethodDef(Statement):
+
+    __value: builtins.Method = None
+
+    def __init__(
+        self, name: Name, parameters: list[Parameter], block: Block,
+        annotations: list[Annotation], **kwargs
+    ):
+        self.__name: Name = name
+        self.__parameters: list[Parameter] = parameters
+        self.__block: Block = block
+        self.__annotations: list[Annotation] = annotations
+        self.__kwargs: dict[str, typing.Any] = kwargs
+
+    @property
+    def name(self) -> Name:
+        return self.__name
+
+    @property
+    def parameters(self) -> list[Parameter]:
+        return self.__parameters
+
+    @property
+    def block(self) -> Block:
+        return self.__block
+
+    @property
+    def annotations(self) -> list[Annotation]:
+        return self.__annotations
+
+    @property
+    def kwargs(self) -> dict[str, typing.Any]:
+        return self.__kwargs
+
+    @property
+    def value(self) -> builtins.Method:
+        return self.__value
+
+    def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
+        self.__value = builtins.Method()
+        identifier: str = self.name.identifier
+        astnodes: list[ASTNode] = list([self])
+        st.insert(identifier, astnodes)
+        return self
 
 
 class ClassDef(Statement):
 
     __value: builtins.Class = None
 
-    def __init__(self, name: Name, block: Block, **flags):
+    def __init__(self, name: Name, block: Block, annotations: list[Annotation], **kwargs):
         self.__name: Name = name
         self.__block: Block = block
-        self.__flags: dict[str, typing.Any] = flags
+        self.__annotations: list[Annotation] = annotations
+        self.__kwargs: dict[str, typing.Any] = kwargs
 
-        self.__properties: dict = dict()
-        self.__methods: dict = dict()
+        self.__properties: dict[str, Property] = dict()
+        self.__methods: dict[str, MethodDef] = dict()
         for statement in self.__block.statements:
             if (isinstance(statement, Property)):
                 identifier = statement.name.identifier
                 self.__properties[identifier] = statement
-            elif (isinstance(statement, FunctionDef)):
+            elif (isinstance(statement, MethodDef)):
                 identifier = statement.name.identifier
                 self.__methods[identifier] = statement
 
-        if ('init' not in self.__methods):
-            name = Name('init')
+        # default factory
+        if (name.identifier not in self.__methods):
             parameters = list()
             block = Block(list())
-            self.__methods['init'] = FunctionDef(name, parameters, block)
+            self.__methods[name.identifier] = \
+                MethodDef(name, parameters, block, list())
 
     @property
     def name(self) -> Name:
@@ -384,16 +455,20 @@ class ClassDef(Statement):
         return self.__block
 
     @property
-    def flags(self) -> dict[str, typing.Any]:
-        return self.__flags
+    def kwargs(self) -> dict[str, typing.Any]:
+        return self.__kwargs
 
     @property
     def properties(self) -> dict[str, Property]:
         return self.__properties
 
     @property
-    def methods(self) -> dict[str, FunctionDef]:
+    def methods(self) -> dict[str, MethodDef]:
         return self.__methods
+
+    @property
+    def annotations(self) -> list[Annotation]:
+        return self.__annotations
 
     @property
     def value(self) -> builtins.Class:
@@ -403,8 +478,33 @@ class ClassDef(Statement):
         self.__value = builtins.Class()
         identifier: str = self.name.identifier
         astnodes: list[ASTNode] = list([self])
-        st.insert(identifier, astnodes, isastnode=True)
-        return None
+        st.insert(identifier, astnodes)
+        return self
+
+
+class Instance(Statement):
+
+    __value: builtins.Instance = None
+
+    def __init__(self, classdef: ClassDef, instancest: symtable.Class):
+        self.__classdef = classdef
+        self.__instancest = instancest
+
+    @property
+    def classdef(self) -> ClassDef:
+        return self.__classdef
+
+    @property
+    def instancest(self) -> symtable.Class:
+        return self.__instancest
+
+    @property
+    def value(self) -> builtins.Instance:
+        return self.__value
+
+    def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
+        self.__value = builtins.Instance(self.classdef.value)
+        return self
 
 
 class Or(Expression):
@@ -1079,22 +1179,44 @@ class Call(Expression):
 
         if (isinstance(astnode, ClassDef)):
             classdef: ClassDef = astnode
-            methods: dict[str, FunctionDef] = classdef.methods
+            properties: dict[str, Property] = classdef.properties
+            methods: dict[str, MethodDef] = classdef.methods
             instancest: symtable.Class = factory.SYMTABLE.new(
                 'Class', identifier=identifier, parent=st
             )
 
             # TODO: Insert symbols for properties
-            # TODO: Insert methods for properties
+            # TODO: Insert symbols for methods
 
             # Evaluate constructor
-            constructor: FunctionDef = methods['init']
-            constructor.evaluate(instancest)
-            call: Call = Call(Name('init'), self.arguments)
+            factorymethod: MethodDef = methods[identifier]
+            factorymethod.evaluate(instancest)
+            call: Call = Call(Name(identifier), self.arguments)
             call.evaluate(instancest)
 
-            # Return class instance - TODO: object ast
-            return builtins.Object(identifier)
+            # Return class instance - TODO: instance ast
+            return Instance(classdef, instancest)
+
+        elif (isinstance(astnode, MethodDef)):
+            methoddef: MethodDef = astnode
+            parameters: list[Parameter] = methoddef.parameters
+            block: Block = methoddef.block
+            methodst: symtable.Function = factory.SYMTABLE.new(
+                'Function', identifier=identifier, parent=st
+            )
+
+            # Insert symbols for arguments
+            for index in range(len(parameters)):
+                parameter: Parameter = parameters[index]
+                identifier: str = parameter.name.identifier
+                astnodes: list[ASTNode] = list([
+                    self.arguments[index].evaluate(st)
+                ])
+                methodst.insert(identifier, astnodes, isparameter=True)
+            
+            # Evaluate method block
+            node: ASTNode = block.evaluate(methodst)
+            return node
 
         elif (isinstance(astnode, FunctionDef)):
             functiondef: FunctionDef = astnode
@@ -1114,16 +1236,16 @@ class Call(Expression):
                 functionst.insert(identifier, astnodes, isparameter=True)
             
             # Evaluate function block
-            if (functiondef.flags.get('isbuiltin', False)):
-                functionpointer: types.FunctionType = functiondef.flags.get(
+            if (functiondef.kwargs.get('isbuiltin', False)):
+                functionpointer: types.FunctionType = functiondef.kwargs.get(
                     'pointer', None
                 )
                 args: dict = dict()
                 for parameter in parameters:
-                    value: typing.Any = parameter.evaluate(functionst).value
+                    value: builtins.Type = parameter.evaluate(functionst).value
                     args[parameter.name.identifier] = value
-                value: typing.Any = functionpointer(**args)
-                return factory.AST.new(literal=value)
+                returnvalue: typing.Any = functionpointer(**args)
+                return factory.AST.new(literal=returnvalue)
             else:
                 node: ASTNode = block.evaluate(functionst)
                 return node

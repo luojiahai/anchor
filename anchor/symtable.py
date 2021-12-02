@@ -14,10 +14,10 @@ __all__: list[str] = [
 
 class Symbol(object):
 
-    def __init__(self, identifier: str, astnodes: list[ast.ASTNode], **flags):
+    def __init__(self, identifier: str, astnodes: list[ast.ASTNode], **kwargs):
         self.__identifier: str = identifier
         self.__astnodes: list[ast.ASTNode] = astnodes
-        self.__flags: dict[str, typing.Any] = flags
+        self.__kwargs: dict[str, typing.Any] = kwargs
 
     @property
     def identifier(self) -> str:
@@ -35,8 +35,8 @@ class Symbol(object):
         return self.__astnodes[0]
 
     @property
-    def flags(self) -> dict[str, typing.Any]:
-        return self.__flags
+    def kwargs(self) -> dict[str, typing.Any]:
+        return self.__kwargs
 
 
 class SymbolTableType(object):
@@ -66,16 +66,16 @@ class SymbolTable(object):
         return self._symbols
     
     def insert(
-        self, identifier: str, astnodes: list[ast.ASTNode], **flags
+        self, identifier: str, astnodes: list[ast.ASTNode], **kwargs
     ) -> None:
         symbol: Symbol = None
         if (identifier in self.symbols):
             symbol = Symbol(
                 identifier, self.symbols[identifier].astnodes + astnodes, 
-                **flags,
+                **kwargs,
             )
         else:
-            symbol = Symbol(identifier, astnodes, **flags,)
+            symbol = Symbol(identifier, astnodes, **kwargs)
         assert (symbol != None)
         self.symbols[identifier] = symbol
 

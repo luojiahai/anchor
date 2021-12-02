@@ -166,33 +166,31 @@ class AnchorParser(Parser):
 
     def p_statement_classdef(self, p: yacc.YaccProduction) -> None:
         '''statement : CLASS LSQB annotations RSQB name BEGIN block END'''
-        # TODO: annotations, inheritance
         annotations: list[ast.Annotation] = p[3]
         name: ast.Name = p[5]
         block: ast.Block = p[7]
-        p[0] = ast.ClassDef(name, block)
+        p[0] = ast.ClassDef(name, block, annotations)
 
     def p_statement_property(self, p: yacc.YaccProduction) -> None:
         '''statement : PROPERTY LSQB annotations RSQB name SEMI'''
-        # TODO: annotations
         annotations: list[ast.Annotation] = p[3]
         name: ast.Name = p[5]
-        p[0] = ast.Property(name)
+        p[0] = ast.Property(name, annotations)
 
     def p_statement_methoddef(self, p: yacc.YaccProduction) -> None:
         '''statement : METHOD LSQB annotations RSQB name LPAR parameters RPAR \
                        RARROW expression BEGIN block END
                      | METHOD LSQB annotations RSQB name LPAR RPAR \
                        RARROW expression BEGIN block END'''
-        # TODO: annotations
         if (len(p) == 14):
             annotations: list[ast.Annotation] = [p[3]]
             name: ast.Name = p[5]
             parameters: list[ast.Parameter] = p[7]
             returntype: ast.Expression = p[10]
             body: ast.Block = p[12]
-            p[0] = ast.FunctionDef(
-                name, parameters, body, returntype=returntype, ismethod=True
+            p[0] = ast.MethodDef(
+                name, parameters, body, annotations,
+                returntype=returntype, ismethod=True,
             )
         elif (len(p) == 13):
             annotations: list[ast.Annotation] = [p[3]]
@@ -200,8 +198,9 @@ class AnchorParser(Parser):
             parameters: list[ast.Parameter] = []
             returntype: ast.Expression = p[9]
             body: ast.Block = p[11]
-            p[0] = ast.FunctionDef(
-                name, parameters, body, returntype=returntype, ismethod=True
+            p[0] = ast.MethodDef(
+                name, parameters, body, annotations,
+                returntype=returntype, ismethod=True,
             )
 
     def p_annotations(self, p: yacc.YaccProduction) -> None:
@@ -225,6 +224,7 @@ class AnchorParser(Parser):
         '''annotation : PUBLIC
                       | PRIVATE
                       | PROTECTED
+                      | FACTORY
                       | GET
                       | SET
                       | REF

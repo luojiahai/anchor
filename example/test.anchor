@@ -38,7 +38,7 @@ print(c);
 
 class[public] MyClass
 begin
-    method[public] init() -> Null
+    method[public, factory] MyClass() -> Null
     begin
         print("this is in class.init");
     end

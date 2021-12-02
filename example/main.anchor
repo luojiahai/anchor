@@ -4,13 +4,7 @@ begin
     property[public, get] b;        # get only public property
     property[private] c;            # equivalent to private property
 
-    method[public] init(num: Number[ref], str: String[val]) -> Null
+    method[public, factory] Main() -> Null
     begin
     end
-
-    method[public] main() -> Null
-    begin
-        print("Hello, World!");
-    end
-
 end
