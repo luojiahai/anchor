@@ -65,13 +65,13 @@ class Block(ASTNode):
 
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
         for statement in self.statements:
-            node: ASTNode = statement.evaluate(st)
-            if (isinstance(node, Return)):
-                return node
-            elif (isinstance(node, Break)):
-                return node
-            elif (isinstance(node, Continue)):
-                return node
+            astnode: ASTNode = statement.evaluate(st)
+            if (isinstance(astnode, Return)):
+                return astnode
+            elif (isinstance(astnode, Break)):
+                return astnode
+            elif (isinstance(astnode, Continue)):
+                return astnode
         return None
 
 
@@ -85,8 +85,8 @@ class Program(ASTNode):
         return self.__block
     
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
-        node: ASTNode = self.block.evaluate(st)
-        return node
+        astnode: ASTNode = self.block.evaluate(st)
+        return astnode
 
 
 class Name(Expression):
@@ -120,7 +120,8 @@ class Assignment(Statement):
 
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
         identifier: str = self.name.identifier
-        astnodes: list[ASTNode] = list([self.expression.evaluate(st)])
+        astnode = self.expression.evaluate(st)
+        astnodes: list[ASTNode] = list([astnode])
         st.insert(identifier, astnodes)
         return None
 
@@ -135,6 +136,7 @@ class Break(Statement):
         return self.__literal
 
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
+        st
         return self
 
 
@@ -148,6 +150,7 @@ class Continue(Statement):
         return self.__literal
 
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
+        st
         return self
 
 
@@ -155,8 +158,9 @@ class Return(Statement, Atom):
 
     __value: builtins.Type = None
 
-    def __init__(self, expression: Expression):
+    def __init__(self, expression: Expression, value: builtins.Type = None):
         self.__expression: Expression = expression
+        self.__value = value
 
     @property
     def expression(self) -> Expression:
@@ -166,14 +170,8 @@ class Return(Statement, Atom):
     def value(self) -> builtins.Type:
         return self.__value
 
-    @value.setter
-    def value(self, other) -> None:
-        self.__value = other
-
-    def copy(self):
-        new = Return(self.expression)
-        new.value = self.value
-        return new
+    def copy(self) -> ASTNode:
+        return Return(self.expression, self.value)
 
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
         atom: Atom = self.expression.evaluate(st)
@@ -203,7 +201,8 @@ class Elif(Statement):
         return self.__elseblock
 
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
-        return self.block.evaluate(st)
+        astnode: ASTNode = self.block.evaluate(st)
+        return astnode
 
 
 class If(Statement):
@@ -236,17 +235,21 @@ class If(Statement):
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
         ifcondition: Atom = self.expression.evaluate(st)
         if (ifcondition.value):
-            return self.block.evaluate(st)
+            astnode: ASTNode = self.block.evaluate(st)
+            return astnode
         else:
             for elifstatement in self.elifs:
                 elifcondition: Atom = elifstatement.expression.evaluate(st)
                 if (elifcondition.value):
-                    return elifstatement.evaluate(st)
+                    astnode: ASTNode = elifstatement.evaluate(st)
+                    return astnode
                 elif (elifstatement.elseblock):
-                    return elifstatement.elseblock.evaluate(st)
+                    astnode: ASTNode = elifstatement.elseblock.evaluate(st)
+                    return astnode
             
             if (self.elseblock):
-                return self.elseblock.evaluate(st)
+                astnode: ASTNode = self.elseblock.evaluate(st)
+                return astnode
             return None
 
 
@@ -272,15 +275,16 @@ class Iterate(Statement):
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
         identifier: str = self.variable.identifier
         for item in self.iterable.evaluate(st):
-            astnode: ASTNode = item
-            astnodes: list[ASTNode] = list([astnode.evaluate(st)])
+            itemnode: ASTNode = item
+            astnode: ASTNode = itemnode.evaluate(st)
+            astnodes: list[ASTNode] = list([astnode])
             st.insert(identifier, astnodes)
-            node: ASTNode = self.block.evaluate(st)
-            if (isinstance(node, Return)):
-                return node
-            elif (isinstance(node, Break)):
+            astnode: ASTNode = self.block.evaluate(st)
+            if (isinstance(astnode, Return)):
+                return astnode
+            elif (isinstance(astnode, Break)):
                 break
-            elif (isinstance(node, Continue)):
+            elif (isinstance(astnode, Continue)):
                 continue
         return None
 
@@ -302,13 +306,13 @@ class Loop(Statement):
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
         condition: Atom = self.expression.evaluate(st)
         while (condition.value):
-            node: ASTNode = self.block.evaluate(st)
+            astnode: ASTNode = self.block.evaluate(st)
             condition = self.expression.evaluate(st)
-            if (isinstance(node, Return)):
-                return node
-            elif (isinstance(node, Break)):
+            if (isinstance(astnode, Return)):
+                return astnode
+            elif (isinstance(astnode, Break)):
                 break
-            elif (isinstance(node, Continue)):
+            elif (isinstance(astnode, Continue)):
                 continue
         return None
 
@@ -329,6 +333,7 @@ class Annotation(Statement, Atom):
         return self.__value
 
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
+        st
         self.__value = builtins.Annotation(str(self.literal))
         return self
 
@@ -399,25 +404,24 @@ class FunctionDef(Statement, Atom, Callable):
         for index in range(len(parameters)):
             parameter: Parameter = parameters[index]
             identifier: str = parameter.name.identifier
-            astnodes: list[ASTNode] = list([
-                arguments[index].evaluate(parentst)
-            ])
+            argument: Expression = arguments[index]
+            astnode: ASTNode = argument.evaluate(parentst)
+            astnodes: list[ASTNode] = list([astnode])
             functionst.insert(identifier, astnodes, isparameter=True)
         
         # Evaluate function block
-        if (self.kwargs.get('isbuiltin', False)):
-            functionpointer: types.FunctionType = self.kwargs.get(
-                'pointer', None
-            )
-            args: dict = dict()
+        isbuiltin = self.kwargs.get('isbuiltin', False)
+        if (isbuiltin):
+            functionpointer: types.FunctionType = self.kwargs.get('pointer')
+            args: dict[str, builtins.Type] = dict()
             for parameter in parameters:
                 value: builtins.Type = parameter.evaluate(functionst).value
                 args[parameter.name.identifier] = value
             returnvalue: typing.Any = functionpointer(**args)
             return factory.AST.new(literal=returnvalue)
         else:
-            node: ASTNode = block.evaluate(functionst)
-            return node
+            astnode: ASTNode = block.evaluate(functionst)
+            return astnode
 
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
         self.__value = builtins.Function()
@@ -513,8 +517,8 @@ class MethodDef(Statement, Atom, Callable):
             methodst.insert(identifier, astnodes, isparameter=True)
         
         # Evaluate method block
-        node: ASTNode = block.evaluate(methodst)
-        return node
+        astnode: ASTNode = block.evaluate(methodst)
+        return astnode
 
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
         self.__value = builtins.Method()
@@ -641,6 +645,7 @@ class Instance(Statement, Atom):
         return self.__value
 
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
+        st
         self.__value = builtins.Instance(self.classdef.value)
         return self
 
@@ -663,9 +668,9 @@ class Or(Expression):
         left: Expression = self.left.evaluate(st)
         right: Expression = self.right.evaluate(st)
         value: typing.Any = left.value or right.value
-        node: Expression = factory.AST.new(literal=value)
-        node.evaluate(st)
-        return node
+        astnode: Expression = factory.AST.new(literal=value)
+        astnode.evaluate(st)
+        return astnode
 
 
 class And(Expression):
@@ -686,9 +691,9 @@ class And(Expression):
         left: Expression = self.left.evaluate(st)
         right: Expression = self.right.evaluate(st)
         value: typing.Any = left.value and right.value
-        node: Expression = factory.AST.new(literal=value)
-        node.evaluate(st)
-        return node
+        astnode: Expression = factory.AST.new(literal=value)
+        astnode.evaluate(st)
+        return astnode
 
 
 class Not(Expression):
@@ -703,9 +708,9 @@ class Not(Expression):
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
         right: Expression = self.right.evaluate(st)
         value: typing.Any = not right.value
-        node: Expression = factory.AST.new(literal=value)
-        node.evaluate(st)
-        return node
+        astnode: Expression = factory.AST.new(literal=value)
+        astnode.evaluate(st)
+        return astnode
 
 
 class EqEqual(Expression):
@@ -726,9 +731,9 @@ class EqEqual(Expression):
         left: Expression = self.left.evaluate(st)
         right: Expression = self.right.evaluate(st)
         value: typing.Any = left.value == right.value
-        node: Expression = factory.AST.new(literal=value)
-        node.evaluate(st)
-        return node
+        astnode: Expression = factory.AST.new(literal=value)
+        astnode.evaluate(st)
+        return astnode
 
 
 class NotEqual(Expression):
@@ -749,9 +754,9 @@ class NotEqual(Expression):
         left: Expression = self.left.evaluate(st)
         right: Expression = self.right.evaluate(st)
         value: typing.Any = left.value != right.value
-        node: Expression = factory.AST.new(literal=value)
-        node.evaluate(st)
-        return node
+        astnode: Expression = factory.AST.new(literal=value)
+        astnode.evaluate(st)
+        return astnode
 
 
 class Less(Expression):
@@ -772,9 +777,9 @@ class Less(Expression):
         left: Expression = self.left.evaluate(st)
         right: Expression = self.right.evaluate(st)
         value: typing.Any = left.value < right.value
-        node: Expression = factory.AST.new(literal=value)
-        node.evaluate(st)
-        return node
+        astnode: Expression = factory.AST.new(literal=value)
+        astnode.evaluate(st)
+        return astnode
 
 
 class LessEqual(Expression):
@@ -795,9 +800,9 @@ class LessEqual(Expression):
         left: Expression = self.left.evaluate(st)
         right: Expression = self.right.evaluate(st)
         value: typing.Any = left.value <= right.value
-        node: Expression = factory.AST.new(literal=value)
-        node.evaluate(st)
-        return node
+        astnode: Expression = factory.AST.new(literal=value)
+        astnode.evaluate(st)
+        return astnode
 
 
 class Greater(Expression):
@@ -818,9 +823,9 @@ class Greater(Expression):
         left: Expression = self.left.evaluate(st)
         right: Expression = self.right.evaluate(st)
         value: typing.Any = left.value > right.value
-        node: Expression = factory.AST.new(literal=value)
-        node.evaluate(st)
-        return node
+        astnode: Expression = factory.AST.new(literal=value)
+        astnode.evaluate(st)
+        return astnode
 
 
 class GreaterEqual(Expression):
@@ -841,9 +846,9 @@ class GreaterEqual(Expression):
         left: Expression = self.left.evaluate(st)
         right: Expression = self.right.evaluate(st)
         value: typing.Any = left.value >= right.value
-        node: Expression = factory.AST.new(literal=value)
-        node.evaluate(st)
-        return node
+        astnode: Expression = factory.AST.new(literal=value)
+        astnode.evaluate(st)
+        return astnode
 
 
 class Plus(Expression):
@@ -864,9 +869,9 @@ class Plus(Expression):
         left: Expression = self.left.evaluate(st)
         right: Expression = self.right.evaluate(st)
         value: typing.Any = left.value + right.value
-        node: Expression = factory.AST.new(literal=value)
-        node.evaluate(st)
-        return node
+        astnode: Expression = factory.AST.new(literal=value)
+        astnode.evaluate(st)
+        return astnode
 
 
 class Minus(Expression):
@@ -887,9 +892,9 @@ class Minus(Expression):
         left: Expression = self.left.evaluate(st)
         right: Expression = self.right.evaluate(st)
         value: typing.Any = left.value - right.value
-        node: Expression = factory.AST.new(literal=value)
-        node.evaluate(st)
-        return node
+        astnode: Expression = factory.AST.new(literal=value)
+        astnode.evaluate(st)
+        return astnode
 
 
 class Star(Expression):
@@ -910,9 +915,9 @@ class Star(Expression):
         left: Expression = self.left.evaluate(st)
         right: Expression = self.right.evaluate(st)
         value: typing.Any = left.value * right.value
-        node: Expression = factory.AST.new(literal=value)
-        node.evaluate(st)
-        return node
+        astnode: Expression = factory.AST.new(literal=value)
+        astnode.evaluate(st)
+        return astnode
 
 
 class DoubleStar(Expression):
@@ -933,9 +938,9 @@ class DoubleStar(Expression):
         left: Expression = self.left.evaluate(st)
         right: Expression = self.right.evaluate(st)
         value: typing.Any = left.value ** right.value
-        node: Expression = factory.AST.new(literal=value)
-        node.evaluate(st)
-        return node
+        astnode: Expression = factory.AST.new(literal=value)
+        astnode.evaluate(st)
+        return astnode
 
 
 class Slash(Expression):
@@ -956,9 +961,9 @@ class Slash(Expression):
         left: Expression = self.left.evaluate(st)
         right: Expression = self.right.evaluate(st)
         value: typing.Any = left.value / right.value
-        node: Expression = factory.AST.new(literal=value)
-        node.evaluate(st)
-        return node
+        astnode: Expression = factory.AST.new(literal=value)
+        astnode.evaluate(st)
+        return astnode
 
 
 class DoubleSlash(Expression):
@@ -979,9 +984,9 @@ class DoubleSlash(Expression):
         left: Expression = self.left.evaluate(st)
         right: Expression = self.right.evaluate(st)
         value: typing.Any = left.value // right.value
-        node: Expression = factory.AST.new(literal=value)
-        node.evaluate(st)
-        return node
+        astnode: Expression = factory.AST.new(literal=value)
+        astnode.evaluate(st)
+        return astnode
 
 
 class Percent(Expression):
@@ -1002,9 +1007,9 @@ class Percent(Expression):
         left: Expression = self.left.evaluate(st)
         right: Expression = self.right.evaluate(st)
         value: typing.Any = left.value % right.value
-        node: Expression = factory.AST.new(literal=value)
-        node.evaluate(st)
-        return node
+        astnode: Expression = factory.AST.new(literal=value)
+        astnode.evaluate(st)
+        return astnode
 
 
 class UPlus(Expression):
@@ -1019,9 +1024,9 @@ class UPlus(Expression):
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
         right: Expression = self.right.evaluate(st)
         value: typing.Any = +right.value
-        node: Expression = factory.AST.new(literal=value)
-        node.evaluate(st)
-        return node
+        astnode: Expression = factory.AST.new(literal=value)
+        astnode.evaluate(st)
+        return astnode
 
 
 class UMinus(Expression):
@@ -1036,9 +1041,9 @@ class UMinus(Expression):
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
         right: Expression = self.right.evaluate(st)
         value: typing.Any = -right.value
-        node: Expression = factory.AST.new(literal=value)
-        node.evaluate(st)
-        return node
+        astnode: Expression = factory.AST.new(literal=value)
+        astnode.evaluate(st)
+        return astnode
 
 
 class Boolean(Expression, Atom):
@@ -1057,6 +1062,7 @@ class Boolean(Expression, Atom):
         return self.__value
 
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
+        st
         self.__value = builtins.Boolean(bool(self.literal))
         return self
 
@@ -1077,6 +1083,7 @@ class Null(Expression, Atom):
         return self.__value
 
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
+        st
         self.__value = builtins.Null(self.literal)
         return self
 
@@ -1109,6 +1116,7 @@ class String(Expression, Atom, Iterable):
         return factory.AST.new(literal=item)
 
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
+        st
         self.__value = builtins.String(str(self.literal))
         return self
 
@@ -1129,6 +1137,7 @@ class Integer(Expression, Atom):
         return self.__value
 
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
+        st
         self.__value = builtins.Integer(int(self.literal))
         return self
 
@@ -1149,6 +1158,7 @@ class Float(Expression, Atom):
         return self.__value
 
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
+        st
         self.__value = builtins.Float(float(self.literal))
         return self
 
@@ -1169,6 +1179,7 @@ class Complex(Expression, Atom):
         return self.__value
 
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
+        st
         self.__value = builtins.Complex(complex(self.literal))
         return self
 
@@ -1338,6 +1349,7 @@ class DotName(Expression):
         return self.__name
 
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
+        st
         return self
 
 
