@@ -15,10 +15,25 @@ class ASTNode(abc.ABC):
     def evaluate(self, st): pass
 
 
+class Atom(abc.ABC):
+
+    __value: builtins.Type = None
+
+    @property
+    def value(self):
+        return self.__value
+
+
 class Iterable(abc.ABC):
 
     @abc.abstractmethod
-    def index(self, key): pass
+    def __iter__(self): pass
+
+    @abc.abstractmethod
+    def __next__(self): pass
+
+    @abc.abstractmethod
+    def __getitem__(self, key): pass
 
 
 class Callable(abc.ABC):
@@ -27,10 +42,16 @@ class Callable(abc.ABC):
     def call(self, arguments, st): pass
 
 
-class Expression(ASTNode): pass
+class Expression(ASTNode):
+
+    @abc.abstractmethod
+    def evaluate(self, st) -> ASTNode: pass
 
 
-class Statement(ASTNode): pass
+class Statement(ASTNode):
+
+    @abc.abstractmethod
+    def evaluate(self, st) -> ASTNode: pass
 
 
 class Block(ASTNode):
@@ -130,7 +151,7 @@ class Continue(Statement):
         return self
 
 
-class Return(Statement):
+class Return(Statement, Atom):
 
     __value: builtins.Type = None
 
@@ -155,7 +176,8 @@ class Return(Statement):
         return new
 
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
-        self.__value = self.expression.evaluate(st).value
+        atom: Atom = self.expression.evaluate(st)
+        self.__value = atom.value
         return self.copy()
 
 
@@ -212,14 +234,16 @@ class If(Statement):
         return self.__elseblock
 
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
-        if (self.expression.evaluate(st).value):
+        ifcondition: Atom = self.expression.evaluate(st)
+        if (ifcondition.value):
             return self.block.evaluate(st)
         else:
-            for elif_ in self.elifs:
-                if (elif_.expression.evaluate(st).value):
-                    return elif_.evaluate(st)
-                elif (elif_.elseblock):
-                    return elif_.elseblock.evaluate(st)
+            for elifstatement in self.elifs:
+                elifcondition: Atom = elifstatement.expression.evaluate(st)
+                if (elifcondition.value):
+                    return elifstatement.evaluate(st)
+                elif (elifstatement.elseblock):
+                    return elifstatement.elseblock.evaluate(st)
             
             if (self.elseblock):
                 return self.elseblock.evaluate(st)
@@ -247,8 +271,9 @@ class Iterate(Statement):
 
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
         identifier: str = self.variable.identifier
-        for element in self.iterable.evaluate(st).iterable:
-            astnodes: list[ASTNode] = list([element])
+        for item in self.iterable.evaluate(st):
+            astnode: ASTNode = item
+            astnodes: list[ASTNode] = list([astnode.evaluate(st)])
             st.insert(identifier, astnodes)
             node: ASTNode = self.block.evaluate(st)
             if (isinstance(node, Return)):
@@ -275,8 +300,10 @@ class Loop(Statement):
         return self.__block
 
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
-        while (self.expression.evaluate(st).value):
+        condition: Atom = self.expression.evaluate(st)
+        while (condition.value):
             node: ASTNode = self.block.evaluate(st)
+            condition = self.expression.evaluate(st)
             if (isinstance(node, Return)):
                 return node
             elif (isinstance(node, Break)):
@@ -286,7 +313,7 @@ class Loop(Statement):
         return None
 
 
-class Annotation(Statement):
+class Annotation(Statement, Atom):
 
     __value: builtins.Annotation = None
 
@@ -326,7 +353,7 @@ class Parameter(Statement):
         return astnode
 
 
-class FunctionDef(Statement, Callable):
+class FunctionDef(Statement, Atom, Callable):
 
     __value: builtins.Function = None
 
@@ -400,7 +427,7 @@ class FunctionDef(Statement, Callable):
         return self
 
 
-class Property(Statement):
+class Property(Statement, Atom):
 
     __value: builtins.Property = None
 
@@ -428,7 +455,7 @@ class Property(Statement):
         return self
 
 
-class MethodDef(Statement, Callable):
+class MethodDef(Statement, Atom, Callable):
 
     __value: builtins.Method = None
 
@@ -497,7 +524,7 @@ class MethodDef(Statement, Callable):
         return self
 
 
-class ClassDef(Statement, Callable):
+class ClassDef(Statement, Atom, Callable):
 
     __value: builtins.Class = None
 
@@ -593,7 +620,7 @@ class ClassDef(Statement, Callable):
         return self
 
 
-class Instance(Statement):
+class Instance(Statement, Atom):
 
     __value: builtins.Instance = None
 
@@ -1014,7 +1041,7 @@ class UMinus(Expression):
         return node
 
 
-class Boolean(Expression):
+class Boolean(Expression, Atom):
 
     __value: builtins.Boolean = None
 
@@ -1034,7 +1061,7 @@ class Boolean(Expression):
         return self
 
 
-class Null(Expression):
+class Null(Expression, Atom):
 
     __value: builtins.Null = None
 
@@ -1054,7 +1081,7 @@ class Null(Expression):
         return self
 
 
-class String(Expression, Iterable):
+class String(Expression, Atom, Iterable):
 
     __value: builtins.String = None
 
@@ -1069,7 +1096,15 @@ class String(Expression, Iterable):
     def value(self) -> builtins.String:
         return self.__value
 
-    def index(self, key):
+    def __iter__(self):
+        self.iter = self.value.__iter__()
+        return self
+
+    def __next__(self):
+        item = self.iter.__next__()
+        return factory.AST.new(literal=item)
+
+    def __getitem__(self, key):
         item = self.value.__getitem__(key)
         return factory.AST.new(literal=item)
 
@@ -1078,7 +1113,7 @@ class String(Expression, Iterable):
         return self
 
 
-class Integer(Expression):
+class Integer(Expression, Atom):
 
     __value: builtins.Integer = None
 
@@ -1098,7 +1133,7 @@ class Integer(Expression):
         return self
 
 
-class Float(Expression):
+class Float(Expression, Atom):
 
     __value: builtins.Float = None
 
@@ -1118,7 +1153,7 @@ class Float(Expression):
         return self
 
 
-class Complex(Expression):
+class Complex(Expression, Atom):
 
     __value: builtins.Complex = None
 
@@ -1138,19 +1173,17 @@ class Complex(Expression):
         return self
 
 
-class Tuple(Expression, Iterable):
+class Tuple(Expression, Atom, Iterable):
 
     __literal: typing.Any = None
     __value: builtins.Tuple = None
-    __iterable: tuple = None
 
-    def __init__(self, **kwargs):
-        literal: typing.Any = kwargs.get('literal', None)
-        if (literal):
-            self.__literal = literal
-        else:
-            expressions = kwargs.get('expressions', None)
-            self.__expressions: list[Expression] = expressions
+    def __init__(
+        self, literal: typing.Any = None, 
+        expressions: list[Expression] = list()
+    ):
+        self.__literal = literal
+        self.__expressions: list[Expression] = expressions
 
     @property
     def literal(self):
@@ -1164,11 +1197,15 @@ class Tuple(Expression, Iterable):
     def value(self) -> builtins.Tuple:
         return self.__value
 
-    @property
-    def iterable(self) -> tuple[Expression]:
-        return self.__iterable
+    def __iter__(self):
+        self.iter = self.value.__iter__()
+        return self
 
-    def index(self, key):
+    def __next__(self):
+        item = self.iter.__next__()
+        return factory.AST.new(literal=item)
+
+    def __getitem__(self, key):
         item = self.value.__getitem__(key)
         return factory.AST.new(literal=item)
     
@@ -1176,48 +1213,49 @@ class Tuple(Expression, Iterable):
         if (self.literal):
             self.__value = builtins.Tuple(tuple(self.literal))
         else:
-            self.__value = builtins.Tuple(tuple([
-                expression.evaluate(st).value
-                for expression in self.expressions
-            ]))
-            self.__iterable = tuple([
+            atoms: list[Atom] = list([
                 expression.evaluate(st)
                 for expression in self.expressions
             ])
+            self.__value = builtins.Tuple(tuple(map(
+                lambda x: x.value, atoms,
+            )))
         return self
 
 
-class List(Expression, Iterable):
+class List(Expression, Atom, Iterable):
 
     __literal: typing.Any = None
     __value: builtins.List = None
-    __iterable: list[Expression] = None
 
-    def __init__(self, **kwargs):
-        literal: typing.Any = kwargs.get('literal', None)
-        if (literal):
-            self.__literal = literal
-        else:
-            expressions = kwargs.get('expressions', None)
-            self.__expressions: list[Expression] = expressions
+    def __init__(
+        self, literal: typing.Any = None, 
+        expressions: list[Expression] = list()
+    ):
+        self.__literal = literal
+        self.__expressions: list[Expression] = expressions
 
     @property
     def literal(self) -> typing.Any:
         return self.__literal
 
     @property
-    def expressions(self) -> Expression:
+    def expressions(self) -> list[Expression]:
         return self.__expressions
 
     @property
     def value(self) -> builtins.List:
         return self.__value
 
-    @property
-    def iterable(self) -> list[Expression]:
-        return self.__iterable
+    def __iter__(self):
+        self.iter = self.value.__iter__()
+        return self
 
-    def index(self, key):
+    def __next__(self):
+        item = self.iter.__next__()
+        return factory.AST.new(literal=item)
+
+    def __getitem__(self, key):
         item = self.value.__getitem__(key)
         return factory.AST.new(literal=item)
     
@@ -1225,30 +1263,27 @@ class List(Expression, Iterable):
         if (self.literal):
             self.__value = builtins.List(list(self.literal))
         else:
-            self.__value = builtins.List(list([
-                expression.evaluate(st).value
-                for expression in self.expressions
-            ]))
-            self.__iterable = list([
-                expression.evaluate(st) 
+            atoms: list[Atom] = list([
+                expression.evaluate(st)
                 for expression in self.expressions
             ])
+            self.__value = builtins.List(list(map(
+                lambda x: x.value, atoms,
+            )))
         return self
 
 
-class Dict(Expression, Iterable):
+class Dict(Expression, Atom, Iterable):
 
     __literal: typing.Any = None
     __value: builtins.Dict = None
-    __iterable: dict[Expression, Expression] = None
 
-    def __init__(self, **kwargs):
-        literal: typing.Any = kwargs.get('literal', None)
-        if (literal):
-            self.__literal = literal
-        else:
-            kvpairs = kwargs.get('kvpairs', None)
-            self.__kvpairs: list[tuple[Expression, Expression]] = kvpairs
+    def __init__(
+        self, literal: typing.Any = None, 
+        kvpairs: list[tuple[Expression, Expression]] = list()
+    ):
+        self.__literal = literal
+        self.__kvpairs: list[tuple[Expression, Expression]] = kvpairs
 
     @property
     def literal(self) -> typing.Any:
@@ -1262,11 +1297,15 @@ class Dict(Expression, Iterable):
     def value(self) -> builtins.Dict:
         return self.__value
 
-    @property
-    def iterable(self) -> dict[Expression, Expression]:
-        return self.__iterable
+    def __iter__(self):
+        self.iter = self.value.__iter__()
+        return self
 
-    def index(self, key):
+    def __next__(self):
+        item = self.iter.__next__()
+        return factory.AST.new(literal=item)
+
+    def __getitem__(self, key):
         item = self.value.__getitem__(key)
         return factory.AST.new(literal=item)
 
@@ -1274,14 +1313,13 @@ class Dict(Expression, Iterable):
         if (self.literal):
             self.__value = builtins.Dict(dict(self.literal))
         else:
-            self.__value = builtins.Dict({
-                k.evaluate(st).value: v.evaluate(st).value
-                for k, v in self.kvpairs
-            })
-            self.__iterable = dict({
+            atoms: dict[Atom, Atom] = dict({
                 k.evaluate(st): v.evaluate(st)
                 for k, v in self.kvpairs
             })
+            self.__value = builtins.Dict(dict(map(
+                lambda item: (item[0].value, item[1].value), atoms.items(),
+            )))
         return self
 
 

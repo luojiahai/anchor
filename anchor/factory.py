@@ -56,6 +56,9 @@ class ASTNodeFactory(object):
                 ASTNodeFactory.__ASTNodeFactory(declarations)
         return ASTNodeFactory.__instance
 
+    def new(self, literal: typing.Any) -> typing.Any:
+        return ASTNodeFactory().new(literal)
+
 
 class SymbolTableFactory(object):
 
@@ -73,6 +76,9 @@ class SymbolTableFactory(object):
             SymbolTableFactory.__instance = \
                 SymbolTableFactory.__SymbolTableFactory(declarations)
         return SymbolTableFactory.__instance
+
+    def new(self, literal: typing.Any) -> typing.Any:
+        return SymbolTableFactory().new(literal)
 
 
 AST: ASTNodeFactory = None

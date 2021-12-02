@@ -48,7 +48,7 @@ class Boolean(Type, int):
 class Null(Type):
 
     def __init__(self, value: str, **kwargs):
-        Type.__init__(self, 'NullType', **kwargs)
+        Type.__init__(self, 'Null', **kwargs)
         self.__value: str = value
 
     @property

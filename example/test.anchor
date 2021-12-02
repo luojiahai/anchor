@@ -13,6 +13,8 @@ begin
     print(e);
 end
 
+print({5: 6, 7: 8});
+
 i = 5;
 loop (i < 13)
 begin
