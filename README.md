@@ -1,6 +1,6 @@
 # Anchor Programming Language
 
-## Installing and running
+## Building and Installing
 
 Build and install the Anchor compiler:
 ```
@@ -10,10 +10,59 @@ python3 -m build
 pip install ./dist/anchor-<version>.tar.gz --force-reinstall
 ```
 
+---
+
+## Running
+
 Run the Anchor compiler:
 ```
-anchor [option] [file]
+an [option] [file]
 ```
+
+---
+
+## Getting Started
+
+This is an example of the Anchor code to print `Hello, World!`:
+```
+print("Hello, World!");
+```
+
+This is an example of the Anchor code to define a class:
+```
+class[public] MyClass
+begin
+    property[public, get, set] x: Integer;
+
+    method[public, factory] MyClass() -> MyClass
+    begin
+        this.x = 0;
+        this.printSomething();
+        return this;
+    end
+
+    method[public, factory] MyClass(x: Integer) -> MyClass
+    begin
+        this.x = x;
+        return this;
+    end
+
+    method[private] printSomething() -> Null
+    begin
+        print("this is a private method");
+    end
+end
+```
+
+This is an example of the legacy function definition to return a string:
+```
+function myFunc() -> String
+begin
+    return "a legacy function";
+end
+```
+
+---
 
 ## Contributing
 
