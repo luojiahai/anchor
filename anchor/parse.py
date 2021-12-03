@@ -154,7 +154,7 @@ class AnchorParser(Parser):
             returntype: ast.Expression = p[7]
             body: ast.Block = p[9]
             p[0] = ast.FunctionDef(
-                name, parameters, body, returntype=returntype
+                name, parameters, body, returntype=returntype,
             )
         elif (len(p) == 10):
             name: ast.Name = p[2]
@@ -162,7 +162,7 @@ class AnchorParser(Parser):
             returntype: ast.Expression = p[7]
             body: ast.Block = p[8]
             p[0] = ast.FunctionDef(
-                name, parameters, body, returntype=returntype
+                name, parameters, body, returntype=returntype,
             )
 
     def p_statement_classdef(self, p: yacc.YaccProduction) -> None:
@@ -190,8 +190,7 @@ class AnchorParser(Parser):
             returntype: ast.Expression = p[10]
             body: ast.Block = p[12]
             p[0] = ast.MethodDef(
-                name, parameters, body, annotations,
-                returntype=returntype, ismethod=True,
+                name, parameters, body, annotations, returntype=returntype,
             )
         elif (len(p) == 13):
             annotations: list[ast.Annotation] = [p[3]]
@@ -200,8 +199,7 @@ class AnchorParser(Parser):
             returntype: ast.Expression = p[9]
             body: ast.Block = p[11]
             p[0] = ast.MethodDef(
-                name, parameters, body, annotations,
-                returntype=returntype, ismethod=True,
+                name, parameters, body, annotations, returntype=returntype,
             )
 
     def p_annotations(self, p: yacc.YaccProduction) -> None:
