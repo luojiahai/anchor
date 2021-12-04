@@ -24,7 +24,7 @@ Run the following commands in order:
 python3 -m pip install --upgrade pip
 python3 -m pip install --upgrade build
 python3 -m build
-pip install ./dist/anchor-<version>.tar.gz --force-reinstall
+pip install ./dist/anpl-<version>.tar.gz --force-reinstall
 ```
 
 ---

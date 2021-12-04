@@ -20,8 +20,8 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    package_dir={"": "."},
-    packages=setuptools.find_packages(where="."),
+    package_dir={"": "src"},
+    packages=setuptools.find_packages(where="src"),
     python_requires=">=3.9",
     entry_points = {
         'console_scripts': ['an=anchor.__main__:main'],
