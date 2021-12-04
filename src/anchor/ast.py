@@ -1032,16 +1032,9 @@ class UMinus(Expression):
 
 class Boolean(Expression, Atom):
 
-    __literal: str = None
-    __value: builtins.Boolean = None
-
-    def __init__(self, literal: str = None, value: bool = None):
-        if (literal != None):
-            self.__literal = literal
-            self.__value = builtins.Boolean(bool(self.literal))
-        elif (value != None):
-            self.__literal = str(value)
-            self.__value = builtins.Boolean(bool(value))
+    def __init__(self, value: bool):
+        self.__literal: str = str(value)
+        self.__value: builtins.Boolean = builtins.Boolean(bool(value))
 
     @property
     def literal(self) -> str:
