@@ -42,11 +42,11 @@ class ASTNodeFactory(object):
             for key, builder in declarations:
                 self._registerbuilder(key, builder)
         
-        def new(self, literal: typing.Any) -> typing.Any:
-            if (isinstance(literal, builtins.Type)):
-                return super().new(literal.typename, literal=literal)
-            key = self.__astnodename[type(literal)]
-            return super().new(key, literal=literal)
+        def new(self, value: typing.Any) -> typing.Any:
+            if (isinstance(value, builtins.Type)):
+                return super().new(value.typename, value=value)
+            key = self.__astnodename[type(value)]
+            return super().new(key, value=value)
 
     __instance: __ASTNodeFactory = None
 
@@ -56,8 +56,8 @@ class ASTNodeFactory(object):
                 ASTNodeFactory.__ASTNodeFactory(declarations)
         return ASTNodeFactory.__instance
 
-    def new(self, literal: typing.Any) -> typing.Any:
-        return ASTNodeFactory().new(literal)
+    def new(self, value: typing.Any) -> typing.Any:
+        return ASTNodeFactory().new(value)
 
 
 class SymbolTableFactory(object):
@@ -77,8 +77,8 @@ class SymbolTableFactory(object):
                 SymbolTableFactory.__SymbolTableFactory(declarations)
         return SymbolTableFactory.__instance
 
-    def new(self, literal: typing.Any) -> typing.Any:
-        return SymbolTableFactory().new(literal)
+    def new(self, key: str, **kwargs) -> typing.Any:
+        return SymbolTableFactory().new(key, **kwargs)
 
 
 AST: ASTNodeFactory = None
