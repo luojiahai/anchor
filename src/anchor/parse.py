@@ -266,15 +266,16 @@ class AnchorParser(Parser):
 
     def p_statement_break(self, p: yacc.YaccProduction) -> None:
         '''statement : BREAK SEMI'''
-        p[0] = ast.Break(p[1])
+        p[0] = ast.Break(literal=p[1])
 
     def p_statement_continue(self, p: yacc.YaccProduction) -> None:
         '''statement : CONTINUE SEMI'''
-        p[0] = ast.Continue(p[1])
+        p[0] = ast.Continue(literal=p[1])
 
     def p_statement_return(self, p: yacc.YaccProduction) -> None:
         '''statement : RETURN expression SEMI'''
-        p[0] = ast.Return(p[2])
+        expression = p[2]
+        p[0] = ast.Return(expression=expression)
 
     def p_statement_expression(self, p: yacc.YaccProduction) -> None:
         '''statement : expression SEMI'''
@@ -391,10 +392,10 @@ class AnchorParser(Parser):
             p[0] = list([expression])
 
     def p_expression_atom(self, p: yacc.YaccProduction) -> None:
-        '''expression : true
+        '''expression : name
+                      | true
                       | false
                       | null
-                      | name
                       | integer
                       | float
                       | complex
@@ -404,37 +405,37 @@ class AnchorParser(Parser):
                       | dict'''
         p[0] = p[1]
 
-    def p_true(self, p: yacc.YaccProduction) -> None:
-        '''true : TRUE'''
-        p[0] = ast.Boolean(True)
-
-    def p_false(self, p: yacc.YaccProduction) -> None:
-        '''false : FALSE'''
-        p[0] = ast.Boolean(False)
-
-    def p_null(self, p: yacc.YaccProduction) -> None:
-        '''null : NULL'''
-        p[0] = ast.Null(p[1])
-
     def p_name(self, p: yacc.YaccProduction) -> None:
         '''name : NAME'''
         p[0] = ast.Name(p[1])
 
+    def p_true(self, p: yacc.YaccProduction) -> None:
+        '''true : TRUE'''
+        p[0] = ast.Boolean(value=True)
+
+    def p_false(self, p: yacc.YaccProduction) -> None:
+        '''false : FALSE'''
+        p[0] = ast.Boolean(value=False)
+
+    def p_null(self, p: yacc.YaccProduction) -> None:
+        '''null : NULL'''
+        p[0] = ast.Null(literal=p[1])
+
     def p_integer(self, p: yacc.YaccProduction) -> None:
         '''integer : INTEGER'''
-        p[0] = ast.Integer(p[1])
+        p[0] = ast.Integer(literal=p[1])
 
     def p_float(self, p: yacc.YaccProduction) -> None:
         '''float : FLOAT'''
-        p[0] = ast.Float(p[1])
+        p[0] = ast.Float(literal=p[1])
 
     def p_complex(self, p: yacc.YaccProduction) -> None:
         '''complex : COMPLEX'''
-        p[0] = ast.Complex(p[1])
+        p[0] = ast.Complex(literal=p[1])
 
     def p_string(self, p: yacc.YaccProduction) -> None:
         '''string : STRING'''
-        p[0] = ast.String(p[1])
+        p[0] = ast.String(literal=p[1])
 
     def p_tuple(self, p: yacc.YaccProduction) -> None:
         '''tuple : LPAR expression COMMA expressions RPAR
