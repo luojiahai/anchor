@@ -2,7 +2,18 @@
 
 ## Building and Installing
 
-Build and install the Anchor compiler:
+> Anchor requires Python 3.9 or later
+
+### PyPI [Recommended]
+
+Install the latest release from [The Python Package Index (PyPI)](https://pypi.org/project/anpl/):
+```
+pip install anpl
+```
+
+### Build and install locally
+
+Run the following commands in order:
 ```
 python3 -m pip install --upgrade pip
 python3 -m pip install --upgrade build
@@ -18,6 +29,8 @@ Run the Anchor compiler:
 ```
 an [option] [file]
 ```
+
+> `an --help` for more information
 
 ---
 
