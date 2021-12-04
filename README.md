@@ -1,5 +1,11 @@
 # Anchor Programming Language
 
+[![anchor](https://img.shields.io/badge/Anchor-f03752?style=flat-square)](.)
+[![build](https://img.shields.io/github/workflow/status/luojiahai/anchor/Upload%20Python%20Package?style=flat-square&logo=githubactions&logoColor=white)](https://github.com/luojiahai/anchor/actions/workflows/python-publish.yml)
+[![python](https://img.shields.io/pypi/pyversions/anpl?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![pypi](https://img.shields.io/pypi/v/anpl?style=flat-square&logo=pypi&logoColor=white)](https://pypi.org/project/anpl/)
+[![license](https://img.shields.io/pypi/l/anpl?style=flat-square&logo=github&logoColor=white)](./LICENSE)
+
 ## Building and Installing
 
 > Anchor requires Python 3.9 or later
