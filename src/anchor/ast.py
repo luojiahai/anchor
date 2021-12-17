@@ -457,10 +457,10 @@ class Property(Statement, Atom):
         return self.__value
 
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
-        self.__value = builtins.Property()
+        self.__value = "DEBUG!!!"
         identifier: str = self.name.identifier
         astnodes: typing.List[ASTNode] = list([self])
-        st.insert(identifier, astnodes)
+        st.insert(identifier, astnodes, isproperty=True)
         return self
 
 
@@ -529,7 +529,7 @@ class MethodDef(Statement, Atom, Callable):
         self.__value = builtins.Method()
         identifier: str = self.name.identifier
         astnodes: typing.List[ASTNode] = list([self])
-        st.insert(identifier, astnodes)
+        st.insert(identifier, astnodes, ismethod=True)
         return self
 
 
@@ -603,21 +603,13 @@ class ClassDef(Statement, Atom, Callable):
 
         # Insert symbols for properties
         for _, prop in properties.items():
-            astnodes: typing.List[ASTNode] = list([prop])
-            instancest.insert(
-                prop.name.identifier, astnodes, isproperty=True
-            )
+            prop.evaluate(instancest)
 
         # Insert symbols for methods
         for _, method in methods.items():
-            astnodes: typing.List[ASTNode] = list([method])
-            instancest.insert(
-                method.name.identifier, astnodes, ismethod=True
-            )
+            method.evaluate(instancest)
 
         # Evaluate constructor
-        factorymethod: MethodDef = methods[self.name.identifier]
-        factorymethod.evaluate(instancest)
         call: Call = Call(Name(self.name.identifier), arguments)
         call.evaluate(instancest)
 
@@ -1381,7 +1373,7 @@ class Call(Expression):
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
         astnode: ASTNode = None
         if (isinstance(self.expression, Name)):
-            name = self.expression
+            name: Name = self.expression
             identifier: str = name.identifier
             astnode = st.lookup(identifier).astnode
         elif (isinstance(self.expression, DotName)):
@@ -1389,7 +1381,7 @@ class Call(Expression):
             instancename: Name = dotname.expression
             instance: Instance = st.lookup(instancename.identifier).astnode
             st = instance.instancest
-            name = dotname.name
+            name: Name = dotname.name
             identifier: str = name.identifier
             astnode = st.lookup(identifier).astnode
         else:

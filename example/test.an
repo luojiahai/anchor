@@ -52,6 +52,7 @@ begin
     method[public] test(s) -> Null
     begin
         print("this is a test method in MyClass");
+        print(prop);
         print(s);
         return Null;
     end

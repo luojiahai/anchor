@@ -70,16 +70,18 @@ class SymbolTable(object):
     def insert(
         self, identifier: str, astnodes: typing.List[ast.ASTNode], **kwargs
     ) -> None:
-        symbol: Symbol = None
         if (identifier in self.symbols):
+            oldsymbol = self.symbols[identifier]
             symbol = Symbol(
-                identifier, self.symbols[identifier].astnodes + astnodes, 
-                **kwargs
+                identifier, oldsymbol.astnodes + astnodes, 
+                **(oldsymbol.kwargs | kwargs)
             )
+            self.symbols[identifier] = symbol
+        elif (self._parent): 
+            self._parent.insert(identifier, astnodes, **kwargs)
         else:
             symbol = Symbol(identifier, astnodes, **kwargs)
-        assert (symbol != None)
-        self.symbols[identifier] = symbol
+            self.symbols[identifier] = symbol
 
     def lookup(self, identifier: str) -> Symbol:
         if (identifier in self.symbols):

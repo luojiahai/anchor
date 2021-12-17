@@ -1,0 +1,21 @@
+class[public] MyClass
+begin
+    property[public, get, set] prop;
+    
+    method[public, factory] MyClass() -> Null
+    begin
+        print("this is in MyClass");
+        prop = 2333;
+    end
+
+    method[public] test(s) -> Null
+    begin
+        print("this is a test method in MyClass");
+        print(prop);
+        print(s);
+        return Null;
+    end
+end
+
+obj = MyClass();
+print(obj.test("YOLO"));
