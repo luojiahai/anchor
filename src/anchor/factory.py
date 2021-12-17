@@ -37,7 +37,9 @@ class ASTNodeFactory(object):
             dict: 'Dict',
         })
 
-        def __init__(self, declarations: typing.List[typing.Tuple[str, typing.Type]]):
+        def __init__(
+            self, declarations: typing.List[typing.Tuple[str, typing.Type]]
+        ):
             super().__init__()
             for key, builder in declarations:
                 self._registerbuilder(key, builder)
@@ -64,7 +66,9 @@ class SymbolTableFactory(object):
 
     class __SymbolTableFactory(Factory):
 
-        def __init__(self, declarations: typing.List[typing.Tuple[str, typing.Type]]):
+        def __init__(
+            self, declarations: typing.List[typing.Tuple[str, typing.Type]]
+        ):
             super().__init__()
             for key, builder in declarations:
                 self._registerbuilder(key, builder)

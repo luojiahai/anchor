@@ -74,7 +74,7 @@ class SymbolTable(object):
         if (identifier in self.symbols):
             symbol = Symbol(
                 identifier, self.symbols[identifier].astnodes + astnodes, 
-                **kwargs,
+                **kwargs
             )
         else:
             symbol = Symbol(identifier, astnodes, **kwargs)

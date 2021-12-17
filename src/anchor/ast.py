@@ -159,7 +159,9 @@ class Return(Statement, Atom):
     __expression: Expression = None
     __value: builtins.Type = None
 
-    def __init__(self, expression: Expression = None, value: builtins.Type = None):
+    def __init__(
+        self, expression: Expression = None, value: builtins.Type = None
+    ):
         self.__expression = expression
         self.__value = value
 
@@ -365,7 +367,8 @@ class FunctionDef(Statement, Atom, Callable):
     __value: builtins.Function = None
 
     def __init__(
-        self, name: Name, parameters: typing.List[Parameter], block: Block, **kwargs
+        self, name: Name, parameters: typing.List[Parameter], block: Block, 
+        **kwargs
     ):
         self.__name: Name = name
         self.__parameters: typing.List[Parameter] = parameters
@@ -1236,7 +1239,7 @@ class Tuple(Expression, Atom, Iterable):
                 for expression in self.expressions
             ])
             self.__value = builtins.Tuple(tuple(map(
-                lambda x: x.value, atoms,
+                lambda x: x.value, atoms
             )))
         elif (self.value != None):
             pass
@@ -1284,7 +1287,7 @@ class List(Expression, Atom, Iterable):
                 for expression in self.expressions
             ])
             self.__value = builtins.List(list(map(
-                lambda x: x.value, atoms,
+                lambda x: x.value, atoms
             )))
         elif (self.value != None):
             pass
@@ -1301,7 +1304,8 @@ class Dict(Expression, Atom, Iterable):
         value: typing.Dict = None
     ):
         if (kvpairs != None):
-            self.__kvpairs: typing.List[typing.Tuple[Expression, Expression]] = kvpairs
+            self.__kvpairs: typing.List[typing.Tuple[Expression, Expression]] \
+                = kvpairs
         elif (value != None):
             self.__value = builtins.Dict(dict(value))
 
@@ -1332,7 +1336,7 @@ class Dict(Expression, Atom, Iterable):
                 for k, v in self.kvpairs
             })
             self.__value = builtins.Dict(dict(map(
-                lambda item: (item[0].value, item[1].value), atoms.items(),
+                lambda item: (item[0].value, item[1].value), atoms.items()
             )))
         elif (self.value != None):
             pass
@@ -1360,7 +1364,9 @@ class DotName(Expression):
 
 class Call(Expression):
 
-    def __init__(self, expression: Expression, arguments: typing.List[Expression]):
+    def __init__(
+        self, expression: Expression, arguments: typing.List[Expression]
+    ):
         self.__expression: Expression = expression
         self.__arguments: typing.List[Expression] = arguments
 

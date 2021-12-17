@@ -155,7 +155,7 @@ class AnchorParser(Parser):
             returntype: ast.Expression = p[7]
             body: ast.Block = p[9]
             p[0] = ast.FunctionDef(
-                name, parameters, body, returntype=returntype,
+                name, parameters, body, returntype=returntype
             )
         elif (len(p) == 10):
             name: ast.Name = p[2]
@@ -163,7 +163,7 @@ class AnchorParser(Parser):
             returntype: ast.Expression = p[7]
             body: ast.Block = p[8]
             p[0] = ast.FunctionDef(
-                name, parameters, body, returntype=returntype,
+                name, parameters, body, returntype=returntype
             )
 
     def p_statement_classdef(self, p: yacc.YaccProduction) -> None:
@@ -191,7 +191,7 @@ class AnchorParser(Parser):
             returntype: ast.Expression = p[10]
             body: ast.Block = p[12]
             p[0] = ast.MethodDef(
-                name, parameters, body, annotations, returntype=returntype,
+                name, parameters, body, annotations, returntype=returntype
             )
         elif (len(p) == 13):
             annotations: typing.List[ast.Annotation] = [p[3]]
@@ -200,7 +200,7 @@ class AnchorParser(Parser):
             returntype: ast.Expression = p[9]
             body: ast.Block = p[11]
             p[0] = ast.MethodDef(
-                name, parameters, body, annotations, returntype=returntype,
+                name, parameters, body, annotations, returntype=returntype
             )
 
     def p_annotations(self, p: yacc.YaccProduction) -> None:
@@ -465,7 +465,8 @@ class AnchorParser(Parser):
         '''dict : LBRACE kvpairs RBRACE
                 | LBRACE RBRACE'''
         if (len(p) == 4):
-            kvpairs: typing.List[typing.Tuple[ast.Expression, ast.Expression]] = p[2]
+            kvpairs: typing.List[typing.Tuple[ast.Expression, ast.Expression]] \
+                = p[2]
             p[0] = ast.Dict(kvpairs=kvpairs)
         elif (len(p) == 3):
             p[0] = ast.Dict(kvpairs=list())
@@ -496,7 +497,8 @@ class AnchorParser(Parser):
         '''kvpairs_ : kvpairs_ COMMA kvpair
                     | kvpair'''
         if (len(p) == 4):
-            kvpairs: typing.List[typing.Tuple[ast.Expression, ast.Expression]] = p[1]
+            kvpairs: typing.List[typing.Tuple[ast.Expression, ast.Expression]] \
+                = p[1]
             kvpair: typing.Tuple[ast.Expression, ast.Expression] = p[3]
             if (kvpair): kvpairs.append(kvpair)
             p[0] = kvpairs

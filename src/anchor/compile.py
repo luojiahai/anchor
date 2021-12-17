@@ -15,7 +15,7 @@ def execute(data: str) -> typing.Any:
     # Define main symbol table
     mainidentifier = 'Main'
     symboltable: symtable.SymbolTable = factory.SYMTABLE.new(
-        symtable.Type.MAIN, identifier=mainidentifier,
+        symtable.Type.MAIN, identifier=mainidentifier
     )
 
     # Include builtin functions
@@ -26,7 +26,7 @@ def execute(data: str) -> typing.Any:
             for argument in inspect.getfullargspec(functionpointer)[0]
         ])
         functiondef: ast.FunctionDef = ast.FunctionDef(
-            name, parameters, None, pointer=functionpointer, isbuiltin=True,
+            name, parameters, None, pointer=functionpointer, isbuiltin=True
         )
         functiondef.evaluate(symboltable)
     
@@ -34,7 +34,7 @@ def execute(data: str) -> typing.Any:
     parser: parse.AnchorParser = parse.AnchorParser(
         debuglex=system.GLOBAL.debuglex, 
         debugyacc=system.GLOBAL.debugyacc,
-        debuglog=system.GLOBAL.log,
+        debuglog=system.GLOBAL.log
     )
     abstractsyntaxtree: ast.ASTNode = parser.parse(data)
     return abstractsyntaxtree.evaluate(symboltable)
