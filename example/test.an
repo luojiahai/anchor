@@ -49,12 +49,13 @@ begin
         prop = 2333;
     end
 
-    method[public] test() -> Null
+    method[public] test(s) -> Null
     begin
         print("this is a test method in MyClass");
+        print(s);
         return Null;
     end
 end
 
 obj = MyClass();
-print(obj.test());
+print(obj.test("YOLO"));
