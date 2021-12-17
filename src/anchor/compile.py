@@ -1,5 +1,5 @@
-import inspect
 import typing
+import inspect
 import anchor.system as system
 import anchor.parse as parse
 import anchor.ast as ast
@@ -8,7 +8,7 @@ import anchor.builtins as builtins
 import anchor.factory as factory
 
 
-__all__: list[str] = ['execute',]
+__all__: typing.List[str] = ['execute',]
 
 
 def execute(data: str) -> typing.Any:
@@ -21,7 +21,7 @@ def execute(data: str) -> typing.Any:
     # Include builtin functions
     for identifier, functionpointer in builtins.FUNCTION.items():
         name = ast.Name(identifier)
-        parameters: list[ast.Parameter] = list([
+        parameters: typing.List[ast.Parameter] = list([
             ast.Parameter(ast.Name(argument))
             for argument in inspect.getfullargspec(functionpointer)[0]
         ])

@@ -1,15 +1,15 @@
-import abc
 import typing
+import abc
 import anchor.builtins as builtins
 
 
-__all__: list[str] = ['AST', 'SYMTABLE',]
+__all__: typing.List[str] = ['AST', 'SYMTABLE',]
 
 
 class Factory(abc.ABC):
 
     def __init__(self):
-        self._builders: dict[str, typing.Any] = {}
+        self._builders: typing.Dict[str, typing.Any] = {}
 
     def _registerbuilder(self, key: str, builder: typing.Any) -> None:
         self._builders[key] = builder
@@ -25,7 +25,7 @@ class ASTNodeFactory(object):
 
     class __ASTNodeFactory(Factory):
 
-        __astnodename: dict[typing.Type, str] = dict({
+        __astnodename: typing.Dict[typing.Type, str] = dict({
             bool: 'Boolean',
             type(None): 'Null',
             int: 'Integer',
@@ -37,7 +37,7 @@ class ASTNodeFactory(object):
             dict: 'Dict',
         })
 
-        def __init__(self, declarations: list[tuple[str, typing.Type]]):
+        def __init__(self, declarations: typing.List[typing.Tuple[str, typing.Type]]):
             super().__init__()
             for key, builder in declarations:
                 self._registerbuilder(key, builder)
@@ -50,7 +50,7 @@ class ASTNodeFactory(object):
 
     __instance: __ASTNodeFactory = None
 
-    def __new__(cls, declarations: list[tuple[str, typing.Type]]):
+    def __new__(cls, declarations: typing.List[typing.Tuple[str, typing.Type]]):
         if (not ASTNodeFactory.__instance):
             ASTNodeFactory.__instance = \
                 ASTNodeFactory.__ASTNodeFactory(declarations)
@@ -64,14 +64,14 @@ class SymbolTableFactory(object):
 
     class __SymbolTableFactory(Factory):
 
-        def __init__(self, declarations: list[tuple[str, typing.Type]]):
+        def __init__(self, declarations: typing.List[typing.Tuple[str, typing.Type]]):
             super().__init__()
             for key, builder in declarations:
                 self._registerbuilder(key, builder)
 
     __instance: __SymbolTableFactory = None
 
-    def __new__(cls, declarations: list[tuple[str, typing.Type]]):
+    def __new__(cls, declarations: typing.List[typing.Tuple[str, typing.Type]]):
         if (not SymbolTableFactory.__instance):
             SymbolTableFactory.__instance = \
                 SymbolTableFactory.__SymbolTableFactory(declarations)

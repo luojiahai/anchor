@@ -1,10 +1,11 @@
+import typing
 import anchor.system as system
 import anchor.token as token
 import anchor.keyword as keyword
 import anchor.ply.lex as lex
 
 
-__all__: list[str] = ['AnchorLexer',]
+__all__: typing.List[str] = ['AnchorLexer',]
 
 
 # Regular expression utility functions

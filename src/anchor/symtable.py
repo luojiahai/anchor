@@ -7,24 +7,26 @@ if (typing.TYPE_CHECKING):
 import anchor.factory as factory
 
 
-__all__: list[str] = [
+__all__: typing.List[str] = [
     'Type', 'SymbolTable', 'Class', 'Function', 'Symbol',
 ]
 
 
 class Symbol(object):
 
-    def __init__(self, identifier: str, astnodes: list[ast.ASTNode], **kwargs):
+    def __init__(
+        self, identifier: str, astnodes: typing.List[ast.ASTNode], **kwargs
+    ):
         self.__identifier: str = identifier
-        self.__astnodes: list[ast.ASTNode] = astnodes
-        self.__kwargs: dict[str, typing.Any] = kwargs
+        self.__astnodes: typing.List[ast.ASTNode] = astnodes
+        self.__kwargs: typing.Dict[str, typing.Any] = kwargs
 
     @property
     def identifier(self) -> str:
         return self.__identifier
 
     @property
-    def astnodes(self) -> list[ast.ASTNode]:
+    def astnodes(self) -> typing.List[ast.ASTNode]:
         return self.__astnodes
 
     @property
@@ -35,7 +37,7 @@ class Symbol(object):
         return self.__astnodes[0]
 
     @property
-    def kwargs(self) -> dict[str, typing.Any]:
+    def kwargs(self) -> typing.Dict[str, typing.Any]:
         return self.__kwargs
 
 
@@ -50,7 +52,7 @@ class SymbolTable(object):
     def __init__(self, identifier: str, parent = None):
         self._identifier: str = identifier
         self._type: Type = Type.MAIN
-        self._symbols: dict[str, Symbol] = dict()
+        self._symbols: typing.Dict[str, Symbol] = dict()
         self._parent: SymbolTable = parent
 
     @property
@@ -62,11 +64,11 @@ class SymbolTable(object):
         return self._identifier
 
     @property
-    def symbols(self) -> dict[str, Symbol]:
+    def symbols(self) -> typing.Dict[str, Symbol]:
         return self._symbols
     
     def insert(
-        self, identifier: str, astnodes: list[ast.ASTNode], **kwargs
+        self, identifier: str, astnodes: typing.List[ast.ASTNode], **kwargs
     ) -> None:
         symbol: Symbol = None
         if (identifier in self.symbols):
@@ -90,27 +92,27 @@ class SymbolTable(object):
 
 class Class(SymbolTable):
 
-    __methods: list[Symbol] = None
+    __methods: typing.List[Symbol] = None
 
     def __init__(self, identifier: str, parent: SymbolTable = None):
         super().__init__(identifier, parent=parent)
         self._type: Type = Type.CLASS
 
     @property
-    def methods(self) -> list[Symbol]:
+    def methods(self) -> typing.List[Symbol]:
         return self.__methods
 
 
 class Function(SymbolTable):
 
-    __parameters: list[Symbol] = None
+    __parameters: typing.List[Symbol] = None
 
     def __init__(self, identifier: str, parent: SymbolTable=None):
         super().__init__(identifier, parent=parent)
         self._type: Type = Type.FUNCTION
 
     @property
-    def parameters(self) -> list[Symbol]:
+    def parameters(self) -> typing.List[Symbol]:
         return self.__parameters
 
 

@@ -1,7 +1,7 @@
 import typing
 
 
-__all__: list[str] = ['pmdict', 'kwdict', 'NAME',]
+__all__: typing.List[str] = ['pmdict', 'kwdict', 'NAME',]
 
 
 PERCENT: typing.Literal         = 'PERCENT'
@@ -33,7 +33,7 @@ RBRACE: typing.Literal          = 'RBRACE'
 UPLUS: typing.Literal           = 'UPLUS'
 UMINUS: typing.Literal          = 'UMINUS'
 
-pmdict: dict[typing.Literal, str] = {
+pmdict: typing.Dict[str, str] = {
     COMMA                       : r',',
     LPAR                        : r'\(',
     RPAR                        : r'\)',
@@ -93,7 +93,7 @@ SET: typing.Literal             = 'SET'
 REF: typing.Literal             = 'REF'
 VAL: typing.Literal             = 'VAL'
 
-kwdict: dict[typing.Literal, str] = {
+kwdict: typing.Dict[str, str] = {
     BEGIN                       : 'begin',
     END                         : 'end',
     TRUE                        : 'True',
@@ -131,8 +131,9 @@ __all__.extend(
     [name for name, value in globals().items() if isinstance(value, str)]
 )
 
+namedict: typing.Dict[str, str] = dict(pmdict | kwdict)
 
-NAME: dict[typing.Literal, str] = {
+NAME: typing.Dict[str, str] = {
     value.replace('\\', ''): name 
-    for name, value in (pmdict | kwdict).items()
+    for name, value in namedict.items()
 }

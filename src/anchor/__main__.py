@@ -8,13 +8,13 @@ import anchor.compile as compile
 import anchor.builtins as builtins
 
 
-__all__: list[str] = ['main',]
+__all__: typing.List[str] = ['main',]
 
 
 def default(str) -> str:
     return str + ' [Default: %default]'
 
-def readcommand(argv: list[str]) -> dict[str, typing.Any]:
+def readcommand(argv: typing.List[str]) -> typing.Dict[str, typing.Any]:
     from optparse import OptionParser
     usage_str = 'anchor [option] [file]'
     parser = OptionParser(usage_str)

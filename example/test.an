@@ -29,13 +29,14 @@ begin
     i = i + 1;
 end
 
-function myfunc() -> Null
+function myfunc(s) -> Null
 begin
     print("this is in function");
+    print(s);
     return 123;
 end
 
-c = myfunc();
+c = myfunc("Hey!");
 print(c);
 
 class[public] MyClass

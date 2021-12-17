@@ -1,9 +1,9 @@
 import sys
-import abc
 import typing
+import abc
 
 
-__all__: list[str] = [
+__all__: typing.List[str] = [
     'STREAM', 'CLASS', 'FUNCTION',
     'Boolean', 'Null', 'Integer', 'Float', 'Complex', 'String', 
     'Tuple', 'List', 'Dict', 'Function', 
@@ -12,7 +12,7 @@ __all__: list[str] = [
 
 
 # Anchor stream name to Python stream
-STREAM: dict[str, typing.TextIO] = {
+STREAM: typing.Dict[str, typing.TextIO] = {
     'stdin': sys.stdin,
     'stdout': sys.stdout,
     'stderr': sys.stderr,
@@ -23,14 +23,14 @@ class Type(abc.ABC):
     
     def __init__(self, typename: str, **kwargs):
         self.__typename: str = typename
-        self.__kwargs: dict[str, typing.Any] = kwargs
+        self.__kwargs: typing.Dict[str, typing.Any] = kwargs
 
     @property
     def typename(self) -> str:
         return self.__typename
 
     @property
-    def kwargs(self) -> dict[str, typing.Any]:
+    def kwargs(self) -> typing.Dict[str, typing.Any]:
         return self.__kwargs
 
 
@@ -108,7 +108,7 @@ class String(Type, str):
 
 class Tuple(Type, tuple): 
     
-    def __init__(self, value: tuple, **kwargs):
+    def __init__(self, value: typing.Tuple, **kwargs):
         Type.__init__(self, 'Tuple', **kwargs)
 
     def __new__(self, value):
@@ -117,14 +117,14 @@ class Tuple(Type, tuple):
 
 class List(Type, list):
 
-    def __init__(self, value: list, **kwargs):
+    def __init__(self, value: typing.List, **kwargs):
         Type.__init__(self, 'List', **kwargs)
         self.extend(value)
 
 
 class Dict(Type, dict):
 
-    def __init__(self, value: dict, **kwargs):
+    def __init__(self, value: typing.Dict, **kwargs):
         Type.__init__(self, 'Dict', **kwargs)
         self.update(value)
 

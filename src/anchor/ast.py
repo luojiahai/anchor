@@ -6,7 +6,7 @@ import anchor.symtable as symtable
 import anchor.factory as factory
 
 
-__all__: list[str] = []
+__all__: typing.List[str] = []
 
 
 class ASTNode(abc.ABC):
@@ -56,11 +56,11 @@ class Statement(ASTNode):
 
 class Block(ASTNode):
 
-    def __init__(self, statements: list[Statement]):
-        self.__statements: list[Statement] = statements
+    def __init__(self, statements: typing.List[Statement]):
+        self.__statements: typing.List[Statement] = statements
 
     @property
-    def statements(self) -> list[Statement]:
+    def statements(self) -> typing.List[Statement]:
         return self.__statements
 
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
@@ -121,7 +121,7 @@ class Assignment(Statement):
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
         identifier: str = self.name.identifier
         astnode = self.expression.evaluate(st)
-        astnodes: list[ASTNode] = list([astnode])
+        astnodes: typing.List[ASTNode] = list([astnode])
         st.insert(identifier, astnodes)
         return None
 
@@ -211,11 +211,11 @@ class If(Statement):
 
     def __init__(
         self, expression: Expression, block: Block, 
-        elifs: list[Elif] = list(), elseblock: Block = None
+        elifs: typing.List[Elif] = list(), elseblock: Block = None
     ):
         self.__expression: Expression = expression
         self.__block: Block = block
-        self.__elifs: list[Elif] = elifs
+        self.__elifs: typing.List[Elif] = elifs
         self.__elseblock: Block = elseblock
 
     @property
@@ -227,7 +227,7 @@ class If(Statement):
         return self.__block
 
     @property
-    def elifs(self) -> list[Elif]:
+    def elifs(self) -> typing.List[Elif]:
         return self.__elifs
 
     @property
@@ -279,7 +279,7 @@ class Iterate(Statement):
         for item in self.iterable.evaluate(st):
             itemnode: ASTNode = item
             astnode: ASTNode = itemnode.evaluate(st)
-            astnodes: list[ASTNode] = list([astnode])
+            astnodes: typing.List[ASTNode] = list([astnode])
             st.insert(identifier, astnodes)
             astnode: ASTNode = self.block.evaluate(st)
             if (isinstance(astnode, Return)):
@@ -365,19 +365,19 @@ class FunctionDef(Statement, Atom, Callable):
     __value: builtins.Function = None
 
     def __init__(
-        self, name: Name, parameters: list[Parameter], block: Block, **kwargs
+        self, name: Name, parameters: typing.List[Parameter], block: Block, **kwargs
     ):
         self.__name: Name = name
-        self.__parameters: list[Parameter] = parameters
+        self.__parameters: typing.List[Parameter] = parameters
         self.__block: Block = block
-        self.__kwargs: dict[str, typing.Any] = kwargs
+        self.__kwargs: typing.Dict[str, typing.Any] = kwargs
 
     @property
     def name(self) -> Name:
         return self.__name
 
     @property
-    def parameters(self) -> list[Parameter]:
+    def parameters(self) -> typing.List[Parameter]:
         return self.__parameters
 
     @property
@@ -385,7 +385,7 @@ class FunctionDef(Statement, Atom, Callable):
         return self.__block
 
     @property
-    def kwargs(self) -> dict[str, typing.Any]:
+    def kwargs(self) -> typing.Dict[str, typing.Any]:
         return self.__kwargs
 
     @property
@@ -393,9 +393,9 @@ class FunctionDef(Statement, Atom, Callable):
         return self.__value
 
     def call(
-        self, arguments: list[Expression], parentst: symtable.SymbolTable
+        self, arguments: typing.List[Expression], parentst: symtable.SymbolTable
     ) -> ASTNode:
-        parameters: list[Parameter] = self.parameters
+        parameters: typing.List[Parameter] = self.parameters
         block: Block = self.block
         functionst: symtable.Function = factory.SYMTABLE.new(
             symtable.Type.FUNCTION, 
@@ -408,14 +408,14 @@ class FunctionDef(Statement, Atom, Callable):
             identifier: str = parameter.name.identifier
             argument: Expression = arguments[index]
             astnode: ASTNode = argument.evaluate(parentst)
-            astnodes: list[ASTNode] = list([astnode])
+            astnodes: typing.List[ASTNode] = list([astnode])
             functionst.insert(identifier, astnodes, isparameter=True)
         
         # Evaluate function block
         isbuiltin = self.kwargs.get('isbuiltin', False)
         if (isbuiltin):
             functionpointer: types.FunctionType = self.kwargs.get('pointer')
-            args: dict[str, builtins.Type] = dict()
+            args: typing.Dict[str, builtins.Type] = dict()
             for parameter in parameters:
                 value: builtins.Type = parameter.evaluate(functionst).value
                 args[parameter.name.identifier] = value
@@ -428,7 +428,7 @@ class FunctionDef(Statement, Atom, Callable):
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
         self.__value = builtins.Function()
         identifier: str = self.name.identifier
-        astnodes: list[ASTNode] = list([self])
+        astnodes: typing.List[ASTNode] = list([self])
         st.insert(identifier, astnodes)
         return self
 
@@ -437,16 +437,16 @@ class Property(Statement, Atom):
 
     __value: builtins.Property = None
 
-    def __init__(self, name: Name, annotations: list[Annotation]):
+    def __init__(self, name: Name, annotations: typing.List[Annotation]):
         self.__name: Name = name
-        self.__annotations: list[Annotation] = annotations
+        self.__annotations: typing.List[Annotation] = annotations
 
     @property
     def name(self) -> Name:
         return self.__name
 
     @property
-    def annotations(self) -> list[Annotation]:
+    def annotations(self) -> typing.List[Annotation]:
         return self.__annotations
 
     @property
@@ -456,7 +456,7 @@ class Property(Statement, Atom):
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
         self.__value = builtins.Property()
         identifier: str = self.name.identifier
-        astnodes: list[ASTNode] = list([self])
+        astnodes: typing.List[ASTNode] = list([self])
         st.insert(identifier, astnodes)
         return self
 
@@ -466,21 +466,21 @@ class MethodDef(Statement, Atom, Callable):
     __value: builtins.Method = None
 
     def __init__(
-        self, name: Name, parameters: list[Parameter], block: Block,
-        annotations: list[Annotation], **kwargs
+        self, name: Name, parameters: typing.List[Parameter], block: Block,
+        annotations: typing.List[Annotation], **kwargs
     ):
         self.__name: Name = name
-        self.__parameters: list[Parameter] = parameters
+        self.__parameters: typing.List[Parameter] = parameters
         self.__block: Block = block
-        self.__annotations: list[Annotation] = annotations
-        self.__kwargs: dict[str, typing.Any] = kwargs
+        self.__annotations: typing.List[Annotation] = annotations
+        self.__kwargs: typing.Dict[str, typing.Any] = kwargs
 
     @property
     def name(self) -> Name:
         return self.__name
 
     @property
-    def parameters(self) -> list[Parameter]:
+    def parameters(self) -> typing.List[Parameter]:
         return self.__parameters
 
     @property
@@ -488,11 +488,11 @@ class MethodDef(Statement, Atom, Callable):
         return self.__block
 
     @property
-    def annotations(self) -> list[Annotation]:
+    def annotations(self) -> typing.List[Annotation]:
         return self.__annotations
 
     @property
-    def kwargs(self) -> dict[str, typing.Any]:
+    def kwargs(self) -> typing.Dict[str, typing.Any]:
         return self.__kwargs
 
     @property
@@ -500,9 +500,9 @@ class MethodDef(Statement, Atom, Callable):
         return self.__value
 
     def call(
-        self, arguments: list[Expression], parentst: symtable.SymbolTable
+        self, arguments: typing.List[Expression], parentst: symtable.SymbolTable
     ) -> ASTNode:
-        parameters: list[Parameter] = self.parameters
+        parameters: typing.List[Parameter] = self.parameters
         block: Block = self.block
         methodst: symtable.Function = factory.SYMTABLE.new(
             symtable.Type.FUNCTION, 
@@ -513,7 +513,7 @@ class MethodDef(Statement, Atom, Callable):
         for index in range(len(parameters)):
             parameter: Parameter = parameters[index]
             identifier: str = parameter.name.identifier
-            astnodes: list[ASTNode] = list([
+            astnodes: typing.List[ASTNode] = list([
                 arguments[index].evaluate(parentst)
             ])
             methodst.insert(identifier, astnodes, isparameter=True)
@@ -525,7 +525,7 @@ class MethodDef(Statement, Atom, Callable):
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
         self.__value = builtins.Method()
         identifier: str = self.name.identifier
-        astnodes: list[ASTNode] = list([self])
+        astnodes: typing.List[ASTNode] = list([self])
         st.insert(identifier, astnodes)
         return self
 
@@ -534,14 +534,17 @@ class ClassDef(Statement, Atom, Callable):
 
     __value: builtins.Class = None
 
-    def __init__(self, name: Name, block: Block, annotations: list[Annotation], **kwargs):
+    def __init__(
+        self, name: Name, block: Block, annotations: typing.List[Annotation], 
+        **kwargs
+    ):
         self.__name: Name = name
         self.__block: Block = block
-        self.__annotations: list[Annotation] = annotations
-        self.__kwargs: dict[str, typing.Any] = kwargs
+        self.__annotations: typing.List[Annotation] = annotations
+        self.__kwargs: typing.Dict[str, typing.Any] = kwargs
 
-        self.__properties: dict[str, Property] = dict()
-        self.__methods: dict[str, MethodDef] = dict()
+        self.__properties: typing.Dict[str, Property] = dict()
+        self.__methods: typing.Dict[str, MethodDef] = dict()
         for statement in self.__block.statements:
             if (isinstance(statement, Property)):
                 identifier = statement.name.identifier
@@ -566,19 +569,19 @@ class ClassDef(Statement, Atom, Callable):
         return self.__block
 
     @property
-    def kwargs(self) -> dict[str, typing.Any]:
+    def kwargs(self) -> typing.Dict[str, typing.Any]:
         return self.__kwargs
 
     @property
-    def properties(self) -> dict[str, Property]:
+    def properties(self) -> typing.Dict[str, Property]:
         return self.__properties
 
     @property
-    def methods(self) -> dict[str, MethodDef]:
+    def methods(self) -> typing.Dict[str, MethodDef]:
         return self.__methods
 
     @property
-    def annotations(self) -> list[Annotation]:
+    def annotations(self) -> typing.List[Annotation]:
         return self.__annotations
 
     @property
@@ -586,10 +589,10 @@ class ClassDef(Statement, Atom, Callable):
         return self.__value
 
     def call(
-        self, arguments: list[Expression], parentst: symtable.SymbolTable
+        self, arguments: typing.List[Expression], parentst: symtable.SymbolTable
     ) -> ASTNode:
-        properties: dict[str, Property] = self.properties
-        methods: dict[str, MethodDef] = self.methods
+        properties: typing.Dict[str, Property] = self.properties
+        methods: typing.Dict[str, MethodDef] = self.methods
         instancest: symtable.Class = factory.SYMTABLE.new(
             symtable.Type.CLASS, 
             identifier=self.name.identifier, parent=parentst,
@@ -597,14 +600,14 @@ class ClassDef(Statement, Atom, Callable):
 
         # Insert symbols for properties
         for _, prop in properties.items():
-            astnodes: list[ASTNode] = list([prop])
+            astnodes: typing.List[ASTNode] = list([prop])
             instancest.insert(
                 prop.name.identifier, astnodes, isproperty=True
             )
 
         # Insert symbols for methods
         for _, method in methods.items():
-            astnodes: list[ASTNode] = list([method])
+            astnodes: typing.List[ASTNode] = list([method])
             instancest.insert(
                 method.name.identifier, astnodes, ismethod=True
             )
@@ -621,7 +624,7 @@ class ClassDef(Statement, Atom, Callable):
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
         self.__value = builtins.Class()
         identifier: str = self.name.identifier
-        astnodes: list[ASTNode] = list([self])
+        astnodes: typing.List[ASTNode] = list([self])
         st.insert(identifier, astnodes)
         return self
 
@@ -1193,21 +1196,21 @@ class Complex(Expression, Atom):
 
 class Tuple(Expression, Atom, Iterable):
 
-    __expressions: list[Expression] = None
+    __expressions: typing.List[Expression] = None
     __value: builtins.Tuple = None
 
     def __init__(
-        self, expressions: list[Expression] = None,
-        value: tuple = None 
+        self, expressions: typing.List[Expression] = None,
+        value: typing.Tuple = None 
         
     ):
         if (expressions != None):
-            self.__expressions: list[Expression] = expressions
+            self.__expressions: typing.List[Expression] = expressions
         elif (value != None):
             self.__value = builtins.Tuple(tuple(value))
 
     @property
-    def expressions(self) -> list[Expression]:
+    def expressions(self) -> typing.List[Expression]:
         return self.__expressions
 
     @property
@@ -1228,7 +1231,7 @@ class Tuple(Expression, Atom, Iterable):
     
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
         if (self.expressions != None):
-            atoms: list[Atom] = list([
+            atoms: typing.List[Atom] = list([
                 expression.evaluate(st)
                 for expression in self.expressions
             ])
@@ -1242,20 +1245,20 @@ class Tuple(Expression, Atom, Iterable):
 
 class List(Expression, Atom, Iterable):
     
-    __expressions: list[Expression] = None
+    __expressions: typing.List[Expression] = None
     __value: builtins.List = None
 
     def __init__(
-        self, expressions: list[Expression] = None,
-        value: list = None
+        self, expressions: typing.List[Expression] = None,
+        value: typing.List = None
     ):
         if (expressions != None):
-            self.__expressions: list[Expression] = expressions
+            self.__expressions: typing.List[Expression] = expressions
         elif (value != None):
             self.__value = builtins.List(list(value))
 
     @property
-    def expressions(self) -> list[Expression]:
+    def expressions(self) -> typing.List[Expression]:
         return self.__expressions
 
     @property
@@ -1276,7 +1279,7 @@ class List(Expression, Atom, Iterable):
     
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
         if (self.expressions != None):
-            atoms: list[Atom] = list([
+            atoms: typing.List[Atom] = list([
                 expression.evaluate(st)
                 for expression in self.expressions
             ])
@@ -1290,20 +1293,20 @@ class List(Expression, Atom, Iterable):
 
 class Dict(Expression, Atom, Iterable):
 
-    __kvpairs: list[tuple[Expression, Expression]] = None
+    __kvpairs: typing.List[typing.Tuple[Expression, Expression]] = None
     __value: builtins.Dict = None
 
     def __init__(
-        self, kvpairs: list[tuple[Expression, Expression]] = None,
-        value: dict = None
+        self, kvpairs: typing.List[typing.Tuple[Expression, Expression]] = None,
+        value: typing.Dict = None
     ):
         if (kvpairs != None):
-            self.__kvpairs: list[tuple[Expression, Expression]] = kvpairs
+            self.__kvpairs: typing.List[typing.Tuple[Expression, Expression]] = kvpairs
         elif (value != None):
             self.__value = builtins.Dict(dict(value))
 
     @property
-    def kvpairs(self) -> list[tuple[Expression, Expression]]:
+    def kvpairs(self) -> typing.List[typing.Tuple[Expression, Expression]]:
         return self.__kvpairs
 
     @property
@@ -1324,7 +1327,7 @@ class Dict(Expression, Atom, Iterable):
 
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
         if (self.kvpairs != None):
-            atoms: dict[Atom, Atom] = dict({
+            atoms: typing.Dict[Atom, Atom] = dict({
                 k.evaluate(st): v.evaluate(st)
                 for k, v in self.kvpairs
             })
@@ -1357,16 +1360,16 @@ class DotName(Expression):
 
 class Call(Expression):
 
-    def __init__(self, expression: Expression, arguments: list[Expression]):
+    def __init__(self, expression: Expression, arguments: typing.List[Expression]):
         self.__expression: Expression = expression
-        self.__arguments: list[Expression] = arguments
+        self.__arguments: typing.List[Expression] = arguments
 
     @property
     def expression(self) -> Expression:
         return self.__expression
 
     @property
-    def arguments(self) -> list[Expression]:
+    def arguments(self) -> typing.List[Expression]:
         return self.__arguments
     
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
