@@ -122,7 +122,11 @@ class Assignment(Statement):
         identifier: str = self.name.identifier
         astnode = self.expression.evaluate(st)
         astnodes: typing.List[ASTNode] = list([astnode])
-        st.insert(identifier, astnodes)
+        symbol = st.lookup(identifier)
+        if (symbol and symbol.kwargs.get('isproperty', False)):
+            symbol.symtable.insert(identifier, astnodes)
+        else:
+            st.insert(identifier, astnodes)
         return None
 
 

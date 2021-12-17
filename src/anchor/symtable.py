@@ -15,10 +15,12 @@ __all__: typing.List[str] = [
 class Symbol(object):
 
     def __init__(
-        self, identifier: str, astnodes: typing.List[ast.ASTNode], **kwargs
+        self, identifier: str, astnodes: typing.List[ast.ASTNode],
+        symtable: SymbolTable, **kwargs
     ):
         self.__identifier: str = identifier
         self.__astnodes: typing.List[ast.ASTNode] = astnodes
+        self.__symtable: SymbolTable = symtable
         self.__kwargs: typing.Dict[str, typing.Any] = kwargs
 
     @property
@@ -35,6 +37,10 @@ class Symbol(object):
             # return latest defined astnode
             return self.__astnodes[-1]
         return self.__astnodes[0]
+
+    @property
+    def symtable(self) -> SymbolTable:
+        return self.__symtable
 
     @property
     def kwargs(self) -> typing.Dict[str, typing.Any]:
@@ -70,18 +76,17 @@ class SymbolTable(object):
     def insert(
         self, identifier: str, astnodes: typing.List[ast.ASTNode], **kwargs
     ) -> None:
+        symbol: Symbol = self.lookup(identifier)
         if (identifier in self.symbols):
             oldsymbol = self.symbols[identifier]
             symbol = Symbol(
-                identifier, oldsymbol.astnodes + astnodes, 
+                identifier, oldsymbol.astnodes + astnodes, self,
                 **(oldsymbol.kwargs | kwargs)
             )
-            self.symbols[identifier] = symbol
-        elif (self._parent): 
-            self._parent.insert(identifier, astnodes, **kwargs)
         else:
-            symbol = Symbol(identifier, astnodes, **kwargs)
-            self.symbols[identifier] = symbol
+            symbol = Symbol(identifier, astnodes, self, **kwargs)
+        assert (symbol != None)
+        self.symbols[identifier] = symbol
 
     def lookup(self, identifier: str) -> Symbol:
         if (identifier in self.symbols):
