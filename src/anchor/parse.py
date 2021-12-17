@@ -512,6 +512,7 @@ class AnchorParser(Parser):
 
     def p_empty(self, p: yacc.YaccProduction) -> None:
         '''empty : '''
+        p
         pass
 
     def p_error(self, p: yacc.YaccProduction) -> None:

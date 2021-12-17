@@ -513,9 +513,9 @@ class MethodDef(Statement, Atom, Callable):
         for index in range(len(parameters)):
             parameter: Parameter = parameters[index]
             identifier: str = parameter.name.identifier
-            astnodes: typing.List[ASTNode] = list([
-                arguments[index].evaluate(parentst)
-            ])
+            argument: Expression = arguments[index]
+            astnode: ASTNode = argument.evaluate(parentst)
+            astnodes: typing.List[ASTNode] = list([astnode])
             methodst.insert(identifier, astnodes, isparameter=True)
         
         # Evaluate method block
