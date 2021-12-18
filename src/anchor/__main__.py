@@ -97,8 +97,8 @@ def readcommand(argv: typing.List[str]) -> typing.Dict[str, typing.Any]:
         stream = system.GLOBAL.logstream,
         format = '[DEBUG] %(filename)s:%(lineno)d:%(message)s'
     )
-    log = logging.getLogger()
-    system.GLOBAL.log = log
+    logger = logging.getLogger()
+    system.GLOBAL.logger = logger
 
     # Input stream
     inputstream = None

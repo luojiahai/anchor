@@ -8,7 +8,7 @@ __all__: typing.List[str] = ['AST', 'SYMTABLE',]
 
 class Factory(abc.ABC):
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._builders: typing.Dict[str, typing.Any] = {}
 
     def _registerbuilder(self, key: str, builder: typing.Any) -> None:
@@ -39,7 +39,7 @@ class ASTNodeFactory(object):
 
         def __init__(
             self, declarations: typing.List[typing.Tuple[str, typing.Type]]
-        ):
+        ) -> None:
             super().__init__()
             for key, builder in declarations:
                 self._registerbuilder(key, builder)
@@ -52,7 +52,9 @@ class ASTNodeFactory(object):
 
     __instance: __ASTNodeFactory = None
 
-    def __new__(cls, declarations: typing.List[typing.Tuple[str, typing.Type]]):
+    def __new__(
+        cls, declarations: typing.List[typing.Tuple[str, typing.Type]]
+    ) -> __ASTNodeFactory:
         if (not ASTNodeFactory.__instance):
             ASTNodeFactory.__instance = \
                 ASTNodeFactory.__ASTNodeFactory(declarations)
@@ -68,14 +70,16 @@ class SymbolTableFactory(object):
 
         def __init__(
             self, declarations: typing.List[typing.Tuple[str, typing.Type]]
-        ):
+        ) -> None:
             super().__init__()
             for key, builder in declarations:
                 self._registerbuilder(key, builder)
 
     __instance: __SymbolTableFactory = None
 
-    def __new__(cls, declarations: typing.List[typing.Tuple[str, typing.Type]]):
+    def __new__(
+        cls, declarations: typing.List[typing.Tuple[str, typing.Type]]
+    ) -> __SymbolTableFactory:
         if (not SymbolTableFactory.__instance):
             SymbolTableFactory.__instance = \
                 SymbolTableFactory.__SymbolTableFactory(declarations)

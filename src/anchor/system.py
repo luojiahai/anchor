@@ -18,7 +18,7 @@ class Global(object):
             self.__outputstream: typing.TextIO = sys.stdout
             self.__errorstream: typing.TextIO = sys.stderr
             self.__logstream: typing.TextIO = sys.stderr
-            self.__log: logging.Logger = None
+            self.__logger: logging.Logger = None
 
         @property
         def debug(self) -> bool:
@@ -77,12 +77,12 @@ class Global(object):
             self.__logstream = other
 
         @property
-        def log(self) -> logging.Logger:
-            return self.__log
+        def logger(self) -> logging.Logger:
+            return self.__logger
 
-        @log.setter
-        def log(self, other: logging.Logger):
-            self.__log = other
+        @logger.setter
+        def logger(self, other: logging.Logger):
+            self.__logger = other
 
     __instance: __Global = None
 
@@ -90,5 +90,69 @@ class Global(object):
         if (not Global.__instance):
             Global.__instance = Global.__Global()
         return Global.__instance
+
+    @property
+    def debug(self) -> bool:
+        return self.__instance.debug
+
+    @debug.setter
+    def debug(self, other: bool):
+        self.__instance.debug = other
+
+    @property
+    def debuglex(self) -> bool:
+        return self.__instance.debuglex
+
+    @debuglex.setter
+    def debuglex(self, other: bool):
+        self.__instance.debuglex = other
+
+    @property
+    def debugyacc(self) -> bool:
+        return self.__instance.debugyacc
+
+    @debugyacc.setter
+    def debugyacc(self, other: bool):
+        self.__instance.debugyacc = other
+
+    @property
+    def inputstream(self) -> typing.TextIO:
+        return self.__instance.inputstream
+
+    @inputstream.setter
+    def inputstream(self, other: typing.TextIO):
+        self.__instance.inputstream = other
+        
+    @property
+    def outputstream(self) -> typing.TextIO:
+        return self.__instance.outputstream
+
+    @outputstream.setter
+    def outputstream(self, other: typing.TextIO):
+        self.__instance.outputstream = other
+
+    @property
+    def errorstream(self) -> typing.TextIO:
+        return self.__instance.errorstream
+
+    @errorstream.setter
+    def errorstream(self, other: typing.TextIO):
+        self.__instance.errorstream = other
+
+    @property
+    def logstream(self) -> typing.TextIO:
+        return self.__instance.logstream
+
+    @logstream.setter
+    def logstream(self, other: typing.TextIO):
+        self.__instance.logstream = other
+
+    @property
+    def logger(self) -> logging.Logger:
+        return self.__instance.logger
+
+    @logger.setter
+    def logger(self, other: logging.Logger):
+        self.__instance.logger = other
 
 GLOBAL: Global = Global()

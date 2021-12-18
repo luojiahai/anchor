@@ -13,7 +13,7 @@ __all__: typing.List[str] = ['execute',]
 
 def execute(data: str) -> typing.Any:
     # Define main symbol table
-    mainidentifier = 'Main'
+    mainidentifier: typing.Literal = 'Main'
     symboltable: symtable.SymbolTable = factory.SYMTABLE.new(
         symtable.Type.MAIN, identifier=mainidentifier
     )
@@ -34,7 +34,7 @@ def execute(data: str) -> typing.Any:
     parser: parse.AnchorParser = parse.AnchorParser(
         debuglex=system.GLOBAL.debuglex, 
         debugyacc=system.GLOBAL.debugyacc,
-        debuglog=system.GLOBAL.log
+        debuglog=system.GLOBAL.logger
     )
     abstractsyntaxtree: ast.ASTNode = parser.parse(data)
     return abstractsyntaxtree.evaluate(symboltable)

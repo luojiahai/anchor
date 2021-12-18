@@ -41,9 +41,9 @@ String: typing.AnyStr = group(
 class AnchorLexer(object):
 
     # List of token names
-    tokens = tuple(token.NAME.values()) + (
+    tokens = tuple(token.NAME.values()) + tuple((
         'NAME', 'INTEGER', 'FLOAT', 'COMPLEX', 'STRING',
-    )
+    ))
 
     # Regular expression rules for tokens
     t_ignore            = ' \f\t'
@@ -79,23 +79,23 @@ class AnchorLexer(object):
     t_RBRACE            = token.namedict[token.RBRACE]
 
     # Name
-    def t_NAME(self, t: lex.LexToken):
+    def t_NAME(self, t: lex.LexToken) -> lex.LexToken:
         r'[a-zA-Z_][a-zA-Z0-9_]*'
         if (keyword.iskeyword(t.value)):
             t.type = token.NAME[t.value]
         return t
 
     # Define a rule for newline so we can track line numbers
-    def t_NEWLINE(self, t: lex.LexToken):
+    def t_NEWLINE(self, t: lex.LexToken) -> lex.LexToken:
         r'\n'
         t.lexer.lineno += 1
 
     # Error handling rule
-    def t_error(self, t: lex.LexToken):
+    def t_error(self, t: lex.LexToken) -> lex.LexToken:
         t.lexer.skip(1)
 
     # Build the lexer
-    def build(self, **kwargs):
+    def build(self, **kwargs) -> None:
         self.lexer = lex.lex(module=self, **kwargs)
 
     # Test
@@ -105,4 +105,4 @@ class AnchorLexer(object):
             t: lex.LexToken = self.lexer.token()
             if (not t): 
                 break
-            system.GLOBAL.log.debug(t)
+            system.GLOBAL.logger.debug(t)

@@ -165,7 +165,7 @@ class Return(Statement, Atom):
 
     def __init__(
         self, expression: Expression = None, value: builtins.Type = None
-    ):
+    ) -> None:
         self.__expression = expression
         self.__value = value
 
@@ -189,9 +189,9 @@ class Return(Statement, Atom):
 
 class Elif(Statement):
 
-    def __init__(self, 
-        expression: Expression, block: Block, elseblock: Block = None
-    ):
+    def __init__(
+        self, expression: Expression, block: Block, elseblock: Block = None
+    ) -> None:
         self.__expression: Expression = expression
         self.__block: Block = block
         self.__elseblock: Block = elseblock
@@ -218,7 +218,7 @@ class If(Statement):
     def __init__(
         self, expression: Expression, block: Block, 
         elifs: typing.List[Elif] = list(), elseblock: Block = None
-    ):
+    ) -> None:
         self.__expression: Expression = expression
         self.__block: Block = block
         self.__elifs: typing.List[Elif] = elifs
@@ -263,7 +263,9 @@ class If(Statement):
 
 class Iterate(Statement):
 
-    def __init__(self, iterable: Expression, variable: Name, block: Block) -> None:
+    def __init__(
+        self, iterable: Expression, variable: Name, block: Block
+    ) -> None:
         self.__iterable: Expression = iterable
         self.__variable: Name = variable
         self.__block: Block = block
@@ -373,7 +375,7 @@ class FunctionDef(Statement, Atom, Callable):
     def __init__(
         self, name: Name, parameters: typing.List[Parameter], block: Block, 
         **kwargs
-    ):
+    ) -> None:
         self.__name: Name = name
         self.__parameters: typing.List[Parameter] = parameters
         self.__block: Block = block
@@ -444,7 +446,9 @@ class Property(Statement, Atom):
 
     __value: builtins.Property = None
 
-    def __init__(self, name: Name, annotations: typing.List[Annotation]) -> None:
+    def __init__(
+        self, name: Name, annotations: typing.List[Annotation]
+    ) -> None:
         self.__name: Name = name
         self.__annotations: typing.List[Annotation] = annotations
 
@@ -475,7 +479,7 @@ class MethodDef(Statement, Atom, Callable):
     def __init__(
         self, name: Name, parameters: typing.List[Parameter], block: Block,
         annotations: typing.List[Annotation], **kwargs
-    ):
+    ) -> None:
         self.__name: Name = name
         self.__parameters: typing.List[Parameter] = parameters
         self.__block: Block = block
@@ -544,7 +548,7 @@ class ClassDef(Statement, Atom, Callable):
     def __init__(
         self, name: Name, block: Block, annotations: typing.List[Annotation], 
         **kwargs
-    ):
+    ) -> None:
         self.__name: Name = name
         self.__block: Block = block
         self.__annotations: typing.List[Annotation] = annotations
@@ -1200,9 +1204,8 @@ class Tuple(Expression, Atom, Iterable):
 
     def __init__(
         self, expressions: typing.List[Expression] = None,
-        value: typing.Tuple = None 
-        
-    ):
+        value: typing.Tuple = None
+    ) -> None:
         if (expressions != None):
             self.__expressions: typing.List[Expression] = expressions
         elif (value != None):
@@ -1250,7 +1253,7 @@ class List(Expression, Atom, Iterable):
     def __init__(
         self, expressions: typing.List[Expression] = None,
         value: typing.List = None
-    ):
+    ) -> None:
         if (expressions != None):
             self.__expressions: typing.List[Expression] = expressions
         elif (value != None):
@@ -1298,7 +1301,7 @@ class Dict(Expression, Atom, Iterable):
     def __init__(
         self, kvpairs: typing.List[typing.Tuple[Expression, Expression]] = None,
         value: typing.Dict = None
-    ):
+    ) -> None:
         if (kvpairs != None):
             self.__kvpairs: typing.List[typing.Tuple[Expression, Expression]] \
                 = kvpairs
@@ -1362,7 +1365,7 @@ class Call(Expression):
 
     def __init__(
         self, expression: Expression, arguments: typing.List[Expression]
-    ):
+    ) -> None:
         self.__expression: Expression = expression
         self.__arguments: typing.List[Expression] = arguments
 

@@ -12,8 +12,8 @@ __all__: typing.List[str] = ['AnchorParser',]
 
 class Parser(abc.ABC):
 
-    tokens: typing.Tuple = ()
-    precedence: typing.Tuple = ()
+    tokens: typing.Tuple = tuple()
+    precedence: typing.Tuple = tuple()
 
     def __init__(self, **kwargs) -> None:
         self.debuglex: bool = kwargs.get('debuglex', False)
@@ -43,7 +43,7 @@ class AnchorParser(Parser):
     tokens: typing.Tuple = lex.AnchorLexer.tokens
 
     # Precedence rules
-    precedence: typing.Tuple = (
+    precedence: typing.Tuple = tuple((
         ('left', token.OR,),
         ('left', token.AND,),
         ('right', token.NOT,),
@@ -54,7 +54,7 @@ class AnchorParser(Parser):
         ('right', token.UPLUS, token.UMINUS,),
         ('left', token.DOUBLESTAR,),
         ('left', token.LPAR, token.RPAR,),
-    )
+    ))
 
     def p_program(self, p: yacc.YaccProduction) -> None:
         '''program : block
@@ -518,5 +518,5 @@ class AnchorParser(Parser):
         pass
 
     def p_error(self, p: yacc.YaccProduction) -> None:
-        system.GLOBAL.log.debug(f'Error: {p}')
+        system.GLOBAL.logger.debug(f'Error: {p}')
         pass
