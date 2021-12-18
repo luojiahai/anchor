@@ -10,7 +10,7 @@ class Global(object):
 
     class __Global(object):
 
-        def __init__(self):
+        def __init__(self) -> None:
             self.__debug: bool = False
             self.__debuglex: bool = False
             self.__debugyacc: bool = False

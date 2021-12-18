@@ -56,7 +56,7 @@ class Statement(ASTNode):
 
 class Block(ASTNode):
 
-    def __init__(self, statements: typing.List[Statement]):
+    def __init__(self, statements: typing.List[Statement]) -> None:
         self.__statements: typing.List[Statement] = statements
 
     @property
@@ -77,7 +77,7 @@ class Block(ASTNode):
 
 class Program(ASTNode):
 
-    def __init__(self, block: Block):
+    def __init__(self, block: Block) -> None:
         self.__block: Block = block
 
     @property
@@ -91,7 +91,7 @@ class Program(ASTNode):
 
 class Name(Expression):
 
-    def __init__(self, identifier: str):
+    def __init__(self, identifier: str) -> None:
         self.__identifier: str = identifier
 
     @property
@@ -106,7 +106,7 @@ class Name(Expression):
 
 class Assignment(Statement):
 
-    def __init__(self, name: Name, expression: Expression):
+    def __init__(self, name: Name, expression: Expression) -> None:
         self.__name: Name = name
         self.__expression: Expression = expression
 
@@ -132,7 +132,7 @@ class Assignment(Statement):
 
 class Break(Statement):
 
-    def __init__(self, literal: str):
+    def __init__(self, literal: str) -> None:
         self.__literal: str = literal
 
     @property
@@ -146,7 +146,7 @@ class Break(Statement):
 
 class Continue(Statement):
     
-    def __init__(self, literal: str):
+    def __init__(self, literal: str) -> None:
         self.__literal: str = literal
 
     @property
@@ -263,7 +263,7 @@ class If(Statement):
 
 class Iterate(Statement):
 
-    def __init__(self, iterable: Expression, variable: Name, block: Block):
+    def __init__(self, iterable: Expression, variable: Name, block: Block) -> None:
         self.__iterable: Expression = iterable
         self.__variable: Name = variable
         self.__block: Block = block
@@ -299,7 +299,7 @@ class Iterate(Statement):
 
 class Loop(Statement):
 
-    def __init__(self, expression: Expression, block: Block):
+    def __init__(self, expression: Expression, block: Block) -> None:
         self.__expression: Expression = expression
         self.__block: Block = block
 
@@ -329,7 +329,7 @@ class Annotation(Statement, Atom):
 
     __value: builtins.Annotation = None
 
-    def __init__(self, literal: typing.Any):
+    def __init__(self, literal: typing.Any) -> None:
         self.__literal: typing.Any = literal
 
     @property
@@ -348,7 +348,7 @@ class Annotation(Statement, Atom):
 
 class Parameter(Statement):
 
-    def __init__(self, name: Name, typename: Name = None):
+    def __init__(self, name: Name, typename: Name = None) -> None:
         self.__name: Name = name
         self.__typename: Name = typename
 
@@ -444,7 +444,7 @@ class Property(Statement, Atom):
 
     __value: builtins.Property = None
 
-    def __init__(self, name: Name, annotations: typing.List[Annotation]):
+    def __init__(self, name: Name, annotations: typing.List[Annotation]) -> None:
         self.__name: Name = name
         self.__annotations: typing.List[Annotation] = annotations
 
@@ -632,7 +632,7 @@ class Instance(Statement, Atom):
 
     __value: builtins.Instance = None
 
-    def __init__(self, classdef: ClassDef, instancest: symtable.Class):
+    def __init__(self, classdef: ClassDef, instancest: symtable.Class) -> None:
         self.__classdef: ClassDef = classdef
         self.__instancest = instancest
 
@@ -656,7 +656,7 @@ class Instance(Statement, Atom):
 
 class Or(Expression):
 
-    def __init__(self, left: Expression, right: Expression):
+    def __init__(self, left: Expression, right: Expression) -> None:
         self.__left: Expression = left
         self.__right: Expression = right
 
@@ -678,7 +678,7 @@ class Or(Expression):
 
 class And(Expression):
 
-    def __init__(self, left: Expression, right: Expression):
+    def __init__(self, left: Expression, right: Expression) -> None:
         self.__left: Expression = left
         self.__right: Expression = right
 
@@ -700,7 +700,7 @@ class And(Expression):
 
 class Not(Expression):
 
-    def __init__(self, right: Expression):
+    def __init__(self, right: Expression) -> None:
         self.__right: Expression = right
 
     @property
@@ -716,7 +716,7 @@ class Not(Expression):
 
 class EqEqual(Expression):
 
-    def __init__(self, left: Expression, right: Expression):
+    def __init__(self, left: Expression, right: Expression) -> None:
         self.__left: Expression = left
         self.__right: Expression = right
 
@@ -738,7 +738,7 @@ class EqEqual(Expression):
 
 class NotEqual(Expression):
 
-    def __init__(self, left: Expression, right: Expression):
+    def __init__(self, left: Expression, right: Expression) -> None:
         self.__left: Expression = left
         self.__right: Expression = right
 
@@ -760,7 +760,7 @@ class NotEqual(Expression):
 
 class Less(Expression):
 
-    def __init__(self, left: Expression, right: Expression):
+    def __init__(self, left: Expression, right: Expression) -> None:
         self.__left: Expression = left
         self.__right: Expression = right
 
@@ -782,7 +782,7 @@ class Less(Expression):
 
 class LessEqual(Expression):
 
-    def __init__(self, left: Expression, right: Expression):
+    def __init__(self, left: Expression, right: Expression) -> None:
         self.__left: Expression = left
         self.__right: Expression = right
 
@@ -804,7 +804,7 @@ class LessEqual(Expression):
 
 class Greater(Expression):
 
-    def __init__(self, left: Expression, right: Expression):
+    def __init__(self, left: Expression, right: Expression) -> None:
         self.__left: Expression = left
         self.__right: Expression = right
 
@@ -826,7 +826,7 @@ class Greater(Expression):
 
 class GreaterEqual(Expression):
 
-    def __init__(self, left: Expression, right: Expression):
+    def __init__(self, left: Expression, right: Expression) -> None:
         self.__left: Expression = left
         self.__right: Expression = right
 
@@ -848,7 +848,7 @@ class GreaterEqual(Expression):
 
 class Plus(Expression):
 
-    def __init__(self, left: Expression, right: Expression):
+    def __init__(self, left: Expression, right: Expression) -> None:
         self.__left: Expression = left
         self.__right: Expression = right
 
@@ -870,7 +870,7 @@ class Plus(Expression):
 
 class Minus(Expression):
 
-    def __init__(self, left: Expression, right: Expression):
+    def __init__(self, left: Expression, right: Expression) -> None:
         self.__left: Expression = left
         self.__right: Expression = right
 
@@ -892,7 +892,7 @@ class Minus(Expression):
 
 class Star(Expression):
 
-    def __init__(self, left: Expression, right: Expression):
+    def __init__(self, left: Expression, right: Expression) -> None:
         self.__left: Expression = left
         self.__right: Expression = right
 
@@ -914,7 +914,7 @@ class Star(Expression):
 
 class DoubleStar(Expression):
 
-    def __init__(self, left: Expression, right: Expression):
+    def __init__(self, left: Expression, right: Expression) -> None:
         self.__left: Expression = left
         self.__right: Expression = right
 
@@ -936,7 +936,7 @@ class DoubleStar(Expression):
 
 class Slash(Expression):
 
-    def __init__(self, left: Expression, right: Expression):
+    def __init__(self, left: Expression, right: Expression) -> None:
         self.__left: Expression = left
         self.__right: Expression = right
 
@@ -958,7 +958,7 @@ class Slash(Expression):
 
 class DoubleSlash(Expression):
 
-    def __init__(self, left: Expression, right: Expression):
+    def __init__(self, left: Expression, right: Expression) -> None:
         self.__left: Expression = left
         self.__right: Expression = right
 
@@ -980,7 +980,7 @@ class DoubleSlash(Expression):
 
 class Percent(Expression):
 
-    def __init__(self, left: Expression, right: Expression):
+    def __init__(self, left: Expression, right: Expression) -> None:
         self.__left: Expression = left
         self.__right: Expression = right
 
@@ -1002,7 +1002,7 @@ class Percent(Expression):
 
 class UPlus(Expression):
 
-    def __init__(self, right: Expression):
+    def __init__(self, right: Expression) -> None:
         self.__right: Expression = right
 
     @property
@@ -1018,7 +1018,7 @@ class UPlus(Expression):
 
 class UMinus(Expression):
 
-    def __init__(self, right: Expression):
+    def __init__(self, right: Expression) -> None:
         self.__right: Expression = right
 
     @property
@@ -1034,7 +1034,7 @@ class UMinus(Expression):
 
 class Boolean(Expression, Atom):
 
-    def __init__(self, value: bool):
+    def __init__(self, value: bool) -> None:
         self.__literal: str = str(value)
         self.__value: builtins.Boolean = builtins.Boolean(bool(value))
 
@@ -1056,7 +1056,7 @@ class Null(Expression, Atom):
     __literal: str = None
     __value: builtins.Null = None
 
-    def __init__(self, literal: str = None, value: str = None):
+    def __init__(self, literal: str = None, value: str = None) -> None:
         if (literal != None):
             self.__literal = literal
             self.__value = builtins.Null(str(self.literal))
@@ -1082,7 +1082,7 @@ class String(Expression, Atom, Iterable):
     __literal: str = None
     __value: builtins.String = None
 
-    def __init__(self, literal: str = None, value: str = None):
+    def __init__(self, literal: str = None, value: str = None) -> None:
         if (literal != None):
             self.__literal = literal
             self.__value = builtins.String(str(self.literal))
@@ -1120,7 +1120,7 @@ class Integer(Expression, Atom):
     __literal: str = None
     __value: builtins.Integer = None
 
-    def __init__(self, literal: str = None, value: int = None):
+    def __init__(self, literal: str = None, value: int = None) -> None:
         if (literal != None):
             self.__literal = literal
             self.__value = builtins.Integer(int(self.literal))
@@ -1146,7 +1146,7 @@ class Float(Expression, Atom):
     __literal: str = None
     __value: builtins.Float = None
 
-    def __init__(self, literal: str = None, value: float = None):
+    def __init__(self, literal: str = None, value: float = None) -> None:
         if (literal != None):
             self.__literal = literal
             self.__value = builtins.Float(float(self.literal))
@@ -1172,7 +1172,7 @@ class Complex(Expression, Atom):
     __literal: str = None
     __value: builtins.Complex = None
 
-    def __init__(self, literal: str = None, value: complex = None):
+    def __init__(self, literal: str = None, value: complex = None) -> None:
         if (literal != None):
             self.__literal = literal
             self.__value = builtins.Complex(complex(self.literal))
@@ -1341,7 +1341,7 @@ class Dict(Expression, Atom, Iterable):
 
 class DotName(Expression):
 
-    def __init__(self, expression: Expression, name: Name):
+    def __init__(self, expression: Expression, name: Name) -> None:
         self.__expression: Expression = expression
         self.__name: Name = name
 

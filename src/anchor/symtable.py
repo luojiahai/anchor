@@ -55,7 +55,7 @@ class Type(object):
 
 class SymbolTable(object):
 
-    def __init__(self, identifier: str, parent = None):
+    def __init__(self, identifier: str, parent = None) -> None:
         self._identifier: str = identifier
         self._type: Type = Type.MAIN
         self._symbols: typing.Dict[str, Symbol] = dict()
@@ -101,7 +101,7 @@ class Class(SymbolTable):
 
     __methods: typing.List[Symbol] = None
 
-    def __init__(self, identifier: str, parent: SymbolTable = None):
+    def __init__(self, identifier: str, parent: SymbolTable = None) -> None:
         super().__init__(identifier, parent=parent)
         self._type: Type = Type.CLASS
 
@@ -114,7 +114,7 @@ class Function(SymbolTable):
 
     __parameters: typing.List[Symbol] = None
 
-    def __init__(self, identifier: str, parent: SymbolTable=None):
+    def __init__(self, identifier: str, parent: SymbolTable=None) -> None:
         super().__init__(identifier, parent=parent)
         self._type: Type = Type.FUNCTION
 

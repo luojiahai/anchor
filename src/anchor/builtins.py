@@ -21,7 +21,7 @@ STREAM: typing.Dict[str, typing.TextIO] = {
 
 class Type(abc.ABC):
     
-    def __init__(self, typename: str, **kwargs):
+    def __init__(self, typename: str, **kwargs) -> None:
         self.__typename: str = typename
         self.__kwargs: typing.Dict[str, typing.Any] = kwargs
 
@@ -36,7 +36,7 @@ class Type(abc.ABC):
 
 class Boolean(Type, int):
 
-    def __init__(self, value: int, **kwargs):
+    def __init__(self, value: int, **kwargs) -> None:
         Type.__init__(self, 'Boolean', **kwargs)
         self.__value: int = value
 
@@ -47,7 +47,7 @@ class Boolean(Type, int):
 
 class Null(Type):
 
-    def __init__(self, value: str, **kwargs):
+    def __init__(self, value: str, **kwargs) -> None:
         Type.__init__(self, 'Null', **kwargs)
         self.__value: str = value
 
@@ -64,7 +64,7 @@ class Null(Type):
 
 class Integer(Type, int):
     
-    def __init__(self, value: int, **kwargs):
+    def __init__(self, value: int, **kwargs) -> None:
         Type.__init__(self, 'Integer', **kwargs)
         self.__value: int = value
 
@@ -75,7 +75,7 @@ class Integer(Type, int):
 
 class Float(Type, float):
 
-    def __init__(self, value: float, **kwargs):
+    def __init__(self, value: float, **kwargs) -> None:
         Type.__init__(self, 'Float', **kwargs)
         self.__value: float = value
 
@@ -86,7 +86,7 @@ class Float(Type, float):
 
 class Complex(Type, complex):
     
-    def __init__(self, value: complex, **kwargs):
+    def __init__(self, value: complex, **kwargs) -> None:
         Type.__init__(self, 'Complex', **kwargs)
         self.__value: complex = value
 
@@ -97,7 +97,7 @@ class Complex(Type, complex):
 
 class String(Type, str):
     
-    def __init__(self, value: str, **kwargs):
+    def __init__(self, value: str, **kwargs) -> None:
         Type.__init__(self, 'String', **kwargs)
         self.__value: str = value
 
@@ -108,7 +108,7 @@ class String(Type, str):
 
 class Tuple(Type, tuple): 
     
-    def __init__(self, value: typing.Tuple, **kwargs):
+    def __init__(self, value: typing.Tuple, **kwargs) -> None:
         Type.__init__(self, 'Tuple', **kwargs)
 
     def __new__(self, value):
@@ -117,27 +117,27 @@ class Tuple(Type, tuple):
 
 class List(Type, list):
 
-    def __init__(self, value: typing.List, **kwargs):
+    def __init__(self, value: typing.List, **kwargs) -> None:
         Type.__init__(self, 'List', **kwargs)
         self.extend(value)
 
 
 class Dict(Type, dict):
 
-    def __init__(self, value: typing.Dict, **kwargs):
+    def __init__(self, value: typing.Dict, **kwargs) -> None:
         Type.__init__(self, 'Dict', **kwargs)
         self.update(value)
 
 
 class Function(Type):
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         Type.__init__(self, 'Function', **kwargs)
 
 
 class Annotation(Type):
 
-    def __init__(self, value: str, **kwargs):
+    def __init__(self, value: str, **kwargs) -> None:
         super().__init__('Annotation', **kwargs)
         self.__value: str = value
 
@@ -148,25 +148,25 @@ class Annotation(Type):
 
 class Class(Type):
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         Type.__init__(self, 'Class', **kwargs)
 
 
 class Property(Type):
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         Type.__init__(self, 'Property', **kwargs)
 
 
 class Method(Type):
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         Type.__init__(self, 'Method', **kwargs)
 
 
 class Instance(Type, object):
 
-    def __init__(self, cls: Class, **kwargs):
+    def __init__(self, cls: Class, **kwargs) -> None:
         Type.__init__(self, cls.typename, **kwargs)
 
 

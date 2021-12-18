@@ -15,7 +15,7 @@ class Parser(abc.ABC):
     tokens: typing.Tuple = ()
     precedence: typing.Tuple = ()
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         self.debuglex: bool = kwargs.get('debuglex', False)
         self.debugyacc: bool = kwargs.get('debugyacc', False)
         self.debuglog: bool = kwargs.get('debuglog', None)

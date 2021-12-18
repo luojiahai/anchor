@@ -9,31 +9,33 @@ __all__: typing.List[str] = ['AnchorLexer',]
 
 
 # Regular expression utility functions
-def group(*choices):    return '(' + '|'.join(choices) + ')'
-def any(*choices):      return group(*choices) + '*'
-def maybe(*choices):    return group(*choices) + '?'
+def group(*choices) -> typing.AnyStr: return '(' + '|'.join(choices) + ')'
+def any(*choices) -> typing.AnyStr: return group(*choices) + '*'
+def maybe(*choices) -> typing.AnyStr: return group(*choices) + '?'
 
 # Comment
-Comment                 = r'\#[^\r\n]*'
+Comment: typing.AnyStr = r'\#[^\r\n]*'
 
 # Number
-Hexnumber               = r'0[xX](?:_?[0-9a-fA-F])+'
-Binnumber               = r'0[bB](?:_?[01])+'
-Octnumber               = r'0[oO](?:_?[0-7])+'
-Decnumber               = r'(?:0(?:_?0)*|[1-9](?:_?[0-9])*)'
-Intnumber               = group(Hexnumber, Binnumber, Octnumber, Decnumber)
-Exponent                = r'[eE][-+]?[0-9](?:_?[0-9])*'
-Pointfloat              = group(
-                            r'[0-9](?:_?[0-9])*\.(?:[0-9](?:_?[0-9])*)?',
-                            r'\.[0-9](?:_?[0-9])*') + maybe(Exponent
-                        )
-Expfloat                = r'[0-9](?:_?[0-9])*' + Exponent
-Floatnumber             = group(Pointfloat, Expfloat)
-Imagnumber              = group(r'[0-9](?:_?[0-9])*[jJ]', Floatnumber + r'[jJ]')
-Number                  = group(Imagnumber, Floatnumber, Intnumber)
+Hexnumber: typing.AnyStr = r'0[xX](?:_?[0-9a-fA-F])+'
+Binnumber: typing.AnyStr = r'0[bB](?:_?[01])+'
+Octnumber: typing.AnyStr = r'0[oO](?:_?[0-7])+'
+Decnumber: typing.AnyStr = r'(?:0(?:_?0)*|[1-9](?:_?[0-9])*)'
+Intnumber: typing.AnyStr = group(Hexnumber, Binnumber, Octnumber, Decnumber)
+Exponent: typing.AnyStr = r'[eE][-+]?[0-9](?:_?[0-9])*'
+Pointfloat: typing.AnyStr = group(
+    r'[0-9](?:_?[0-9])*\.(?:[0-9](?:_?[0-9])*)?',
+    r'\.[0-9](?:_?[0-9])*') + maybe(Exponent
+)
+Expfloat: typing.AnyStr = r'[0-9](?:_?[0-9])*' + Exponent
+Floatnumber: typing.AnyStr = group(Pointfloat, Expfloat)
+Imagnumber: typing.AnyStr = group(r'[0-9](?:_?[0-9])*[jJ]', Floatnumber + r'[jJ]')
+Number: typing.AnyStr = group(Imagnumber, Floatnumber, Intnumber)
 
 # String
-String = group(r"'[^\n'\\]*(?:\\.[^\n'\\]*)*'", r'"[^\n"\\]*(?:\\.[^\n"\\]*)*"')
+String: typing.AnyStr = group(
+    r"'[^\n'\\]*(?:\\.[^\n'\\]*)*'", r'"[^\n"\\]*(?:\\.[^\n"\\]*)*"'
+)
 
 
 class AnchorLexer(object):
