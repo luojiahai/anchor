@@ -1,7 +1,7 @@
 import typing
 
 
-__all__: typing.List[str] = ['pmdict', 'kwdict', 'namedict', 'NAME',]
+__all__: typing.List[str] = list(['pmdict', 'kwdict', 'namedict', 'NAME',])
 
 
 PERCENT: typing.Literal         = 'PERCENT'
@@ -133,7 +133,7 @@ __all__.extend(
 
 namedict: typing.Dict[str, str] = dict(pmdict | kwdict)
 
-NAME: typing.Dict[str, str] = {
+NAME: typing.Dict[str, str] = dict({
     value.replace('\\', ''): name 
     for name, value in namedict.items()
-}
+})

@@ -7,7 +7,7 @@ import anchor.ast as ast
 import anchor.system as system
 
 
-__all__: typing.List[str] = ['AnchorParser',]
+__all__: typing.List[str] = list(['AnchorParser',])
 
 
 class Parser(abc.ABC):

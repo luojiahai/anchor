@@ -1,12 +1,11 @@
 import abc
-import types
 import typing
 import anchor.builtins as builtins
 import anchor.symtable as symtable
 import anchor.factory as factory
 
 
-__all__: typing.List[str] = []
+__all__: typing.List[str] = list()
 
 
 class ASTNode(abc.ABC):
@@ -423,7 +422,7 @@ class FunctionDef(Statement, Atom, Callable):
         # Evaluate function block
         isbuiltin = self.kwargs.get('isbuiltin', False)
         if (isbuiltin):
-            functionpointer: types.FunctionType = self.kwargs.get('pointer')
+            functionpointer: typing.Callable = self.kwargs.get('pointer')
             args: typing.Dict[str, builtins.Type] = dict()
             for parameter in parameters:
                 value: builtins.Type = parameter.evaluate(functionst).value

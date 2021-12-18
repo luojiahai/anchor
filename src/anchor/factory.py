@@ -3,7 +3,7 @@ import abc
 import anchor.builtins as builtins
 
 
-__all__: typing.List[str] = ['AST', 'SYMTABLE',]
+__all__: typing.List[str] = list(['AST', 'SYMTABLE',])
 
 
 class Factory(abc.ABC):

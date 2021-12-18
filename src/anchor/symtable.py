@@ -7,9 +7,9 @@ if (typing.TYPE_CHECKING):
 import anchor.factory as factory
 
 
-__all__: typing.List[str] = [
+__all__: typing.List[str] = list([
     'Type', 'SymbolTable', 'Class', 'Function', 'Symbol',
-]
+])
 
 
 class Symbol(object):

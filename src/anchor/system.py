@@ -3,7 +3,7 @@ import typing
 import logging
 
 
-__all__: typing.List[str] = ['GLOBAL',]
+__all__: typing.List[str] = list(['GLOBAL',])
 
 
 class Global(object):

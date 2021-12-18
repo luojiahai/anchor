@@ -3,20 +3,20 @@ import typing
 import abc
 
 
-__all__: typing.List[str] = [
+__all__: typing.List[str] = list([
     'STREAM', 'CLASS', 'FUNCTION',
     'Boolean', 'Null', 'Integer', 'Float', 'Complex', 'String', 
     'Tuple', 'List', 'Dict', 'Function', 
     'Annotation', 'Class', 'Property', 'Method', 'Instance',
-]
+])
 
 
 # Anchor stream name to Python stream
-STREAM: typing.Dict[str, typing.TextIO] = {
+STREAM: typing.Dict[str, typing.TextIO] = dict({
     'stdin': sys.stdin,
     'stdout': sys.stdout,
     'stderr': sys.stderr,
-}
+})
 
 
 class Type(abc.ABC):
@@ -170,7 +170,7 @@ class Instance(Type, object):
         Type.__init__(self, cls.typename, **kwargs)
 
 
-CLASS = {
+CLASS: typing.Dict[str, Type] = dict({
     'Boolean': Boolean,
     'Null': Null,
     'Integer': Integer,
@@ -180,7 +180,7 @@ CLASS = {
     'Tuple': Tuple,
     'List': List,
     'Dict': Dict,
-}
+})
 
 
 def builtin_print(value):
@@ -188,6 +188,6 @@ def builtin_print(value):
 
 
 # Anchor builtin function name to Python function pointer
-FUNCTION = {
+FUNCTION: typing.Dict[str, typing.Callable] = dict({
     'print': builtin_print,
-}
+})

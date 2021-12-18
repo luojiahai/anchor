@@ -8,7 +8,7 @@ import anchor.compile as compile
 import anchor.builtins as builtins
 
 
-__all__: typing.List[str] = ['main',]
+__all__: typing.List[str] = list(['main',])
 
 
 def default(str) -> str:
