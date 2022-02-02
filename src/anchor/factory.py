@@ -3,7 +3,7 @@ import abc
 import anchor.builtins as builtins
 
 
-__all__: typing.List[str] = list(['AST', 'SYMTABLE',])
+__all__: typing.List[str] = list(['AST', 'SYMTABLE', ])
 
 
 class Factory(abc.ABC):
@@ -43,7 +43,7 @@ class ASTNodeFactory(object):
             super().__init__()
             for key, builder in declarations:
                 self._registerbuilder(key, builder)
-        
+
         def new(self, value: typing.Any) -> typing.Any:
             if (isinstance(value, builtins.Type)):
                 return super().new(value.typename, value=value)

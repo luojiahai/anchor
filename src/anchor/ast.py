@@ -82,7 +82,7 @@ class Program(ASTNode):
     @property
     def block(self) -> Block:
         return self.__block
-    
+
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
         astnode: ASTNode = self.block.evaluate(st)
         return astnode
@@ -144,7 +144,7 @@ class Break(Statement):
 
 
 class Continue(Statement):
-    
+
     def __init__(self, literal: str) -> None:
         self.__literal: str = literal
 
@@ -180,7 +180,7 @@ class Return(Statement, Atom):
         return Return(value=self.value)
 
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
-        if (self.expression != None):
+        if (self.expression is not None):
             atom: Atom = self.expression.evaluate(st)
             self.__value = atom.value
         return self.copy()
@@ -198,7 +198,7 @@ class Elif(Statement):
     @property
     def expression(self) -> Expression:
         return self.__expression
-    
+
     @property
     def block(self) -> Block:
         return self.__block
@@ -215,7 +215,7 @@ class Elif(Statement):
 class If(Statement):
 
     def __init__(
-        self, expression: Expression, block: Block, 
+        self, expression: Expression, block: Block,
         elifs: typing.List[Elif] = list(), elseblock: Block = None
     ) -> None:
         self.__expression: Expression = expression
@@ -226,7 +226,7 @@ class If(Statement):
     @property
     def expression(self) -> Expression:
         return self.__expression
-    
+
     @property
     def block(self) -> Block:
         return self.__block
@@ -253,7 +253,7 @@ class If(Statement):
                 elif (elifstatement.elseblock):
                     astnode: ASTNode = elifstatement.elseblock.evaluate(st)
                     return astnode
-            
+
             if (self.elseblock):
                 astnode: ASTNode = self.elseblock.evaluate(st)
                 return astnode
@@ -272,7 +272,7 @@ class Iterate(Statement):
     @property
     def iterable(self) -> Expression:
         return self.__iterable
-    
+
     @property
     def variable(self) -> Name:
         return self.__variable
@@ -307,7 +307,7 @@ class Loop(Statement):
     @property
     def expression(self) -> Expression:
         return self.__expression
-    
+
     @property
     def block(self) -> Block:
         return self.__block
@@ -351,7 +351,7 @@ class FunctionDef(Statement, Atom, Callable):
     __value: builtins.Function = None
 
     def __init__(
-        self, name: Name, parameters: typing.List[Parameter], block: Block, 
+        self, name: Name, parameters: typing.List[Parameter], block: Block,
         **kwargs
     ) -> None:
         self.__name: Name = name
@@ -380,12 +380,13 @@ class FunctionDef(Statement, Atom, Callable):
         return self.__value
 
     def call(
-        self, arguments: typing.List[Expression], parentst: symtable.SymbolTable
-    ) -> ASTNode:
+            self,
+            arguments: typing.List[Expression],
+            parentst: symtable.SymbolTable) -> ASTNode:
         parameters: typing.List[Parameter] = self.parameters
         block: Block = self.block
         functionst: symtable.Function = factory.SYMTABLE.new(
-            symtable.Type.FUNCTION, 
+            symtable.Type.FUNCTION,
             identifier=self.name.identifier, parent=parentst,
         )
 
@@ -397,7 +398,7 @@ class FunctionDef(Statement, Atom, Callable):
             astnode: ASTNode = argument.evaluate(parentst)
             astnodes: typing.List[ASTNode] = list([astnode])
             functionst.insert(identifier, astnodes, isparameter=True)
-        
+
         # Evaluate function block
         isbuiltin = self.kwargs.get('isbuiltin', False)
         if (isbuiltin):
@@ -448,8 +449,8 @@ class MethodDef(Statement, Atom, Callable):
     __value: builtins.Method = None
 
     def __init__(
-        self, name: Name, 
-        parameters: typing.List[Parameter], 
+        self, name: Name,
+        parameters: typing.List[Parameter],
         block: Block,
         **kwargs
     ) -> None:
@@ -479,12 +480,13 @@ class MethodDef(Statement, Atom, Callable):
         return self.__value
 
     def call(
-        self, arguments: typing.List[Expression], parentst: symtable.SymbolTable
-    ) -> ASTNode:
+            self,
+            arguments: typing.List[Expression],
+            parentst: symtable.SymbolTable) -> ASTNode:
         parameters: typing.List[Parameter] = self.parameters
         block: Block = self.block
         methodst: symtable.Function = factory.SYMTABLE.new(
-            symtable.Type.FUNCTION, 
+            symtable.Type.FUNCTION,
             identifier=self.name.identifier, parent=parentst,
         )
 
@@ -496,7 +498,7 @@ class MethodDef(Statement, Atom, Callable):
             astnode: ASTNode = argument.evaluate(parentst)
             astnodes: typing.List[ASTNode] = list([astnode])
             methodst.insert(identifier, astnodes, isparameter=True)
-        
+
         # Evaluate method block
         astnode: ASTNode = block.evaluate(methodst)
         return astnode
@@ -560,12 +562,13 @@ class ClassDef(Statement, Atom, Callable):
         return self.__value
 
     def call(
-        self, arguments: typing.List[Expression], parentst: symtable.SymbolTable
-    ) -> ASTNode:
+            self,
+            arguments: typing.List[Expression],
+            parentst: symtable.SymbolTable) -> ASTNode:
         properties: typing.Dict[str, Property] = self.properties
         methods: typing.Dict[str, MethodDef] = self.methods
         instancest: symtable.Class = factory.SYMTABLE.new(
-            symtable.Type.CLASS, 
+            symtable.Type.CLASS,
             identifier=self.name.identifier, parent=parentst,
         )
 
@@ -1021,10 +1024,10 @@ class Null(Expression, Atom):
     __value: builtins.Null = None
 
     def __init__(self, literal: str = None, value: str = None) -> None:
-        if (literal != None):
+        if (literal is not None):
             self.__literal = literal
             self.__value = builtins.Null(str(self.literal))
-        elif (value != None):
+        elif (value is not None):
             self.__literal = str(value)
             self.__value = builtins.Null(str(value))
 
@@ -1047,10 +1050,10 @@ class String(Expression, Atom, Iterable):
     __value: builtins.String = None
 
     def __init__(self, literal: str = None, value: str = None) -> None:
-        if (literal != None):
+        if (literal is not None):
             self.__literal = literal
             self.__value = builtins.String(str(self.literal))
-        elif (value != None):
+        elif (value is not None):
             self.__literal = str(value)
             self.__value = builtins.String(str(value))
 
@@ -1085,10 +1088,10 @@ class Integer(Expression, Atom):
     __value: builtins.Integer = None
 
     def __init__(self, literal: str = None, value: int = None) -> None:
-        if (literal != None):
+        if (literal is not None):
             self.__literal = literal
             self.__value = builtins.Integer(int(self.literal))
-        elif (value != None):
+        elif (value is not None):
             self.__literal = str(value)
             self.__value = builtins.Integer(int(value))
 
@@ -1111,10 +1114,10 @@ class Float(Expression, Atom):
     __value: builtins.Float = None
 
     def __init__(self, literal: str = None, value: float = None) -> None:
-        if (literal != None):
+        if (literal is not None):
             self.__literal = literal
             self.__value = builtins.Float(float(self.literal))
-        elif (value != None):
+        elif (value is not None):
             self.__literal = str(value)
             self.__value = builtins.Float(float(value))
 
@@ -1137,10 +1140,10 @@ class Complex(Expression, Atom):
     __value: builtins.Complex = None
 
     def __init__(self, literal: str = None, value: complex = None) -> None:
-        if (literal != None):
+        if (literal is not None):
             self.__literal = literal
             self.__value = builtins.Complex(complex(self.literal))
-        elif (value != None):
+        elif (value is not None):
             self.__literal = str(value)
             self.__value = builtins.Complex(complex(value))
 
@@ -1166,9 +1169,9 @@ class Tuple(Expression, Atom, Iterable):
         self, expressions: typing.List[Expression] = None,
         value: typing.Tuple = None
     ) -> None:
-        if (expressions != None):
+        if (expressions is not None):
             self.__expressions: typing.List[Expression] = expressions
-        elif (value != None):
+        elif (value is not None):
             self.__value = builtins.Tuple(tuple(value))
 
     @property
@@ -1190,9 +1193,9 @@ class Tuple(Expression, Atom, Iterable):
     def __getitem__(self, key):
         item = self.value.__getitem__(key)
         return factory.AST.new(value=item)
-    
+
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
-        if (self.expressions != None):
+        if (self.expressions is not None):
             atoms: typing.List[Atom] = list([
                 expression.evaluate(st)
                 for expression in self.expressions
@@ -1200,13 +1203,13 @@ class Tuple(Expression, Atom, Iterable):
             self.__value = builtins.Tuple(tuple(map(
                 lambda x: x.value, atoms
             )))
-        elif (self.value != None):
+        elif (self.value is not None):
             pass
         return self
 
 
 class List(Expression, Atom, Iterable):
-    
+
     __expressions: typing.List[Expression] = None
     __value: builtins.List = None
 
@@ -1214,9 +1217,9 @@ class List(Expression, Atom, Iterable):
         self, expressions: typing.List[Expression] = None,
         value: typing.List = None
     ) -> None:
-        if (expressions != None):
+        if (expressions is not None):
             self.__expressions: typing.List[Expression] = expressions
-        elif (value != None):
+        elif (value is not None):
             self.__value = builtins.List(list(value))
 
     @property
@@ -1238,9 +1241,9 @@ class List(Expression, Atom, Iterable):
     def __getitem__(self, key):
         item = self.value.__getitem__(key)
         return factory.AST.new(value=item)
-    
+
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
-        if (self.expressions != None):
+        if (self.expressions is not None):
             atoms: typing.List[Atom] = list([
                 expression.evaluate(st)
                 for expression in self.expressions
@@ -1248,7 +1251,7 @@ class List(Expression, Atom, Iterable):
             self.__value = builtins.List(list(map(
                 lambda x: x.value, atoms
             )))
-        elif (self.value != None):
+        elif (self.value is not None):
             pass
         return self
 
@@ -1262,10 +1265,10 @@ class Dict(Expression, Atom, Iterable):
         self, kvpairs: typing.List[typing.Tuple[Expression, Expression]] = None,
         value: typing.Dict = None
     ) -> None:
-        if (kvpairs != None):
+        if (kvpairs is not None):
             self.__kvpairs: typing.List[typing.Tuple[Expression, Expression]] \
                 = kvpairs
-        elif (value != None):
+        elif (value is not None):
             self.__value = builtins.Dict(dict(value))
 
     @property
@@ -1289,7 +1292,7 @@ class Dict(Expression, Atom, Iterable):
         return factory.AST.new(value=item)
 
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
-        if (self.kvpairs != None):
+        if (self.kvpairs is not None):
             atoms: typing.Dict[Atom, Atom] = dict({
                 k.evaluate(st): v.evaluate(st)
                 for k, v in self.kvpairs
@@ -1297,7 +1300,7 @@ class Dict(Expression, Atom, Iterable):
             self.__value = builtins.Dict(dict(map(
                 lambda item: (item[0].value, item[1].value), atoms.items()
             )))
-        elif (self.value != None):
+        elif (self.value is not None):
             pass
         return self
 
@@ -1336,7 +1339,7 @@ class Call(Expression):
     @property
     def arguments(self) -> typing.List[Expression]:
         return self.__arguments
-    
+
     def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
         astnode: ASTNode = None
         if (isinstance(self.expression, Name)):

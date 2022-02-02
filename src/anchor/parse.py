@@ -7,7 +7,7 @@ import anchor.ast as ast
 import anchor.system as system
 
 
-__all__: typing.List[str] = list(['AnchorParser',])
+__all__: typing.List[str] = list(['AnchorParser', ])
 
 
 class Parser(abc.ABC):
@@ -23,7 +23,7 @@ class Parser(abc.ABC):
         # Build the lexer and parser
         self.lexer: lex.AnchorLexer = lex.AnchorLexer()
         self.lexer.build(
-            debug=self.debuglex, 
+            debug=self.debuglex,
             debuglog=self.debuglog if self.debuglex else None,
         )
         self.parser = yacc.yacc(
@@ -33,7 +33,8 @@ class Parser(abc.ABC):
         )
 
     def parse(self, data: str) -> ast.ASTNode:
-        if (self.debuglex): self.lexer.debug(data)
+        if (self.debuglex):
+            self.lexer.debug(data)
         return self.parser.parse(data)
 
 
@@ -47,7 +48,7 @@ class AnchorParser(Parser):
         ('left', token.OR,),
         ('left', token.AND,),
         ('right', token.NOT,),
-        ('nonassoc', token.EQEQUAL, token.NOTEQUAL, 
+        ('nonassoc', token.EQEQUAL, token.NOTEQUAL,
             token.LESS, token.GREATER, token.LESSEQUAL, token.GREATEREQUAL,),
         ('left', token.PLUS, token.MINUS,),
         ('left', token.STAR, token.SLASH, token.DOUBLESLASH, token.PERCENT,),
@@ -74,7 +75,8 @@ class AnchorParser(Parser):
         if (len(p) == 3):
             statements: typing.List[ast.Statement] = p[1]
             statement: ast.Statement = p[2]
-            if (statement): statements.append(statement)
+            if (statement):
+                statements.append(statement)
             p[0] = statements
         elif (len(p) == 2):
             statement: ast.Statement = p[1]
@@ -202,7 +204,7 @@ class AnchorParser(Parser):
     def p_parameters(self, p: yacc.YaccProduction) -> None:
         '''parameters : parameters_ COMMA
                       | parameters_'''
-        p[0] = p[1] 
+        p[0] = p[1]
 
     def p_parameters_(self, p: yacc.YaccProduction) -> None:
         '''parameters_ : parameters_ COMMA parameter
@@ -210,7 +212,8 @@ class AnchorParser(Parser):
         if (len(p) == 4):
             parameters: typing.List[ast.Parameter] = p[1]
             parameter: ast.Parameter = p[3]
-            if (parameter): parameters.append(parameter)
+            if (parameter):
+                parameters.append(parameter)
             p[0] = parameters
         if (len(p) == 2):
             parameter: ast.Parameter = p[1]
@@ -278,7 +281,7 @@ class AnchorParser(Parser):
             p[0] = ast.Greater(left, right)
         elif (operator == token.GREATEREQUAL):
             p[0] = ast.GreaterEqual(left, right)
-    
+
     def p_expression_binaryop(self, p: yacc.YaccProduction) -> None:
         '''expression : expression PLUS expression
                       | expression MINUS expression
@@ -340,7 +343,7 @@ class AnchorParser(Parser):
     def p_arguments(self, p: yacc.YaccProduction) -> None:
         '''arguments : args COMMA
                      | args'''
-        p[0] = p[1] 
+        p[0] = p[1]
 
     def p_args(self, p: yacc.YaccProduction) -> None:
         '''args : args COMMA expression
@@ -348,7 +351,8 @@ class AnchorParser(Parser):
         if (len(p) == 4):
             args: typing.List[ast.Expression] = p[1]
             expression: ast.Expression = p[3]
-            if (expression): args.append(expression)
+            if (expression):
+                args.append(expression)
             p[0] = args
         elif (len(p) == 2):
             expression: ast.Expression = p[1]
@@ -427,8 +431,8 @@ class AnchorParser(Parser):
         '''dict : LBRACE kvpairs RBRACE
                 | LBRACE RBRACE'''
         if (len(p) == 4):
-            kvpairs: typing.List[typing.Tuple[ast.Expression, ast.Expression]] \
-                = p[2]
+            kvpairs: typing.List[typing.Tuple[ast.Expression,
+                                              ast.Expression]] = p[2]
             p[0] = ast.Dict(kvpairs=kvpairs)
         elif (len(p) == 3):
             p[0] = ast.Dict(kvpairs=list())
@@ -436,7 +440,7 @@ class AnchorParser(Parser):
     def p_expressions(self, p: yacc.YaccProduction) -> None:
         '''expressions : expressions_ COMMA
                        | expressions_'''
-        p[0] = p[1] 
+        p[0] = p[1]
 
     def p_expressions_(self, p: yacc.YaccProduction) -> None:
         '''expressions_ : expressions_ COMMA expression
@@ -444,7 +448,8 @@ class AnchorParser(Parser):
         if (len(p) == 4):
             expressions: typing.List[ast.Expression] = p[1]
             expression: ast.Expression = p[3]
-            if (expression): expressions.append(expression)
+            if (expression):
+                expressions.append(expression)
             p[0] = expressions
         elif (len(p) == 2):
             expression: ast.Expression = p[1]
@@ -459,10 +464,11 @@ class AnchorParser(Parser):
         '''kvpairs_ : kvpairs_ COMMA kvpair
                     | kvpair'''
         if (len(p) == 4):
-            kvpairs: typing.List[typing.Tuple[ast.Expression, ast.Expression]] \
-                = p[1]
+            kvpairs: typing.List[typing.Tuple[ast.Expression,
+                                              ast.Expression]] = p[1]
             kvpair: typing.Tuple[ast.Expression, ast.Expression] = p[3]
-            if (kvpair): kvpairs.append(kvpair)
+            if (kvpair):
+                kvpairs.append(kvpair)
             p[0] = kvpairs
         elif (len(p) == 2):
             kvpair: typing.Tuple[ast.Expression, ast.Expression] = p[1]

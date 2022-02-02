@@ -7,7 +7,7 @@ __all__: typing.List[str] = list([
     'STREAM', 'CLASS', 'FUNCTION',
     'Boolean', 'Null', 'Integer', 'Float', 'Complex', 'String', 
     'Tuple', 'List', 'Dict', 'Function', 
-    'Annotation', 'Class', 'Property', 'Method', 'Instance',
+    'Class', 'Property', 'Method', 'Instance',
 ])
 
 
@@ -133,17 +133,6 @@ class Function(Type):
 
     def __init__(self, **kwargs) -> None:
         Type.__init__(self, 'Function', **kwargs)
-
-
-class Annotation(Type):
-
-    def __init__(self, value: str, **kwargs) -> None:
-        super().__init__('Annotation', **kwargs)
-        self.__value: str = value
-
-    @property
-    def value(self) -> str:
-        return self.__value
 
 
 class Class(Type):

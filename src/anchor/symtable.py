@@ -55,7 +55,7 @@ class Type(object):
 
 class SymbolTable(object):
 
-    def __init__(self, identifier: str, parent = None) -> None:
+    def __init__(self, identifier: str, parent=None) -> None:
         self._identifier: str = identifier
         self._type: Type = Type.MAIN
         self._symbols: typing.Dict[str, Symbol] = dict()
@@ -72,7 +72,7 @@ class SymbolTable(object):
     @property
     def symbols(self) -> typing.Dict[str, Symbol]:
         return self._symbols
-    
+
     def insert(
         self, identifier: str, astnodes: typing.List[ast.ASTNode], **kwargs
     ) -> None:
@@ -85,13 +85,13 @@ class SymbolTable(object):
             )
         else:
             symbol = Symbol(identifier, astnodes, self, **kwargs)
-        assert (symbol != None)
+        assert (symbol is not None)
         self.symbols[identifier] = symbol
 
     def lookup(self, identifier: str) -> Symbol:
         if (identifier in self.symbols):
             return self.symbols[identifier]
-        elif (self._parent): 
+        elif (self._parent):
             return self._parent.lookup(identifier)
         else:
             return None
@@ -114,7 +114,7 @@ class Function(SymbolTable):
 
     __parameters: typing.List[Symbol] = None
 
-    def __init__(self, identifier: str, parent: SymbolTable=None) -> None:
+    def __init__(self, identifier: str, parent: SymbolTable = None) -> None:
         super().__init__(identifier, parent=parent)
         self._type: Type = Type.FUNCTION
 

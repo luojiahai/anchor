@@ -8,7 +8,7 @@ import anchor.builtins as builtins
 import anchor.factory as factory
 
 
-__all__: typing.List[str] = list(['execute',])
+__all__: typing.List[str] = list(['execute', ])
 
 
 def execute(data: str) -> typing.Any:
@@ -29,10 +29,10 @@ def execute(data: str) -> typing.Any:
             name, parameters, None, pointer=functionpointer, isbuiltin=True
         )
         functiondef.evaluate(symboltable)
-    
+
     # Parse and evaluate abstract syntax tree
     parser: parse.AnchorParser = parse.AnchorParser(
-        debuglex=system.GLOBAL.debuglex, 
+        debuglex=system.GLOBAL.debuglex,
         debugyacc=system.GLOBAL.debugyacc,
         debuglog=system.GLOBAL.logger
     )
