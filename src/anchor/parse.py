@@ -167,70 +167,37 @@ class AnchorParser(Parser):
             )
 
     def p_statement_classdef(self, p: yacc.YaccProduction) -> None:
-        '''statement : CLASS LSQB annotations RSQB name BEGIN block END'''
-        annotations: typing.List[ast.Annotation] = p[3]
-        name: ast.Name = p[5]
-        block: ast.Block = p[7]
-        p[0] = ast.ClassDef(name, block, annotations)
+        '''statement : CLASS name BEGIN block END'''
+        name: ast.Name = p[2]
+        block: ast.Block = p[4]
+        p[0] = ast.ClassDef(name, block)
 
     def p_statement_property(self, p: yacc.YaccProduction) -> None:
-        '''statement : PROPERTY LSQB annotations RSQB name SEMI'''
-        annotations: typing.List[ast.Annotation] = p[3]
-        name: ast.Name = p[5]
-        p[0] = ast.Property(name, annotations)
+        '''statement : PROPERTY name SEMI'''
+        name: ast.Name = p[2]
+        p[0] = ast.Property(name)
 
     def p_statement_methoddef(self, p: yacc.YaccProduction) -> None:
-        '''statement : METHOD LSQB annotations RSQB name LPAR parameters RPAR \
+        '''statement : METHOD name LPAR parameters RPAR \
                        RARROW expression BEGIN block END
-                     | METHOD LSQB annotations RSQB name LPAR RPAR \
+                     | METHOD name LPAR RPAR \
                        RARROW expression BEGIN block END'''
-        if (len(p) == 14):
-            annotations: typing.List[ast.Annotation] = [p[3]]
-            name: ast.Name = p[5]
-            parameters: typing.List[ast.Parameter] = p[7]
-            returntype: ast.Expression = p[10]
-            body: ast.Block = p[12]
+        if (len(p) == 11):
+            name: ast.Name = p[2]
+            parameters: typing.List[ast.Parameter] = p[4]
+            returntype: ast.Expression = p[7]
+            body: ast.Block = p[9]
             p[0] = ast.MethodDef(
-                name, parameters, body, annotations, returntype=returntype
+                name, parameters, body, returntype=returntype
             )
-        elif (len(p) == 13):
-            annotations: typing.List[ast.Annotation] = [p[3]]
-            name: ast.Name = p[5]
+        elif (len(p) == 10):
+            name: ast.Name = p[2]
             parameters: typing.List[ast.Parameter] = []
-            returntype: ast.Expression = p[9]
-            body: ast.Block = p[11]
+            returntype: ast.Expression = p[6]
+            body: ast.Block = p[8]
             p[0] = ast.MethodDef(
-                name, parameters, body, annotations, returntype=returntype
+                name, parameters, body, returntype=returntype
             )
-
-    def p_annotations(self, p: yacc.YaccProduction) -> None:
-        '''annotations : annotations_ COMMA
-                       | annotations_'''
-        p[0] = p[1] 
-
-    def p_annotations_(self, p: yacc.YaccProduction) -> None:
-        '''annotations_ : annotations_ COMMA annotation
-                        | annotation'''
-        if (len(p) == 4):
-            annotations: typing.List[ast.Annotation] = p[1]
-            annotation: ast.Annotation = p[3]
-            if (annotation): annotations.append(annotation)
-            p[0] = annotations
-        elif (len(p) == 2):
-            annotation: ast.Annotation = p[1]
-            p[0] = list([annotation])
-
-    def p_annotation(self, p: yacc.YaccProduction) -> None:
-        '''annotation : PUBLIC
-                      | PRIVATE
-                      | PROTECTED
-                      | FACTORY
-                      | GET
-                      | SET
-                      | REF
-                      | VAL'''
-        literal: str = p[1]
-        p[0] = ast.Annotation(literal)
 
     def p_parameters(self, p: yacc.YaccProduction) -> None:
         '''parameters : parameters_ COMMA
@@ -250,14 +217,9 @@ class AnchorParser(Parser):
             p[0] = list([parameter])
 
     def p_parameter(self, p: yacc.YaccProduction) -> None:
-        '''parameter : name COLON name LSQB annotations RSQB
-                     | name COLON name
+        '''parameter : name COLON name
                      | name'''
-        if (len(p) == 7):
-            name: ast.Name = p[1]
-            typename: ast.Name = p[3]
-            p[0] = ast.Parameter(name, typename)
-        elif (len(p) == 4):
+        if (len(p) == 4):
             name: ast.Name = p[1]
             typename: ast.Name = p[3]
             p[0] = ast.Parameter(name, typename)

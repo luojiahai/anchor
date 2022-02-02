@@ -1,14 +1,14 @@
-class[public] MyClass
+class MyClass
 begin
-    property[public, get, set] prop;
+    property prop;
     
-    method[public, factory] MyClass() -> Null
+    method MyClass() -> Null
     begin
         print("this is in MyClass");
         prop = 2333;
     end
 
-    method[public] test(s) -> Null
+    method test(s) -> Null
     begin
         print("this is a test method in MyClass");
         print(prop);

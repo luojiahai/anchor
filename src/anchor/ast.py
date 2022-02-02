@@ -326,27 +326,6 @@ class Loop(Statement):
         return None
 
 
-class Annotation(Statement, Atom):
-
-    __value: builtins.Annotation = None
-
-    def __init__(self, literal: typing.Any) -> None:
-        self.__literal: typing.Any = literal
-
-    @property
-    def literal(self) -> typing.Any:
-        return self.__literal
-
-    @property
-    def value(self) -> builtins.Annotation:
-        return self.__value
-
-    def evaluate(self, st: symtable.SymbolTable) -> ASTNode:
-        st
-        self.__value = builtins.Annotation(str(self.literal))
-        return self
-
-
 class Parameter(Statement):
 
     def __init__(self, name: Name, typename: Name = None) -> None:
@@ -445,19 +424,12 @@ class Property(Statement, Atom):
 
     __value: builtins.Property = None
 
-    def __init__(
-        self, name: Name, annotations: typing.List[Annotation]
-    ) -> None:
+    def __init__(self, name: Name) -> None:
         self.__name: Name = name
-        self.__annotations: typing.List[Annotation] = annotations
 
     @property
     def name(self) -> Name:
         return self.__name
-
-    @property
-    def annotations(self) -> typing.List[Annotation]:
-        return self.__annotations
 
     @property
     def value(self) -> builtins.Property:
@@ -476,13 +448,14 @@ class MethodDef(Statement, Atom, Callable):
     __value: builtins.Method = None
 
     def __init__(
-        self, name: Name, parameters: typing.List[Parameter], block: Block,
-        annotations: typing.List[Annotation], **kwargs
+        self, name: Name, 
+        parameters: typing.List[Parameter], 
+        block: Block,
+        **kwargs
     ) -> None:
         self.__name: Name = name
         self.__parameters: typing.List[Parameter] = parameters
         self.__block: Block = block
-        self.__annotations: typing.List[Annotation] = annotations
         self.__kwargs: typing.Dict[str, typing.Any] = kwargs
 
     @property
@@ -496,10 +469,6 @@ class MethodDef(Statement, Atom, Callable):
     @property
     def block(self) -> Block:
         return self.__block
-
-    @property
-    def annotations(self) -> typing.List[Annotation]:
-        return self.__annotations
 
     @property
     def kwargs(self) -> typing.Dict[str, typing.Any]:
@@ -544,13 +513,9 @@ class ClassDef(Statement, Atom, Callable):
 
     __value: builtins.Class = None
 
-    def __init__(
-        self, name: Name, block: Block, annotations: typing.List[Annotation], 
-        **kwargs
-    ) -> None:
+    def __init__(self, name: Name, block: Block, **kwargs) -> None:
         self.__name: Name = name
         self.__block: Block = block
-        self.__annotations: typing.List[Annotation] = annotations
         self.__kwargs: typing.Dict[str, typing.Any] = kwargs
 
         self.__properties: typing.Dict[str, Property] = dict()
@@ -589,10 +554,6 @@ class ClassDef(Statement, Atom, Callable):
     @property
     def methods(self) -> typing.Dict[str, MethodDef]:
         return self.__methods
-
-    @property
-    def annotations(self) -> typing.List[Annotation]:
-        return self.__annotations
 
     @property
     def value(self) -> builtins.Class:

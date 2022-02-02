@@ -84,14 +84,6 @@ FOR: typing.Literal             = 'FOR'
 LOOP: typing.Literal            = 'LOOP'
 CONTINUE: typing.Literal        = 'CONTINUE'
 BREAK: typing.Literal           = 'BREAK'
-PUBLIC: typing.Literal          = 'PUBLIC'
-PRIVATE: typing.Literal         = 'PRIVATE'
-PROTECTED: typing.Literal       = 'PROTECTED'
-FACTORY: typing.Literal         = 'FACTORY'
-GET: typing.Literal             = 'GET'
-SET: typing.Literal             = 'SET'
-REF: typing.Literal             = 'REF'
-VAL: typing.Literal             = 'VAL'
 
 kwdict: typing.Dict[str, str] = {
     BEGIN                       : 'begin',
@@ -116,14 +108,6 @@ kwdict: typing.Dict[str, str] = {
     LOOP                        : 'loop',
     CONTINUE                    : 'continue',
     BREAK                       : 'break',
-    PUBLIC                      : 'public',
-    PRIVATE                     : 'private',
-    PROTECTED                   : 'protected',
-    FACTORY                     : 'factory',
-    GET                         : 'get',
-    SET                         : 'set',
-    REF                         : 'ref',
-    VAL                         : 'val',
 }
 
 
