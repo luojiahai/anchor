@@ -49,24 +49,24 @@ print("Hello, World!");
 
 This is an example of the Anchor code to define a class:
 ```
-class MyClass
+class[public] MyClass
 begin
-    property x: Integer;
+    property[public, get, set] x: Integer;
 
-    method MyClass() -> MyClass
+    method[public, factory] MyClass() -> MyClass
     begin
         this.x = 0;
         this.printSomething();
         return this;
     end
 
-    method MyClass(x: Integer) -> MyClass
+    method[public, factory] MyClass(x: Integer) -> MyClass
     begin
         this.x = x;
         return this;
     end
 
-    method printSomething() -> Null
+    method[private] printSomething() -> Null
     begin
         print("this is a private method");
     end
